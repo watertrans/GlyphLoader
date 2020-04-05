@@ -38,7 +38,5 @@ jobs:
         NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
     - name: Push generated package to GitHub registry
-      env: 
-        NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      run: dotnet nuget push "WaterTrans.GlyphLoader/bin/Release/WaterTrans.GlyphLoader.*.nupkg" --skip-duplicate --no-symbols true -k $NUGET_AUTH_TOKEN
+      run: dotnet nuget push "WaterTrans.GlyphLoader/bin/Release/WaterTrans.GlyphLoader.*.nupkg" -k $NUGET_AUTH_TOKEN --skip-duplicate
       working-directory: ./src
