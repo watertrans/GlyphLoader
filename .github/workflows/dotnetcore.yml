@@ -30,15 +30,8 @@ jobs:
       run: dotnet build --configuration Release
       working-directory: ./src
     
-    - name: Prepare GitHub registry
-      uses: actions/setup-dotnet@v1
-      with: 
-        source-url: https://nuget.pkg.github.com/watertrans/index.json
+    - name: Push generated package to GitHub registry
       env: 
         NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-    
-    - name: Push generated package to GitHub registry
-      run: dotnet nuget push "WaterTrans.GlyphLoader/bin/Release/WaterTrans.GlyphLoader.*.nupkg" --skip-duplicate --no-symbols true -k $NUGET_AUTH_TOKEN
+      run: dotnet nuget push "WaterTrans.GlyphLoader/bin/Release/WaterTrans.GlyphLoader.*.nupkg" --skip-duplicate --no-symbols true -k $NUGET_AUTH_TOKEN -s https://nuget.pkg.github.com/watertrans/index.json
       working-directory: ./src
-
-
