@@ -38,7 +38,8 @@ jobs:
       working-directory: src
 
     - name: Prepare artifact
-    - run: mkdir nupkg
+      run: mkdir nupkg
+      
     - run: copy src\WaterTrans.GlyphLoader\bin\Release\WaterTrans.GlyphLoader.*.nupkg nupkg
       
     - name: Upload artifact
