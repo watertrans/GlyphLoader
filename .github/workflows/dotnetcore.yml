@@ -27,23 +27,33 @@ jobs:
       
     - name: Restore packages
       run: nuget restore WaterTrans.GlyphLoader.sln
-      working-directory: ./src
+      working-directory: src
 
     - name: Build with dotnet
       run: dotnet build --configuration Release
-      working-directory: ./src
+      working-directory: src
     
     - name: Run Test
       run: vstest.console.exe /Platform:x64 "WaterTrans.GlyphLoader.Tests\bin\Release\WaterTrans.GlyphLoader.Tests.dll"
-      working-directory: ./src
-          
-    - name: Prepare GitHub registry
-      uses: actions/setup-dotnet@v1
-      with:
-        source-url: https://nuget.pkg.github.com/watertrans/index.json
-      env: 
-        NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      working-directory: src
 
-    - name: Push generated package to GitHub registry
-      run: dotnet nuget push "WaterTrans.GlyphLoader\bin\Release\WaterTrans.GlyphLoader.*.nupkg" -k $NUGET_AUTH_TOKEN --skip-duplicate
-      working-directory: ./src
+    - name: Prepare artifact
+    - run: mkdir nupkg
+    - run: copy src\WaterTrans.GlyphLoader\bin\Release\WaterTrans.GlyphLoader.*.nupkg nupkg
+      
+    - name: Upload artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: nupkg
+        path: nupkg
+      
+#    - name: Prepare GitHub registry
+#      uses: actions/setup-dotnet@v1
+#      with:
+#        source-url: https://nuget.pkg.github.com/watertrans/index.json
+#      env: 
+#        NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+#
+#    - name: Push generated package to GitHub registry
+#      run: dotnet nuget push "WaterTrans.GlyphLoader\bin\Release\WaterTrans.GlyphLoader.*.nupkg" -k $NUGET_AUTH_TOKEN --skip-duplicate
+#      working-directory: src
