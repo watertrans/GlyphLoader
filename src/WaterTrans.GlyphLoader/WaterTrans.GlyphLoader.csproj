@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.0</TargetFramework>
+    <Version>0.1-alpha</Version>
+    <Authors>WaterTrans</Authors>
+    <Product>GlyphLoader</Product>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Description>GlyphLoader is a open source library to SFNT font file. 
+It is written in C#, designed to be small, efficient and portable while capable of producing high-quality glyph images.
+</Description>
+    <Copyright>© 2020 WaterTrans</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/WaterTrans/GlyphLoader</PackageProjectUrl>
+    <PackageTags>OpenType, TrueType, TypeLoader</PackageTags>
+    <PackageReleaseNotes>https://github.com/WaterTrans/GlyphLoader</PackageReleaseNotes>
+    <RepositoryUrl>https://github.com/WaterTrans/GlyphLoader</RepositoryUrl>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\WaterTrans.GlyphLoader.xml</DocumentationFile>
+    <CodeAnalysisRuleSet />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\WaterTrans.GlyphLoader.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="..\stylecop.json" Link="stylecop.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </AdditionalFiles>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
+</Project>
