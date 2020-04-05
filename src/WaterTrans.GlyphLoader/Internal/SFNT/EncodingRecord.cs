@@ -33,7 +33,7 @@ namespace WaterTrans.GlyphLoader.Internal.SFNT
         public uint Offset { get; }
 
         /// <summary>Gets the mapping of a charactor code point to a glyph index.</summary>
-        public Dictionary<uint, ushort> GlyphMap { get; } = new Dictionary<uint, ushort>();
+        public Dictionary<int, ushort> GlyphMap { get; } = new Dictionary<int, ushort>();
 
         /// <summary>Gets the mapping of a Unicode Variation Sequences to a glyph index.</summary>
         public Dictionary<Tuple<uint, uint>, ushort> VariationGlyphMap { get; } = new Dictionary<Tuple<uint, uint>, ushort>();

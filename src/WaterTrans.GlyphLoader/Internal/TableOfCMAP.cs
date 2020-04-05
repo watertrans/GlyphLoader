@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using WaterTrans.GlyphLoader.Internal.SFNT;
 
 namespace WaterTrans.GlyphLoader.Internal
@@ -13,6 +14,8 @@ namespace WaterTrans.GlyphLoader.Internal
     /// </summary>
     internal sealed class TableOfCMAP
     {
+        private readonly Dictionary<int, ushort> _glyphMap;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TableOfCMAP"/> class.
         /// </summary>
@@ -38,7 +41,7 @@ namespace WaterTrans.GlyphLoader.Internal
                     // TODO Cannot be implemented because there is no sample file
                     ushort length = reader.ReadUInt16();
                     ushort language = reader.ReadUInt16();
-                    for (uint i = 1; i <= 256; i++)
+                    for (int i = 1; i <= 256; i++)
                     {
                         record.GlyphMap[i] = reader.ReadByte();
                     }
@@ -107,7 +110,7 @@ namespace WaterTrans.GlyphLoader.Internal
                         ushort rangeOffset = idRangeOffsets[i];
                         if (start != 65535 && end != 65535)
                         {
-                            for (uint j = start; j <= end; j++)
+                            for (int j = start; j <= end; j++)
                             {
                                 if (rangeOffset == 0)
                                 {
@@ -136,7 +139,7 @@ namespace WaterTrans.GlyphLoader.Internal
                     ushort firstCode = reader.ReadUInt16();
                     ushort entryCount = reader.ReadUInt16();
 
-                    for (uint i = 0; i < entryCount; i++)
+                    for (int i = 0; i < entryCount; i++)
                     {
                         record.GlyphMap[firstCode + i] = reader.ReadUInt16();
                     }
@@ -183,7 +186,7 @@ namespace WaterTrans.GlyphLoader.Internal
                         uint glyphIndex = sequentialMapGroups[i].Item3;
                         for (uint j = start; j <= end; j++)
                         {
-                            record.GlyphMap[j] = (ushort)(glyphIndex + (j - start));
+                            record.GlyphMap[(int)j] = (ushort)(glyphIndex + (j - start));
                         }
                     }
                 }
@@ -206,7 +209,7 @@ namespace WaterTrans.GlyphLoader.Internal
                         uint glyphIndex = constantMapGroups[i].Item3;
                         for (uint j = start; j <= end; j++)
                         {
-                            record.GlyphMap[j] = (ushort)glyphIndex;
+                            record.GlyphMap[(int)j] = (ushort)glyphIndex;
                         }
                     }
                 }
@@ -254,6 +257,54 @@ namespace WaterTrans.GlyphLoader.Internal
                     }
                 }
             }
+
+            var sorted = new SortedDictionary<int, Dictionary<int, ushort>>();
+
+            foreach (var record in EncodingRecords)
+            {
+                if (record.PlatformID == 0 && record.EncodingID == 6)
+                {
+                    sorted.Add(1, record.GlyphMap);
+                    continue;
+                }
+                if (record.PlatformID == 0 && record.EncodingID == 4)
+                {
+                    sorted.Add(2, record.GlyphMap);
+                    continue;
+                }
+                if (record.PlatformID == 3 && record.EncodingID == 10)
+                {
+                    sorted.Add(3, record.GlyphMap);
+                    continue;
+                }
+                if (record.PlatformID == 0 && record.EncodingID == 3)
+                {
+                    sorted.Add(4, record.GlyphMap);
+                    continue;
+                }
+                if (record.PlatformID == 3 && record.EncodingID == 1)
+                {
+                    sorted.Add(5, record.GlyphMap);
+                    continue;
+                }
+                if (record.PlatformID == 0 && record.EncodingID == 2)
+                {
+                    sorted.Add(6, record.GlyphMap);
+                    continue;
+                }
+                if (record.PlatformID == 0 && record.EncodingID == 1)
+                {
+                    sorted.Add(7, record.GlyphMap);
+                    continue;
+                }
+                if (record.PlatformID == 0 && record.EncodingID == 0)
+                {
+                    sorted.Add(8, record.GlyphMap);
+                    continue;
+                }
+            }
+
+            _glyphMap = sorted.Values.ToArray()[0];
         }
 
         /// <summary>Gets a list of EncodingRecord.</summary>
@@ -264,5 +315,11 @@ namespace WaterTrans.GlyphLoader.Internal
 
         /// <summary>Gets a number of encoding tables.</summary>
         public ushort NumTables { get; }
+
+        /// <summary>Gets the mapping of a charactor code point to a glyph index optimal.</summary>
+        public Dictionary<int, ushort> GlyphMap
+        {
+            get { return _glyphMap; }
+        }
     }
 }

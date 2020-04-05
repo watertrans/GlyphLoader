@@ -98,6 +98,14 @@ namespace WaterTrans.GlyphLoader
         }
 
         /// <summary>
+        /// Gets the nominal mapping of a Unicode code point to a glyph index as defined by the font 'CMAP' table.
+        /// </summary>
+        public IDictionary<int, ushort> CharacterToGlyphMap
+        {
+            get { return _tableOfCMAP.GlyphMap; }
+        }
+
+        /// <summary>
         /// Gets sfnt Major Version.
         /// </summary>
         internal ushort SfntVersionMajor { get; private set; }
