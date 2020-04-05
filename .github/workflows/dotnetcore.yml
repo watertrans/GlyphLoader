@@ -23,7 +23,7 @@ jobs:
       uses: warrenbuckley/Setup-Nuget@v1
       
     - name: Restore packages
-      run: nuget restore WaterTrans.GlyphLoader.Tests\WaterTrans.GlyphLoader.Tests.csproj
+      run: nuget restore WaterTrans.GlyphLoader.sln
       working-directory: ./src
 
     - name: Build with dotnet
