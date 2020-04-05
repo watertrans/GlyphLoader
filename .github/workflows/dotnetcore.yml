@@ -20,7 +20,7 @@ jobs:
         dotnet-version: '3.1.102'
 
     - name: Setup NuGet
-    - uses: warrenbuckley/Setup-Nuget@v1
+      uses: warrenbuckley/Setup-Nuget@v1
       
     - name: Restore packages
       run: nuget restore WaterTrans.GlyphLoader.Tests\WaterTrans.GlyphLoader.Tests.csproj
