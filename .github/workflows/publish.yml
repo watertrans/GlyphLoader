@@ -1,0 +1,60 @@
+name: Publish GitHub registry
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      
+    - name: Setup .NET environment
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.102'
+
+    - name: Setup NuGet
+      uses: warrenbuckley/Setup-Nuget@v1
+      
+    - name: Setup VSTest Path
+      uses: darenm/Setup-VSTest@v1
+      
+    - name: Restore packages
+      run: nuget restore WaterTrans.GlyphLoader.sln
+      working-directory: src
+
+    - name: Build with dotnet
+      run: dotnet build --configuration Release
+      working-directory: src
+    
+    - name: Run Test
+      run: vstest.console.exe /Platform:x64 "WaterTrans.GlyphLoader.Tests\bin\Release\WaterTrans.GlyphLoader.Tests.dll"
+      working-directory: src
+
+    - name: Prepare artifact
+      run: mkdir package
+      
+    - run: copy src\WaterTrans.GlyphLoader\bin\Release\WaterTrans.GlyphLoader.*.nupkg package
+      
+    - name: Upload artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: package
+        path: package
+      
+    - name: Prepare GitHub registry
+      uses: actions/setup-dotnet@v1
+      with:
+        source-url: https://nuget.pkg.github.com/watertrans/index.json
+      env: 
+        NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+    - name: Push generated package to GitHub registry
+      run: dotnet nuget push WaterTrans.GlyphLoader\bin\Release\WaterTrans.GlyphLoader.*.nupkg --api-key $NUGET_AUTH_TOKEN --skip-duplicate --force-english-output
+      working-directory: src

@@ -1,10 +1,10 @@
-name: .NET Core
+name: Run Test
 
 on:
   push:
-    branches: [ master ]
+    branches: [ develop ]
   pull_request:
-    branches: [ master ]
+    branches: [ develop ]
 
 jobs:
   build:
@@ -38,23 +38,12 @@ jobs:
       working-directory: src
 
     - name: Prepare artifact
-      run: mkdir nupkg
+      run: mkdir package
       
-    - run: copy src\WaterTrans.GlyphLoader\bin\Release\WaterTrans.GlyphLoader.*.nupkg nupkg
+    - run: copy src\WaterTrans.GlyphLoader\bin\Release\WaterTrans.GlyphLoader.*.nupkg package
       
     - name: Upload artifact
       uses: actions/upload-artifact@v1
       with:
-        name: nupkg
-        path: nupkg
-      
-    - name: Prepare GitHub registry
-      uses: actions/setup-dotnet@v1
-      with:
-        source-url: https://nuget.pkg.github.com/watertrans/index.json
-      env: 
-        NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
-    - name: Push generated package to GitHub registry
-      run: dotnet nuget push WaterTrans.GlyphLoader\bin\Release\WaterTrans.GlyphLoader.*.nupkg --api-key $NUGET_AUTH_TOKEN --skip-duplicate --force-english-output
-      working-directory: src
+        name: package
+        path: package
