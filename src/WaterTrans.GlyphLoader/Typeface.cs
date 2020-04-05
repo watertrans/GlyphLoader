@@ -74,6 +74,30 @@ namespace WaterTrans.GlyphLoader
         }
 
         /// <summary>
+        /// Gets the advance widths for the glyphs represented by the Typeface object.
+        /// </summary>
+        public IDictionary<ushort, double> AdvanceWidths
+        {
+            get { return _tableOfHMTX.AdvanceWidths; }
+        }
+
+        /// <summary>
+        /// Gets the distance from the leading end of the advance vector to the left edge of the black box for the glyphs represented by the Typeface object.
+        /// </summary>
+        public IDictionary<ushort, double> LeftSideBearings
+        {
+            get { return _tableOfHMTX.LeftSideBearings; }
+        }
+
+        /// <summary>
+        /// Gets the number of glyphs for the Typeface object.
+        /// </summary>
+        public int GlyphCount
+        {
+            get { return _tableOfMAXP.NumGlyphs; }
+        }
+
+        /// <summary>
         /// Gets sfnt Major Version.
         /// </summary>
         internal ushort SfntVersionMajor { get; private set; }
@@ -190,7 +214,7 @@ namespace WaterTrans.GlyphLoader
             }
 
             _stream.Position = _tableDirectories[TableNames.HMTX].Offset;
-            _tableOfHMTX = new TableOfHMTX(reader, _tableOfHHEA.NumberOfHMetrics, _tableOfMAXP.NumGlyphs);
+            _tableOfHMTX = new TableOfHMTX(reader, _tableOfHHEA.NumberOfHMetrics, _tableOfMAXP.NumGlyphs, _tableOfHEAD.UnitsPerEm);
         }
 
         private void ReadOS2(TypefaceReader reader)

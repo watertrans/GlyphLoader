@@ -2,7 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.IO;
-using WaterTrans.GlyphLoader;
+using System.Windows.Media;
 
 namespace WaterTrans.GlyphLoader.Tests
 {
@@ -16,6 +16,50 @@ namespace WaterTrans.GlyphLoader.Tests
         {
             Assert.ThrowsException<ArgumentNullException>(() => new Typeface(null));
         }
+
+        [TestMethod]
+        public void GlyphCount_OK_SameResultsAsGlyphTypeface()
+        {
+            string fontPath = Path.Combine(Environment.CurrentDirectory, "Roboto-Regular.ttf");
+            var gt = new GlyphTypeface(new Uri(fontPath));
+            using (var fontStream = File.OpenRead(fontPath))
+            {
+                var tf = new Typeface(fontStream);
+                Assert.AreEqual(tf.GlyphCount, gt.GlyphCount);
+            }
+        }
+
+        [TestMethod]
+        public void AdvanceWidths_OK_SameResultsAsGlyphTypeface()
+        {
+            string fontPath = Path.Combine(Environment.CurrentDirectory, "NotoSansJP-Regular.otf");
+            var gt = new GlyphTypeface(new Uri(fontPath));
+            using (var fontStream = File.OpenRead(fontPath))
+            {
+                var tf = new Typeface(fontStream);
+
+                for (ushort i = 0; i < tf.GlyphCount; i++)
+                {
+                    Assert.AreEqual(gt.AdvanceWidths[i], tf.AdvanceWidths[i]);
+                }
+            }
+        }
+
+        // TODO CFF LeftSideBearings 
+        //[TestMethod]
+        //public void LeftSideBearings_OK_SameResultsAsGlyphTypeface()
+        //{
+        //    string fontPath = Path.Combine(Environment.CurrentDirectory, "NotoSansJP-Regular.otf");
+        //    var gt = new GlyphTypeface(new Uri(fontPath));
+        //    using (var fontStream = File.OpenRead(fontPath))
+        //    {
+        //        var tf = new Typeface(fontStream);
+        //        for (ushort i = 0; i < tf.GlyphCount; i++)
+        //        {
+        //            Assert.AreEqual(gt.LeftSideBearings[i], tf.LeftSideBearings[i]);
+        //        }
+        //    }
+        //}
 
         [TestMethod]
         public void Constructor_ThrowsException_IfStreamCanReadIsFalse()

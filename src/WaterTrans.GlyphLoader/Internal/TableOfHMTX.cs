@@ -17,19 +17,20 @@ namespace WaterTrans.GlyphLoader.Internal
         /// <param name="reader">The <see cref="TypefaceReader"/>.</param>
         /// <param name="numberOfHMetrics">The number of hMetrics in ‘hhea’ table.</param>
         /// <param name="numGlyphs">The number of glyphs in ‘maxp’ table.</param>
-        internal TableOfHMTX(TypefaceReader reader, ushort numberOfHMetrics, ushort numGlyphs)
+        /// <param name="unitsPerEm">The unitsPerEm in ‘head’ table.</param>
+        internal TableOfHMTX(TypefaceReader reader, ushort numberOfHMetrics, ushort numGlyphs, ushort unitsPerEm)
         {
-            ushort aw = 0;
-            short lsb = 0;
+            double aw = 0;
+            double lsb = 0;
 
-            for (ushort i = 1; i <= numGlyphs; i++)
+            for (ushort i = 0; i < numGlyphs; i++)
             {
-                if (i <= numberOfHMetrics)
+                if (i < numberOfHMetrics)
                 {
-                    aw = reader.ReadUInt16();
+                    aw = (double)reader.ReadUInt16() / unitsPerEm;
                 }
 
-                lsb = reader.ReadInt16();
+                lsb = (double)reader.ReadInt16() / unitsPerEm;
 
                 AdvanceWidths[i] = aw;
                 LeftSideBearings[i] = lsb;
@@ -37,9 +38,9 @@ namespace WaterTrans.GlyphLoader.Internal
         }
 
         /// <summary>Gets an advance width, in font design units.</summary>
-        public IDictionary<ushort, ushort> AdvanceWidths { get; } = new Dictionary<ushort, ushort>();
+        public IDictionary<ushort, double> AdvanceWidths { get; } = new Dictionary<ushort, double>();
 
         /// <summary>Gets an glyph left side bearing, in font design units.</summary>
-        public IDictionary<ushort, short> LeftSideBearings { get; } = new Dictionary<ushort, short>();
+        public IDictionary<ushort, double> LeftSideBearings { get; } = new Dictionary<ushort, double>();
     }
 }
