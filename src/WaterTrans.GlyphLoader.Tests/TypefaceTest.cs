@@ -35,6 +35,36 @@ namespace WaterTrans.GlyphLoader.Tests
         }
 
         [TestMethod]
+        public void StrikethroughPosition_OK_SameResultsAsGlyphTypeface()
+        {
+            foreach (string fontFile in _fontFiles)
+            {
+                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
+                var gt = new GlyphTypeface(new Uri(fontPath));
+                using (var fontStream = File.OpenRead(fontPath))
+                {
+                    var tf = new Typeface(fontStream);
+                    Assert.AreEqual(tf.StrikethroughPosition, gt.StrikethroughPosition);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void StrikethroughThickness_OK_SameResultsAsGlyphTypeface()
+        {
+            foreach (string fontFile in _fontFiles)
+            {
+                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
+                var gt = new GlyphTypeface(new Uri(fontPath));
+                using (var fontStream = File.OpenRead(fontPath))
+                {
+                    var tf = new Typeface(fontStream);
+                    Assert.AreEqual(tf.StrikethroughThickness, gt.StrikethroughThickness);
+                }
+            }
+        }
+
+        [TestMethod]
         public void UnderlinePosition_OK_SameResultsAsGlyphTypeface()
         {
             foreach (string fontFile in _fontFiles)

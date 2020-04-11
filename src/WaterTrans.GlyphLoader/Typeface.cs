@@ -152,6 +152,44 @@ namespace WaterTrans.GlyphLoader
         }
 
         /// <summary>
+        /// Gets a value that indicates the distance from the baseline to the strikethrough for the typeface.
+        /// </summary>
+        public double StrikethroughPosition
+        {
+            get
+            {
+                if (_tableOfOS2 == null)
+                {
+                    // TODO What should I do?
+                    throw new NotImplementedException();
+                }
+                else
+                {
+                    return (double)_tableOfOS2.StrikeoutPosition / _tableOfHEAD.UnitsPerEm;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets a value that indicates the thickness of the strikethrough relative to the font em size.
+        /// </summary>
+        public double StrikethroughThickness
+        {
+            get
+            {
+                if (_tableOfOS2 == null)
+                {
+                    // TODO What should I do?
+                    throw new NotImplementedException();
+                }
+                else
+                {
+                    return (double)_tableOfOS2.StrikeoutSize / _tableOfHEAD.UnitsPerEm;
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets the position of the underline in the Typeface.
         /// </summary>
         public double UnderlinePosition
