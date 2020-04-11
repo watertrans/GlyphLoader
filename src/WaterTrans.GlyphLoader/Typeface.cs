@@ -22,6 +22,7 @@ namespace WaterTrans.GlyphLoader
         private TableOfHHEA _tableOfHHEA;
         private TableOfHMTX _tableOfHMTX;
         private TableOfOS2 _tableOfOS2;
+        private TableOfPOST _tableOfPOST;
         private TableOfVHEA _tableOfVHEA;
         private TableOfVMTX _tableOfVMTX;
         private TableOfMORT _tableOfMORT;
@@ -148,6 +149,22 @@ namespace WaterTrans.GlyphLoader
                     return (double)_tableOfOS2.XHeight / _tableOfHEAD.UnitsPerEm;
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets the position of the underline in the Typeface.
+        /// </summary>
+        public double UnderlinePosition
+        {
+            get { return (double)_tableOfPOST.UnderlinePosition / _tableOfHEAD.UnitsPerEm; }
+        }
+
+        /// <summary>
+        /// Gets the thickness of the underline relative to em size.
+        /// </summary>
+        public double UnderlineThickness
+        {
+            get { return (double)_tableOfPOST.UnderlineThickness / _tableOfHEAD.UnitsPerEm; }
         }
 
         /// <summary>
@@ -329,6 +346,17 @@ namespace WaterTrans.GlyphLoader
             _tableOfOS2 = new TableOfOS2(reader);
         }
 
+        private void ReadPOST(TypefaceReader reader)
+        {
+            if (!_tableDirectories.ContainsKey(TableNames.POST))
+            {
+                return;
+            }
+
+            _stream.Position = _tableDirectories[TableNames.POST].Offset;
+            _tableOfPOST = new TableOfPOST(reader);
+        }
+
         private void ReadVHEA(TypefaceReader reader)
         {
             if (!_tableDirectories.ContainsKey(TableNames.VHEA))
@@ -395,6 +423,7 @@ namespace WaterTrans.GlyphLoader
                 ReadHHEA(reader);
                 ReadHMTX(reader);
                 ReadOS2(reader);
+                ReadPOST(reader);
                 ReadVHEA(reader);
                 ReadVMTX(reader);
                 ReadMORT(reader);
@@ -422,6 +451,14 @@ namespace WaterTrans.GlyphLoader
                     reader.ReadUInt32());
 
                 _tableDirectories.Add(tableName, td);
+            }
+
+            foreach (string name in TableNames.RequiedTables)
+            {
+                if (!_tableDirectories.ContainsKey(name))
+                {
+                    throw new NotSupportedException("This font file does not contain the required tables.");
+                }
             }
         }
     }

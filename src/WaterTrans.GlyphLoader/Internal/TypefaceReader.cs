@@ -107,6 +107,15 @@ namespace WaterTrans.GlyphLoader.Internal
         }
 
         /// <summary>
+        /// Read Int32.
+        /// </summary>
+        /// <returns>Read result.</returns>
+        public int ReadInt32()
+        {
+            return BitConverter.ToInt32(ReadBytesInternal(4), 0);
+        }
+
+        /// <summary>
         /// Read UInt64.
         /// </summary>
         /// <returns>Read result.</returns>
@@ -122,6 +131,24 @@ namespace WaterTrans.GlyphLoader.Internal
         public long ReadInt64()
         {
             return BitConverter.ToInt64(ReadBytesInternal(8), 0);
+        }
+
+        /// <summary>
+        /// Read Fixed.
+        /// </summary>
+        /// <returns>Read result.</returns>
+        public float ReadFixed()
+        {
+            return ReadInt32() / 65536F;
+        }
+
+        /// <summary>
+        /// Read Fword.
+        /// </summary>
+        /// <returns>Read result.</returns>
+        public short ReadFword()
+        {
+            return ReadInt16();
         }
 
         /// <inheritdoc/>

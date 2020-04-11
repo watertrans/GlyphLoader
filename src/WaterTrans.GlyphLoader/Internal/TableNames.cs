@@ -12,56 +12,81 @@ namespace WaterTrans.GlyphLoader.Internal
         /// <summary>
         /// CMAP table.
         /// </summary>
-        internal const string CMAP = "cmap";
+        public const string CMAP = "cmap";
+
+        /// <summary>
+        /// GLYF table.
+        /// </summary>
+        public const string GLYF = "glyf";
+
+        /// <summary>
+        /// LOCA table.
+        /// </summary>
+        public const string LOCA = "loca";
+
+        /// <summary>
+        /// NAME table.
+        /// </summary>
+        public const string NAME = "name";
 
         /// <summary>
         /// MAXP table.
         /// </summary>
-        internal const string MAXP = "maxp";
+        public const string MAXP = "maxp";
 
         /// <summary>
         /// HEAD table.
         /// </summary>
-        internal const string HEAD = "head";
+        public const string HEAD = "head";
 
         /// <summary>
         /// HHEA table.
         /// </summary>
-        internal const string HHEA = "hhea";
+        public const string HHEA = "hhea";
 
         /// <summary>
         /// HMTX table.
         /// </summary>
-        internal const string HMTX = "hmtx";
+        public const string HMTX = "hmtx";
 
         /// <summary>
         /// OS2 table.
         /// </summary>
-        internal const string OS2 = "OS/2";
+        public const string OS2 = "OS/2";
+
+        /// <summary>
+        /// POST table.
+        /// </summary>
+        public const string POST = "post";
 
         /// <summary>
         /// VHEA table.
         /// </summary>
-        internal const string VHEA = "vhea";
+        public const string VHEA = "vhea";
 
         /// <summary>
         /// VMTX table.
         /// </summary>
-        internal const string VMTX = "vmtx";
+        public const string VMTX = "vmtx";
 
         /// <summary>
         /// MORT table.
         /// </summary>
-        internal const string MORT = "mort";
+        public const string MORT = "mort";
 
         /// <summary>
         /// GSUB table.
         /// </summary>
-        internal const string GSUB = "GSUB";
+        public const string GSUB = "GSUB";
 
         /// <summary>
         /// GPOS table.
         /// </summary>
-        internal const string GPOS = "GPOS";
+        public const string GPOS = "GPOS";
+
+        /// <summary>
+        /// Gets the required tables.
+        /// </summary>
+        public static readonly string[] RequiedTables = { CMAP, HEAD, HHEA, HMTX, MAXP, NAME, POST };
     }
 }

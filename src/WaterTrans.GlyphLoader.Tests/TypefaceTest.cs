@@ -35,6 +35,36 @@ namespace WaterTrans.GlyphLoader.Tests
         }
 
         [TestMethod]
+        public void UnderlinePosition_OK_SameResultsAsGlyphTypeface()
+        {
+            foreach (string fontFile in _fontFiles)
+            {
+                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
+                var gt = new GlyphTypeface(new Uri(fontPath));
+                using (var fontStream = File.OpenRead(fontPath))
+                {
+                    var tf = new Typeface(fontStream);
+                    Assert.AreEqual(tf.UnderlinePosition, gt.UnderlinePosition);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void UnderlineThickness_OK_SameResultsAsGlyphTypeface()
+        {
+            foreach (string fontFile in _fontFiles)
+            {
+                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
+                var gt = new GlyphTypeface(new Uri(fontPath));
+                using (var fontStream = File.OpenRead(fontPath))
+                {
+                    var tf = new Typeface(fontStream);
+                    Assert.AreEqual(tf.UnderlineThickness, gt.UnderlineThickness);
+                }
+            }
+        }
+
+        [TestMethod]
         public void CapsHeight_OK_SameResultsAsGlyphTypeface()
         {
             foreach (string fontFile in _fontFiles)
