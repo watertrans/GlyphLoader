@@ -45,6 +45,11 @@ namespace WaterTrans.GlyphLoader.Internal
         internal const string VHEA = "vhea";
 
         /// <summary>
+        /// VMTX table.
+        /// </summary>
+        internal const string VMTX = "vmtx";
+
+        /// <summary>
         /// MORT table.
         /// </summary>
         internal const string MORT = "mort";

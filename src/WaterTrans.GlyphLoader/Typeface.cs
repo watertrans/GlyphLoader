@@ -23,6 +23,7 @@ namespace WaterTrans.GlyphLoader
         private TableOfHMTX _tableOfHMTX;
         private TableOfOS2 _tableOfOS2;
         private TableOfVHEA _tableOfVHEA;
+        private TableOfVMTX _tableOfVMTX;
         private TableOfMORT _tableOfMORT;
         private TableOfGSUB _tableOfGSUB;
         private TableOfGPOS _tableOfGPOS;
@@ -53,14 +54,8 @@ namespace WaterTrans.GlyphLoader
                 throw new NotSupportedException("The stream does not support reading.");
             }
 
-            _stream = stream;
-
-            if (!stream.CanSeek)
-            {
-                _stream = new MemoryStream();
-                stream.CopyTo(_stream);
-            }
-
+            _stream = new MemoryStream();
+            stream.CopyTo(_stream);
             _stream.Position = 0;
 
             if (IsCollection(_stream))
@@ -74,6 +69,88 @@ namespace WaterTrans.GlyphLoader
         }
 
         /// <summary>
+        /// Gets height of character cell relative to em size.
+        /// </summary>
+        public double Height
+        {
+            get
+            {
+                if (_tableOfOS2 == null)
+                {
+                    return (double)(_tableOfHHEA.Ascender - _tableOfHHEA.Descender) / _tableOfHEAD.UnitsPerEm;
+                }
+                else if ((_tableOfOS2.Selection & 128) > 0) // USE_TYPO_METRICS
+                {
+                    return (double)(_tableOfOS2.TypoAscender - _tableOfOS2.TypoDescender) / _tableOfHEAD.UnitsPerEm;
+                }
+                else
+                {
+                    return (double)(_tableOfOS2.WinAscent + _tableOfOS2.WinDescent) / _tableOfHEAD.UnitsPerEm;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets distance from cell top to English baseline relative to em size.
+        /// </summary>
+        public double Baseline
+        {
+            get
+            {
+                if (_tableOfOS2 == null)
+                {
+                    return (double)_tableOfHHEA.Ascender / _tableOfHEAD.UnitsPerEm;
+                }
+                if ((_tableOfOS2.Selection & 128) > 0) // USE_TYPO_METRICS
+                {
+                    return (double)_tableOfOS2.TypoAscender / _tableOfHEAD.UnitsPerEm;
+                }
+                else
+                {
+                    return (double)_tableOfOS2.WinAscent / _tableOfHEAD.UnitsPerEm;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets distance from baseline to top of English capital relative to em size.
+        /// </summary>
+        public double CapsHeight
+        {
+            get
+            {
+                if (_tableOfOS2 == null)
+                {
+                    // TODO Determining the cap height by 'H' or 'O'? see https://developer.apple.com/fonts/TrueType-Reference-Manual/RM03/Chap3.html#a_whole
+                    throw new NotImplementedException();
+                }
+                else
+                {
+                    return (double)_tableOfOS2.CapHeight / _tableOfHEAD.UnitsPerEm;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets western x-height relative to em size.
+        /// </summary>
+        public double XHeight
+        {
+            get
+            {
+                if (_tableOfOS2 == null)
+                {
+                    // TODO Determining the x height by 'n' or 'o'? see https://developer.apple.com/fonts/TrueType-Reference-Manual/RM03/Chap3.html#a_whole
+                    throw new NotImplementedException();
+                }
+                else
+                {
+                    return (double)_tableOfOS2.XHeight / _tableOfHEAD.UnitsPerEm;
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets the advance widths for the glyphs represented by the Typeface object.
         /// </summary>
         public IDictionary<ushort, double> AdvanceWidths
@@ -82,11 +159,27 @@ namespace WaterTrans.GlyphLoader
         }
 
         /// <summary>
+        /// Gets the advance heights for the glyphs represented by the Typeface object.
+        /// </summary>
+        public IDictionary<ushort, double> AdvanceHeights
+        {
+            get { return _tableOfVMTX.AdvanceHeights; }
+        }
+
+        /// <summary>
         /// Gets the distance from the leading end of the advance vector to the left edge of the black box for the glyphs represented by the Typeface object.
         /// </summary>
         public IDictionary<ushort, double> LeftSideBearings
         {
             get { return _tableOfHMTX.LeftSideBearings; }
+        }
+
+        /// <summary>
+        /// Gets the distance from the top end of the vertical advance vector to the top edge of the black box for the glyphs represented by the Typeface object.
+        /// </summary>
+        public IDictionary<ushort, double> TopSideBearings
+        {
+            get { return _tableOfVMTX.TopSideBearings; }
         }
 
         /// <summary>
@@ -247,6 +340,17 @@ namespace WaterTrans.GlyphLoader
             _tableOfVHEA = new TableOfVHEA(reader);
         }
 
+        private void ReadVMTX(TypefaceReader reader)
+        {
+            if (!_tableDirectories.ContainsKey(TableNames.VMTX))
+            {
+                return;
+            }
+
+            _stream.Position = _tableDirectories[TableNames.VMTX].Offset;
+            _tableOfVMTX = new TableOfVMTX(reader, _tableOfVHEA.NumberOfVMetrics, _tableOfMAXP.NumGlyphs, _tableOfHEAD.UnitsPerEm);
+        }
+
         private void ReadMORT(TypefaceReader reader)
         {
             if (!_tableDirectories.ContainsKey(TableNames.MORT))
@@ -292,6 +396,7 @@ namespace WaterTrans.GlyphLoader
                 ReadHMTX(reader);
                 ReadOS2(reader);
                 ReadVHEA(reader);
+                ReadVMTX(reader);
                 ReadMORT(reader);
                 ReadGSUB(reader);
                 ReadGPOS(reader);
