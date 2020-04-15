@@ -5,7 +5,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using WaterTrans.GlyphLoader.Geometry;
 using WaterTrans.GlyphLoader.Internal;
+using WaterTrans.GlyphLoader.Internal.AAT;
 
 namespace WaterTrans.GlyphLoader
 {
@@ -21,8 +23,9 @@ namespace WaterTrans.GlyphLoader
         private TableOfHEAD _tableOfHEAD;
         private TableOfHHEA _tableOfHHEA;
         private TableOfHMTX _tableOfHMTX;
-        private TableOfOS2 _tableOfOS2;
+        private TableOfOS2  _tableOfOS2;
         private TableOfPOST _tableOfPOST;
+        private TableOfLOCA _tableOfLOCA;
         private TableOfVHEA _tableOfVHEA;
         private TableOfVMTX _tableOfVMTX;
         private TableOfMORT _tableOfMORT;
@@ -283,6 +286,32 @@ namespace WaterTrans.GlyphLoader
         /// </summary>
         internal ushort RangeShift { get; private set; }
 
+        /// <summary>
+        /// Returns a Geometry value describing the path for a single glyph in the font.
+        /// </summary>
+        /// <param name="glyphIndex">The index of the glyph to get the outline for.</param>
+        /// <param name="renderingEmSize">The font size in drawing surface units.</param>
+        /// <param name="hintingEmSize">The size to hint for in points.</param>
+        /// <returns>A <see cref="PathGeometry"/> value that represents the path of the glyph.</returns>
+        public PathGeometry GetGlyphOutline(ushort glyphIndex, double renderingEmSize, double hintingEmSize)
+        {
+            using (var reader = new TypefaceReader(_stream))
+            {
+                double scale = (double)renderingEmSize / _tableOfHEAD.UnitsPerEm;
+                if (_tableDirectories.ContainsKey(TableNames.GLYF))
+                {
+                    // TODO Cache Glyph
+                    return ReadGLYF(reader, glyphIndex).ConvertToPathGeometry(scale);
+                }
+                else
+                {
+                    // TODO
+                }
+
+                return new PathGeometry();
+            }
+        }
+
         private bool IsCollection(Stream stream)
         {
             bool result;
@@ -395,6 +424,17 @@ namespace WaterTrans.GlyphLoader
             _tableOfPOST = new TableOfPOST(reader);
         }
 
+        private void ReadLOCA(TypefaceReader reader)
+        {
+            if (!_tableDirectories.ContainsKey(TableNames.LOCA))
+            {
+                return;
+            }
+
+            _stream.Position = _tableDirectories[TableNames.LOCA].Offset;
+            _tableOfLOCA = new TableOfLOCA(reader, _tableOfMAXP.NumGlyphs, _tableOfHEAD.IndexToLocFormat);
+        }
+
         private void ReadVHEA(TypefaceReader reader)
         {
             if (!_tableDirectories.ContainsKey(TableNames.VHEA))
@@ -450,6 +490,12 @@ namespace WaterTrans.GlyphLoader
             _tableOfGPOS = new TableOfGPOS(reader);
         }
 
+        private GlyphData ReadGLYF(TypefaceReader reader, ushort glyphIndex)
+        {
+            _stream.Position = _tableDirectories[TableNames.GLYF].Offset + _tableOfLOCA.Offsets[glyphIndex];
+            return new GlyphData(reader);
+        }
+
         private void ReadTypeface(Stream stream)
         {
             using (var reader = new TypefaceReader(stream))
@@ -462,6 +508,7 @@ namespace WaterTrans.GlyphLoader
                 ReadHMTX(reader);
                 ReadOS2(reader);
                 ReadPOST(reader);
+                ReadLOCA(reader);
                 ReadVHEA(reader);
                 ReadVMTX(reader);
                 ReadMORT(reader);

@@ -9,14 +9,15 @@ It is written in C#, designed to be small, efficient and portable while capable 
 - Currently under development.
 
 ## Supported Platforms
-This library is compiled for .NET Standard 1.0. Supports following platforms:
+This library is compiled for .NET Standard 2.0. Supports following platforms:
 
-- .NET Core (1.0+)
-- .NET Framework (4.5+)
-- Mono (4.6+)
-- Xamarin.iOS (10.0+)
-- Xamarin.Mac (3.0+)
-- Xamarin.Android (7.0+)
+- .NET Core (2.0+)
+- .NET Framework (4.6.1+)
+- WebAssembly (1.0+)
+- Mono (5.4+)
+- Xamarin.iOS (10.14+)
+- Xamarin.Mac (3.8+)
+- Xamarin.Android (8.0+)
 
 ## Supported Font File Format
 Supports following font file format:

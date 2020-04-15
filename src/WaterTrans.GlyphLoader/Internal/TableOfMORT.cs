@@ -30,20 +30,16 @@ namespace WaterTrans.GlyphLoader.Internal
             }
         }
 
-        /// <summary>Gets metamorphosis chains.</summary>
-        /// <remarks>Metamorphosis chains.</remarks>
+        /// <summary>Gets the metamorphosis chains.</summary>
         public List<Chain> Chains { get; } = new List<Chain>();
 
-        /// <summary>Gets TableVersionNumberMajor.</summary>
-        /// <remarks>0x00010000 for version 1.0.</remarks>
+        /// <summary>Gets a major table version.</summary>
         public ushort TableVersionNumberMajor { get; }
 
-        /// <summary>Gets TableVersionNumberMinor.</summary>
-        /// <remarks>0x00010000 for version 1.0.</remarks>
+        /// <summary>Gets a minor table version.</summary>
         public ushort TableVersionNumberMinor { get; }
 
-        /// <summary>Gets NChains.</summary>
-        /// <remarks>Number of metamorphosis chains contained in this table.</remarks>
+        /// <summary>Gets a number of metamorphosis chains contained in this table.</summary>
         public uint NChains { get; }
     }
 }

@@ -3,6 +3,7 @@ using Moq;
 using System;
 using System.IO;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace WaterTrans.GlyphLoader.Tests
 {
@@ -284,6 +285,72 @@ namespace WaterTrans.GlyphLoader.Tests
             {
                 var tf = new Typeface(fontStream, 1);
             }
+        }
+
+        [TestMethod]
+        public void GetGlyphOutline_OK_SameResultsAsGlyphTypeface()
+        {
+            foreach (string fontFile in _fontFiles)
+            {
+                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
+                var gt = new GlyphTypeface(new Uri(fontPath));
+                using (var fontStream = File.OpenRead(fontPath))
+                {
+                    var tf = new Typeface(fontStream);
+
+                    for (ushort i = 0; i < tf.GlyphCount; i++)
+                    {
+                        var sourceGeometry = tf.GetGlyphOutline(i, 128, 128);
+                        var mediaGeometry1 = ConvetToWpfPathGeometry(sourceGeometry);
+                        mediaGeometry1.Transform = new TranslateTransform(0, tf.Baseline * 128);
+
+                        var mediaGeometry2 = gt.GetGlyphOutline(i, 128, 128);
+                        mediaGeometry2.Transform = new TranslateTransform(0, tf.Baseline * 128);
+
+                        var byteArray1 = RenderBitmap(mediaGeometry1);
+                        var byteArray2 = RenderBitmap(mediaGeometry2);
+
+                        int hitCount = 0;
+                        for (int j = 0; j < byteArray1.Length; j++)
+                        {
+                            if (byteArray1[j] == byteArray2[j])
+                            {
+                                hitCount++;
+                            }
+                        }
+
+                        // Match at least 98%
+                        Assert.IsTrue(hitCount >= 64225,
+                            " [GlyphId]" + i +
+                            " [Typeface]" + mediaGeometry1.ToString() +
+                            " [GlyphTypeface]" + mediaGeometry2.ToString());
+                    }
+                }
+            }
+        }
+
+        private System.Windows.Media.Geometry ConvetToWpfPathGeometry(WaterTrans.GlyphLoader.Geometry.PathGeometry geometry)
+        {
+            return System.Windows.Media.Geometry.Parse(geometry.ToString()).Clone();
+        }
+
+        private byte[] RenderBitmap(System.Windows.Media.Geometry geometry)
+        {
+            var bmp = new RenderTargetBitmap(128, 128, 96, 96, PixelFormats.Default);
+
+            DrawingVisual viz = new DrawingVisual();
+            DrawingContext dc = viz.RenderOpen();
+            dc.DrawGeometry(Brushes.Black, null, geometry);
+            dc.Close();
+            bmp.Render(viz);
+
+            var result = new byte[65536];
+            bmp.CopyPixels(result, 512, 0);
+            bmp.Clear();
+            bmp = null;
+            dc = null;
+            viz = null;
+            return result;
         }
     }
 }

@@ -40,79 +40,74 @@ namespace WaterTrans.GlyphLoader.Internal
             GlyphDataFormat = reader.ReadInt16();
         }
 
-        /// <summary>Gets TableVersionNumberMajor.</summary>
-        /// <remarks>0x00010000 for version 1.0.</remarks>
+        /// <summary>Gets a major table version.</summary>
         public ushort TableVersionNumberMajor { get; }
 
-        /// <summary>Gets TableVersionNumberMinor.</summary>
-        /// <remarks>0x00010000 for version 1.0.</remarks>
+        /// <summary>Gets a minor table version.</summary>
         public ushort TableVersionNumberMinor { get; }
 
-        /// <summary>Gets FontRevisionMajor.</summary>
-        /// <remarks>Set by font manufacturer.</remarks>
+        /// <summary>Gets a major font revision.</summary>
         public ushort FontRevisionMajor { get; }
 
-        /// <summary>Gets FontRevisionMinor.</summary>
-        /// <remarks>Set by font manufacturer.</remarks>
+        /// <summary>Gets a minor font revision.</summary>
         public ushort FontRevisionMinor { get; }
 
-        /// <summary>Gets CheckSumAdjustment.</summary>
+        /// <summary>Gets a check sum adjustment.</summary>
         /// <remarks>To compute:  set it to 0, sum the entire font as ULONG, then store 0xB1B0AFBA - sum.</remarks>
         public uint CheckSumAdjustment { get; }
 
-        /// <summary>Gets MagicNumber.</summary>
+        /// <summary>Gets a magic number.</summary>
         /// <remarks>Set to 0x5F0F3CF5.</remarks>
         public uint MagicNumber { get; }
 
-        /// <summary>Gets Flags.</summary>
+        /// <summary>Gets a flags.</summary>
         /// <remarks>Bit 0 - baseline for font at y=0;Bit 1 - left sidebearing at x=0;Bit 2 - instructions may depend on point size;Bit 3 - force ppem to integer values for all internal scaler math; may use fractional ppem sizes if this bit is clear;Bit 4 - instructions may alter advance width (the advance widths might not scale linearly);Note: All other bits must be zero.</remarks>
         public ushort Flags { get; }
 
-        /// <summary>Gets UnitsPerEm.</summary>
+        /// <summary>Gets the UnitsPerEm.</summary>
         /// <remarks>Valid range is from 16 to 16384.</remarks>
         public ushort UnitsPerEm { get; }
 
-        /// <summary>Gets Created.</summary>
+        /// <summary>Gets a created date.</summary>
         /// <remarks>International date (8-byte field).</remarks>
         public long Created { get; }
 
-        /// <summary>Gets Modified.</summary>
+        /// <summary>Gets a modified date.</summary>
         /// <remarks>International date (8-byte field).</remarks>
         public long Modified { get; }
 
-        /// <summary>Gets XMin.</summary>
+        /// <summary>Gets a xMin.</summary>
         /// <remarks>For all glyph bounding boxes.</remarks>
         public long XMin { get; }
 
-        /// <summary>Gets YMin.</summary>
+        /// <summary>Gets a yMin.</summary>
         /// <remarks>For all glyph bounding boxes.</remarks>
         public long YMin { get; }
 
-        /// <summary>Gets XMax.</summary>
+        /// <summary>Gets a xMax.</summary>
         /// <remarks>For all glyph bounding boxes.</remarks>
         public long XMax { get; }
 
-        /// <summary>Gets YMax.</summary>
+        /// <summary>Gets a yMax.</summary>
         /// <remarks>For all glyph bounding boxes.</remarks>
         public long YMax { get; }
 
-        /// <summary>Gets MacStyle.</summary>
+        /// <summary>Gets the MacStyle.</summary>
         /// <remarks>Bit 0 bold (if set to 1); Bit 1 italic (if set to 1)Bits 2-15 reserved (set to 0).</remarks>
         public ushort MacStyle { get; }
 
-        /// <summary>Gets LowestRecPPEM.</summary>
-        /// <remarks>Smallest readable size in pixels.</remarks>
+        /// <summary>Gets a smallest readable size in pixels.</summary>
         public ushort LowestRecPPEM { get; }
 
-        /// <summary>Gets FontDirectionHint.</summary>
+        /// <summary>Gets a font direction hint.</summary>
         /// <remarks>0 Fully mixed directional glyphs; 1 Only strongly left to right; 2 Like 1 but also contains neutrals ; -1 Only strongly right to left; -2 Like -1 but also contains neutrals.</remarks>
         public short FontDirectionHint { get; }
 
-        /// <summary>Gets IndexToLocFormat.</summary>
+        /// <summary>Gets the IndexToLocFormat.</summary>
         /// <remarks>0 for short offsets, 1 for long.</remarks>
         public short IndexToLocFormat { get; }
 
-        /// <summary>Gets GlyphDataFormat.</summary>
+        /// <summary>Gets the GlyphDataFormat.</summary>
         /// <remarks>0 for current format.</remarks>
         public short GlyphDataFormat { get; }
     }

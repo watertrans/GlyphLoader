@@ -6,8 +6,14 @@ dotnet_style_collection_initializer = true:none
 # IDE0059: Value assigned to variable is never used
 csharp_style_unused_value_assignment_preference = discard_variable:none
 
+# SA1025: Code should not contain multiple whitespace in a row
+dotnet_diagnostic.SA1025.severity = none
+
 # SA1101: Prefix local calls with this
 dotnet_diagnostic.SA1101.severity = none
+
+# SA1108: Block statements should not contain embedded comments
+dotnet_diagnostic.SA1108.severity = none
 
 # SA1200: Using directives should be placed correctly
 dotnet_diagnostic.SA1200.severity = none
@@ -15,8 +21,11 @@ dotnet_diagnostic.SA1200.severity = none
 # SA1309: Field names should not begin with underscore
 dotnet_diagnostic.SA1309.severity = none
 
+# SA1310: Field names should not contain underscore
+dotnet_diagnostic.SA1310.severity = none
+
 # SA1513: Closing brace should be followed by blank line
 dotnet_diagnostic.SA1513.severity = none
 
-# SA1108: Block statements should not contain embedded comments
-dotnet_diagnostic.SA1108.severity = none
+# SA1623: Property summary documentation should match accessors
+dotnet_diagnostic.SA1623.severity = none

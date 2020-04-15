@@ -39,75 +39,68 @@ namespace WaterTrans.GlyphLoader.Internal
             NumberOfHMetrics = reader.ReadUInt16();
         }
 
-        /// <summary>Gets TableVersionNumberMajor.</summary>
-        /// <remarks>0x00010000 for version 1.0.</remarks>
+        /// <summary>Gets a major table version.</summary>
         public ushort TableVersionNumberMajor { get; }
 
-        /// <summary>Gets TableVersionNumberMinor.</summary>
-        /// <remarks>0x00010000 for version 1.0.</remarks>
+        /// <summary>Gets a minor table version.</summary>
         public ushort TableVersionNumberMinor { get; }
 
-        /// <summary>Gets Ascender.</summary>
-        /// <remarks>Typographic ascent.</remarks>
+        /// <summary>Gets the typographic ascent.</summary>
         public short Ascender { get; }
 
-        /// <summary>Gets Descender.</summary>
-        /// <remarks>Typographic descent.</remarks>
+        /// <summary>Gets the typographic descent.</summary>
         public short Descender { get; }
 
-        /// <summary>Gets LineGap.</summary>
+        /// <summary>Gets the line gap.</summary>
         /// <remarks>Typographic line gap. Negative LineGap values are treated as zero in Windows 3.1, System 6, and System 7.</remarks>
         public short LineGap { get; }
 
-        /// <summary>Gets AdvanceWidthMax.</summary>
-        /// <remarks>Maximum advance width value in ‘hmtx’ table.</remarks>
+        /// <summary>Gets the maximum advance width value in ‘hmtx’ table.</summary>
         public ushort AdvanceWidthMax { get; }
 
-        /// <summary>Gets MinLeftSideBearing.</summary>
-        /// <remarks>Minimum left sidebearing value in ‘hmtx’ table.</remarks>
+        /// <summary>Gets the minimum left sidebearing value in ‘hmtx’ table.</summary>
         public short MinLeftSideBearing { get; }
 
-        /// <summary>Gets MinRightSideBearing.</summary>
-        /// <remarks>Minimum right sidebearing value; calculated as Min(aw - lsb - (xMax - xMin)).</remarks>
+        /// <summary>Gets the minimum right sidebearing value; calculated as Min(aw - lsb - (xMax - xMin)).</summary>
         public short MinRightSideBearing { get; }
 
-        /// <summary>Gets XMaxExtent.</summary>
+        /// <summary>Gets the xMaxExtent.</summary>
         /// <remarks>Max(lsb + (xMax - xMin)).</remarks>
         public short XMaxExtent { get; }
 
-        /// <summary>Gets CaretSlopeRise.</summary>
+        /// <summary>Gets the caretSlopeRise.</summary>
         /// <remarks>Used to calculate the slope of the cursor (rise/run); 1 for vertical.</remarks>
         public short CaretSlopeRise { get; }
 
-        /// <summary>Gets CaretSlopeRun.</summary>
+        /// <summary>Gets the caretSlopeRun.</summary>
         /// <remarks>0 for vertical.</remarks>
         public short CaretSlopeRun { get; }
 
-        /// <summary>Gets Reserved1.</summary>
+        /// <summary>Gets a reserved1.</summary>
         /// <remarks>Reserved.</remarks>
         public short Reserved1 { get; }
 
-        /// <summary>Gets Reserved2.</summary>
+        /// <summary>Gets a reserved2.</summary>
         /// <remarks>Reserved.</remarks>
         public short Reserved2 { get; }
 
-        /// <summary>Gets Reserved3.</summary>
+        /// <summary>Gets a reserved3.</summary>
         /// <remarks>Reserved.</remarks>
         public short Reserved3 { get; }
 
-        /// <summary>Gets Reserved4.</summary>
+        /// <summary>Gets a reserved4.</summary>
         /// <remarks>Reserved.</remarks>
         public short Reserved4 { get; }
 
-        /// <summary>Gets Reserved5.</summary>
+        /// <summary>Gets a reserved5.</summary>
         /// <remarks>Reserved.</remarks>
         public short Reserved5 { get; }
 
-        /// <summary>Gets MetricDataFormat.</summary>
+        /// <summary>Gets the metric data format.</summary>
         /// <remarks>0 for current format.</remarks>
         public short MetricDataFormat { get; }
 
-        /// <summary>Gets NumberOfHMetrics.</summary>
+        /// <summary>Gets the number of hMetrics.</summary>
         /// <remarks>Number of hMetric entries in ‘hmtx’table; may be smaller than the total number of glyphs in the font.</remarks>
         public ushort NumberOfHMetrics { get; }
     }

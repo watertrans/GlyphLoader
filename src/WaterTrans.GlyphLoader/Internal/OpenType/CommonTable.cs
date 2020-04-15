@@ -107,48 +107,37 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType
         /// <summary>Gets offset.</summary>
         public long Offset { get; }
 
-        /// <summary>Gets TableVersionNumberMajor.</summary>
-        /// <remarks>0x00010000 for version 1.0.</remarks>
+        /// <summary>Gets a major table version.</summary>
         public ushort TableVersionNumberMajor { get; }
 
-        /// <summary>Gets TableVersionNumberMinor.</summary>
-        /// <remarks>0x00010000 for version 1.0.</remarks>
+        /// <summary>Gets a minor table version.</summary>
         public ushort TableVersionNumberMinor { get; }
 
-        /// <summary>Gets OffsetScriptList.</summary>
-        /// <remarks>Offset to ScriptList table.</remarks>
+        /// <summary>Gets the offset to ScriptList table.</summary>
         public ushort OffsetScriptList { get; }
 
-        /// <summary>Gets OffsetFeatureList.</summary>
-        /// <remarks>Offset to FeatureList table.</remarks>
+        /// <summary>Gets the offset to FeatureList table.</summary>
         public ushort OffsetFeatureList { get; }
 
-        /// <summary>Gets OffsetLookupList.</summary>
-        /// <remarks>Offset to LookupList table.</remarks>
+        /// <summary>Gets the offset to LookupList table.</summary>
         public ushort OffsetLookupList { get; }
 
-        /// <summary>Gets ScriptCount.</summary>
-        /// <remarks>Number of ScriptRecords.</remarks>
+        /// <summary>Gets the number of ScriptRecords.</summary>
         public ushort ScriptCount { get; }
 
-        /// <summary>Gets ScriptList.</summary>
-        /// <remarks>List of ScriptRecord.</remarks>
+        /// <summary>Gets the list of ScriptRecord.</summary>
         public List<ScriptTable> ScriptList { get; } = new List<ScriptTable>();
 
-        /// <summary>Gets FeatureCount.</summary>
-        /// <remarks>Number of FeatureRecords.</remarks>
+        /// <summary>Gets the number of FeatureRecords.</summary>
         public ushort FeatureCount { get; }
 
-        /// <summary>Gets FeatureList.</summary>
-        /// <remarks>List of ScriptRecord.</remarks>
+        /// <summary>Gets the list of ScriptRecord.</summary>
         public List<FeatureTable> FeatureList { get; } = new List<FeatureTable>();
 
-        /// <summary>Gets LookupCount.</summary>
-        /// <remarks>Number of lookups in this table.</remarks>
+        /// <summary>Gets the number of lookups in this table.</summary>
         public ushort LookupCount { get; }
 
-        /// <summary>Gets LookupList.</summary>
-        /// <remarks>List of LookupTable.</remarks>
+        /// <summary>Gets the list of LookupTable.</summary>
         public List<LookupTable> LookupList { get; } = new List<LookupTable>();
 
         /// <summary>

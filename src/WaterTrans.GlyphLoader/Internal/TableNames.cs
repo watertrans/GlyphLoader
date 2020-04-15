@@ -15,16 +15,6 @@ namespace WaterTrans.GlyphLoader.Internal
         public const string CMAP = "cmap";
 
         /// <summary>
-        /// GLYF table.
-        /// </summary>
-        public const string GLYF = "glyf";
-
-        /// <summary>
-        /// LOCA table.
-        /// </summary>
-        public const string LOCA = "loca";
-
-        /// <summary>
         /// NAME table.
         /// </summary>
         public const string NAME = "name";
@@ -60,6 +50,11 @@ namespace WaterTrans.GlyphLoader.Internal
         public const string POST = "post";
 
         /// <summary>
+        /// LOCA table.
+        /// </summary>
+        public const string LOCA = "loca";
+
+        /// <summary>
         /// VHEA table.
         /// </summary>
         public const string VHEA = "vhea";
@@ -83,6 +78,11 @@ namespace WaterTrans.GlyphLoader.Internal
         /// GPOS table.
         /// </summary>
         public const string GPOS = "GPOS";
+
+        /// <summary>
+        /// GLYF table.
+        /// </summary>
+        public const string GLYF = "glyf";
 
         /// <summary>
         /// Gets the required tables.

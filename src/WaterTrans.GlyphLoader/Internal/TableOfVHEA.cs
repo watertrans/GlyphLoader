@@ -35,76 +35,73 @@ namespace WaterTrans.GlyphLoader.Internal
             NumberOfVMetrics = reader.ReadUInt16();
         }
 
-        /// <summary>Gets TableVersionNumberMajor.</summary>
-        /// <remarks>0x00010000 for version 1.0.</remarks>
+        /// <summary>Gets a major table version.</summary>
         public ushort TableVersionNumberMajor { get; }
 
-        /// <summary>Gets TableVersionNumberMinor.</summary>
-        /// <remarks>0x00010000 for version 1.0.</remarks>
+        /// <summary>Gets a minor table version.</summary>
         public ushort TableVersionNumberMinor { get; }
 
-        /// <summary>Gets Ascender.</summary>
+        /// <summary>Gets the ascender.</summary>
         /// <remarks>Distance in FUnits from the centerline to the previous line’s descent.</remarks>
         public short Ascender { get; }
 
-        /// <summary>Gets Descender.</summary>
+        /// <summary>Gets the descender.</summary>
         /// <remarks>Distance in FUnits from the centerline to the next line’s ascent.</remarks>
         public short Descender { get; }
 
-        /// <summary>Gets LineGap.</summary>
+        /// <summary>Gets the line gap.</summary>
         /// <remarks>Reserved; set to 0.</remarks>
         public short LineGap { get; }
 
-        /// <summary>Gets AdvanceHeightMax.</summary>
+        /// <summary>Gets the maximum advance height.</summary>
         /// <remarks>The maximum advance height measurement in FUnits found in the font. This value must be consistent with the entries in the vertical metrics table.</remarks>
         public ushort AdvanceHeightMax { get; }
 
-        /// <summary>Gets MinTopSideBearing.</summary>
+        /// <summary>Gets the minimum top sidebearing measurement.</summary>
         /// <remarks>The minimum top sidebearing measurement found in the font, in FUnits. This value must be consistent with the entries in the vertical metrics table.</remarks>
         public short MinTopSideBearing { get; }
 
-        /// <summary>Gets MinBottomSideBearing.</summary>
+        /// <summary>Gets the minimum bottom sidebearing measurement.</summary>
         /// <remarks>The minimum bottom sidebearing measurement found in the font, in FUnits. This value must be consistent with the entries in the vertical metrics table.</remarks>
         public short MinBottomSideBearing { get; }
 
-        /// <summary>Gets YMaxExtent.</summary>
+        /// <summary>Gets the yMaxExtent.</summary>
         /// <remarks>Defined as yMaxExtent=minTopSideBearing+(yMax-yMin).</remarks>
         public short YMaxExtent { get; }
 
-        /// <summary>Gets CaretSlopeRise.</summary>
+        /// <summary>Gets the caretSlopeRise.</summary>
         /// <remarks>The value of the caretSlopeRise field divided by the value of the caretSlopeRun Field determines the slope of the caret. A value of 0 for the rise and a value of 1 for the run specifies a horizontal caret. A value of 1 for the rise and a value of 0 for the run specifies a vertical caret. Intermediate values are desirable for fonts whose glyphs are oblique or italic. For a vertical font, a horizontal caret is best.</remarks>
         public short CaretSlopeRise { get; }
 
-        /// <summary>Gets CaretSlopeRun.</summary>
+        /// <summary>Gets the caretSlopeRun.</summary>
         /// <remarks>See the caretSlopeRise field. Value=1 for nonslanted vertical fonts.</remarks>
         public short CaretSlopeRun { get; }
 
-        /// <summary>Gets CaretOffset.</summary>
+        /// <summary>Gets the caret offset.</summary>
         /// <remarks>The amount by which the highlight on a slanted glyph needs to be shifted away from the glyph in order to produce the best appearance. Set value equal to 0 for nonslanted fonts.</remarks>
         public short CaretOffset { get; }
 
-        /// <summary>Gets Reserved1.</summary>
+        /// <summary>Gets a reserved1.</summary>
         /// <remarks>Reserved.</remarks>
         public short Reserved1 { get; }
 
-        /// <summary>Gets Reserved2.</summary>
+        /// <summary>Gets a reserved2.</summary>
         /// <remarks>Reserved.</remarks>
         public short Reserved2 { get; }
 
-        /// <summary>Gets Reserved3.</summary>
+        /// <summary>Gets a reserved3.</summary>
         /// <remarks>Reserved.</remarks>
         public short Reserved3 { get; }
 
-        /// <summary>Gets Reserved4.</summary>
+        /// <summary>Gets a reserved4.</summary>
         /// <remarks>Reserved.</remarks>
         public short Reserved4 { get; }
 
-        /// <summary>Gets MetricDataFormat.</summary>
+        /// <summary>Gets the metric data format.</summary>
         /// <remarks>0 for current format.</remarks>
         public short MetricDataFormat { get; }
 
-        /// <summary>Gets NumberOfVMetrics.</summary>
-        /// <remarks>Number of advance heights in the vertical metrics table.</remarks>
+        /// <summary>Gets the Number of advance heights in the vertical metrics table.</summary>
         public ushort NumberOfVMetrics { get; }
     }
 }
