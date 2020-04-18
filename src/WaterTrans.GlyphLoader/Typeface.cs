@@ -16,6 +16,7 @@ namespace WaterTrans.GlyphLoader
     /// </summary>
     public class Typeface
     {
+        private readonly Dictionary<ushort, GlyphData> _glyphDataCache = new Dictionary<ushort, GlyphData>();
         private readonly Dictionary<string, TableDirectory> _tableDirectories = new Dictionary<string, TableDirectory>(StringComparer.OrdinalIgnoreCase);
         private readonly Stream _stream;
         private TableOfCMAP _tableOfCMAP;
@@ -291,17 +292,16 @@ namespace WaterTrans.GlyphLoader
         /// </summary>
         /// <param name="glyphIndex">The index of the glyph to get the outline for.</param>
         /// <param name="renderingEmSize">The font size in drawing surface units.</param>
-        /// <param name="hintingEmSize">The size to hint for in points.</param>
         /// <returns>A <see cref="PathGeometry"/> value that represents the path of the glyph.</returns>
-        public PathGeometry GetGlyphOutline(ushort glyphIndex, double renderingEmSize, double hintingEmSize)
+        public PathGeometry GetGlyphOutline(ushort glyphIndex, double renderingEmSize)
         {
             using (var reader = new TypefaceReader(_stream))
             {
                 double scale = (double)renderingEmSize / _tableOfHEAD.UnitsPerEm;
                 if (_tableDirectories.ContainsKey(TableNames.GLYF))
                 {
-                    // TODO Cache Glyph
-                    return ReadGLYF(reader, glyphIndex).ConvertToPathGeometry(scale);
+                    var glyph = ReadGLYF(reader, glyphIndex);
+                    return glyph.ConvertToPathGeometry(scale);
                 }
                 else
                 {
@@ -492,8 +492,34 @@ namespace WaterTrans.GlyphLoader
 
         private GlyphData ReadGLYF(TypefaceReader reader, ushort glyphIndex)
         {
-            _stream.Position = _tableDirectories[TableNames.GLYF].Offset + _tableOfLOCA.Offsets[glyphIndex];
-            return new GlyphData(reader);
+            GlyphData result = null;
+            if (_tableOfLOCA.Offsets[glyphIndex] == uint.MaxValue)
+            {
+                // No glyph data
+                result = new GlyphData(glyphIndex);
+            }
+            else
+            {
+                _stream.Position = _tableDirectories[TableNames.GLYF].Offset + _tableOfLOCA.Offsets[glyphIndex];
+                result = new GlyphData(reader, glyphIndex);
+            }
+
+            _glyphDataCache[glyphIndex] = result;
+
+            for (int i = 0; i < result.Components.Count; i++)
+            {
+                if (!_glyphDataCache.ContainsKey(result.Components[i].GlyphIndex))
+                {
+                    _glyphDataCache[result.Components[i].GlyphIndex] = ReadGLYF(reader, result.Components[i].GlyphIndex);
+                }
+            }
+
+            if (result.Components.Count > 0)
+            {
+                result.Compound(_glyphDataCache);
+            }
+
+            return result;
         }
 
         private void ReadTypeface(Stream stream)

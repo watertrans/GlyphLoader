@@ -61,6 +61,15 @@ namespace WaterTrans.GlyphLoader.Internal
         }
 
         /// <summary>
+        /// Read sbyte.
+        /// </summary>
+        /// <returns>Read result.</returns>
+        public sbyte ReadSByte()
+        {
+            return _reader.ReadSByte();
+        }
+
+        /// <summary>
         /// Read byte.
         /// </summary>
         /// <returns>Read result.</returns>
@@ -149,6 +158,15 @@ namespace WaterTrans.GlyphLoader.Internal
         public short ReadFword()
         {
             return ReadInt16();
+        }
+
+        /// <summary>
+        /// Read F2Dot14.
+        /// </summary>
+        /// <returns>Read result.</returns>
+        public float ReadF2Dot14()
+        {
+            return (float)ReadInt16() / 16384;
         }
 
         /// <inheritdoc/>

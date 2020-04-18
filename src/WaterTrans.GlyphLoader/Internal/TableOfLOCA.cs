@@ -35,6 +35,14 @@ namespace WaterTrans.GlyphLoader.Internal
                     Offsets[i] = reader.ReadUInt32();
                 }
             }
+
+            for (ushort i = 0; i < numGlyphs; i++)
+            {
+                if (Offsets[i] == Offsets[(ushort)(i + 1)])
+                {
+                    Offsets[i] = uint.MaxValue;
+                }
+            }
         }
 
         /// <summary>Gets the offsets to the locations of the glyphs in the font, relative to the beginning of the glyphData table.</summary>
