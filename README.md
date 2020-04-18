@@ -1,6 +1,13 @@
 # GlyphLoader
-GlyphLoader is a open source library to SFNT font file. 
-It is written in C#, designed to be small, efficient and portable while capable of producing high-quality glyph images.
+GlyphLoader is a .NET Standerd library for TrueType, OpenType font.  
+It is written in C#, designed to be small, efficient and portable while capable of producing high-quality glyph images.  
+In WebAssembly environment, it can be used for application development using glyph outline information.  
+
+## Features
+
+- It provides the similar function as WPF GlyphTypeface class.
+- The output glyph outline can be easily converted to SVG tags.
+- It also supports vertical writing in Japanese.
 
 ## Release Notes
 
@@ -23,9 +30,12 @@ This library is compiled for .NET Standard 2.0. Supports following platforms:
 Supports following font file format:
 
 - TrueType(TTF) and TrueType collections(TTC)
-- OpenType(OTF) and OpenType collections(OTC)
-- Web Open Font Format 2(WOFF2)
+- OpenType(OTF) and OpenType collections(OTC) [comming soon]
+- Web Open Font Format 2(WOFF2) [comming soon]
 
 ## License
 MIT
 
+## Building
+
+GlyphLoader is built using the Visual Studio Community 2019.
