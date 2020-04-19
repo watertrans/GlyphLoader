@@ -23,8 +23,8 @@ namespace WaterTrans.GlyphLoader.Tests
             <body><h1>This glyph may be incorrect.</h1>
             <dl><dt>File: </dt><dd>{fontFile}</dd></dl>
             <dl><dt>GlyphIndex: </dt><dd>{glyphIndex}</dd></dl>
-            <dl><dt>Typeface: </dt><dd><svg width='128' height='200' viewBox='0 -128 128 200' xmlns='http://www.w3.org/2000/svg' version='1.1'><path d='{pathData1}' fill='black' stroke='black' stroke-width='1' /></svg></dd></dl>
-            <dl><dt>GlyphTypeface: </dt><dd><svg width='128' height='200' viewBox='0 -128 128 200' xmlns='http://www.w3.org/2000/svg' version='1.1'><path d='{pathData2}' fill='black' stroke='black' stroke-width='1' /></svg></dd></dl>
+            <dl><dt>Typeface: </dt><dd><svg width='128' height='128' viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg' version='1.1'><path d='{pathData1}' fill='black' stroke='black' stroke-width='1' /></svg></dd></dl>
+            <dl><dt>GlyphTypeface: </dt><dd><svg width='128' height='128' viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg' version='1.1'><path d='{pathData2}' fill='black' stroke='black' stroke-width='1' /></svg></dd></dl>
             </body></html>
         ";
 
@@ -315,7 +315,7 @@ namespace WaterTrans.GlyphLoader.Tests
                         mediaGeometry1.Transform = new TranslateTransform(0, tf.Baseline * 128);
 
                         var mediaGeometry2 = gt.GetGlyphOutline(i, 128, 128);
-                        mediaGeometry2.Transform = new TranslateTransform(0, tf.Baseline * 128);
+                        mediaGeometry2.Transform = new TranslateTransform(0, gt.Baseline * 128);
 
                         var byteArray1 = RenderBitmap(mediaGeometry1);
                         var byteArray2 = RenderBitmap(mediaGeometry2);
@@ -336,8 +336,8 @@ namespace WaterTrans.GlyphLoader.Tests
                             System.Diagnostics.Trace.WriteLine(GlyphWarningMessage
                                 .Replace("{fontFile}", fontFile)
                                 .Replace("{glyphIndex}", i.ToString())
-                                .Replace("{pathData1}", mediaGeometry1.ToString().Remove(0, 2))
-                                .Replace("{pathData2}", mediaGeometry2.ToString().Remove(0, 2)));
+                                .Replace("{pathData1}", mediaGeometry1.GetOutlinedPathGeometry().ToString().Remove(0, 2))
+                                .Replace("{pathData2}", mediaGeometry2.GetOutlinedPathGeometry().ToString().Remove(0, 2)));
                         }
 
                         GC.Collect();
