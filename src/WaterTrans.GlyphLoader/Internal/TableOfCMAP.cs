@@ -38,7 +38,7 @@ namespace WaterTrans.GlyphLoader.Internal
 
                 if (format == 0) // Byte encoding table
                 {
-                    // TODO Cannot be implemented because there is no sample file
+                    // TODO Not tested. Please provide the font file.
                     ushort length = reader.ReadUInt16();
                     ushort language = reader.ReadUInt16();
                     for (int i = 1; i <= 256; i++)
@@ -68,7 +68,7 @@ namespace WaterTrans.GlyphLoader.Internal
                         subHeaders.Add(Tuple.Create(reader.ReadUInt16(), reader.ReadUInt16(), reader.ReadInt16(), reader.ReadUInt16()));
                     }
 
-                    // TODO Cannot be implemented because there is no sample file
+                    // TODO Not tested. Please provide the font file.
                 }
                 else if (format == 4) // Segment mapping to delta values
                 {
@@ -161,7 +161,7 @@ namespace WaterTrans.GlyphLoader.Internal
                         sequentialMapGroups.Add(Tuple.Create(reader.ReadUInt32(), reader.ReadUInt32(), reader.ReadUInt32()));
                     }
 
-                    // TODO Cannot be implemented because there is no sample file
+                    // TODO Not tested. Please provide the font file.
                 }
                 else if (format == 10) // Trimmed array
                 {

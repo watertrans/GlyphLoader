@@ -80,6 +80,11 @@ namespace WaterTrans.GlyphLoader.Internal
         public const string GPOS = "GPOS";
 
         /// <summary>
+        /// CFF table.
+        /// </summary>
+        public const string CFF  = "CFF ";
+
+        /// <summary>
         /// GLYF table.
         /// </summary>
         public const string GLYF = "glyf";

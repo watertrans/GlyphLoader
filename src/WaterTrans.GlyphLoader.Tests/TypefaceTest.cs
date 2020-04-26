@@ -11,11 +11,11 @@ namespace WaterTrans.GlyphLoader.Tests
     public class TypefaceTest
     {
         private readonly string[] _fontFiles = {
+            "NotoSansJP-Regular.otf",
+            "NotoSerifJP-Regular.otf",
             "Roboto-Regular.ttf",
             "RobotoMono-Regular.ttf",
             "Lora-VariableFont_wght.ttf",
-            "NotoSansJP-Regular.otf",
-            "NotoSerifJP-Regular.otf",
         };
 
         private const string GlyphWarningMessage = @"

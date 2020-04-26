@@ -32,6 +32,7 @@ namespace WaterTrans.GlyphLoader
         private TableOfMORT _tableOfMORT;
         private TableOfGSUB _tableOfGSUB;
         private TableOfGPOS _tableOfGPOS;
+        private TableOfCFF  _tableOfCFF;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Typeface"/> class.
@@ -490,6 +491,17 @@ namespace WaterTrans.GlyphLoader
             _tableOfGPOS = new TableOfGPOS(reader);
         }
 
+        private void ReadCFF(TypefaceReader reader)
+        {
+            if (!_tableDirectories.ContainsKey(TableNames.CFF))
+            {
+                return;
+            }
+
+            _stream.Position = _tableDirectories[TableNames.CFF].Offset;
+            _tableOfCFF = new TableOfCFF(reader);
+        }
+
         private GlyphData ReadGLYF(TypefaceReader reader, ushort glyphIndex)
         {
             GlyphData result = null;
@@ -540,6 +552,7 @@ namespace WaterTrans.GlyphLoader
                 ReadMORT(reader);
                 ReadGSUB(reader);
                 ReadGPOS(reader);
+                ReadCFF(reader);
             }
         }
 

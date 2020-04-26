@@ -52,6 +52,37 @@ namespace WaterTrans.GlyphLoader.Internal
         }
 
         /// <summary>
+        /// Read byte array.
+        /// </summary>
+        /// <param name="len">Number of length.</param>
+        /// <returns>Read result.</returns>
+        public byte[] ReadBytes(int len)
+        {
+            return _reader.ReadBytes(len);
+        }
+
+        /// <summary>
+        /// Read specified (1-4) length.
+        /// </summary>
+        /// <param name="size">The value is element size.</param>
+        /// <returns>Read result.</returns>
+        public uint ReadOffset(byte size)
+        {
+            switch (size)
+            {
+                case 1:
+                    return ReadByte();
+                case 2:
+                    return ReadUInt16();
+                case 3:
+                    return ReadUInt24();
+                case 4:
+                    return ReadUInt32();
+            }
+            throw new ArgumentOutOfRangeException(nameof(size));
+        }
+
+        /// <summary>
         /// Read char.
         /// </summary>
         /// <returns>Read result.</returns>
