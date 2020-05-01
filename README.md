@@ -11,9 +11,10 @@ In WebAssembly environment, it can be used for application development using gly
 
 ## Release Notes
 
-### 0.1-alpha
+### 0.1.2-alpha
 
-- Currently under development.
+- Add support for TrueType glyph outline in glyf table
+- Add support fot OpenType glyph outline in CFF table
 
 ## Supported Platforms
 This library is compiled for .NET Standard 2.0. Supports following platforms:
@@ -30,7 +31,7 @@ This library is compiled for .NET Standard 2.0. Supports following platforms:
 Supports following font file format:
 
 - TrueType(TTF) and TrueType collections(TTC)
-- OpenType(OTF) and OpenType collections(OTC) [comming soon]
+- OpenType(OTF) and OpenType collections(OTC)
 - Web Open Font Format 2(WOFF2) [comming soon]
 
 ## License
