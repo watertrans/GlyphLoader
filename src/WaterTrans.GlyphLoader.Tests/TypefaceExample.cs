@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
 namespace WaterTrans.GlyphLoader.Tests
@@ -41,7 +41,7 @@ namespace WaterTrans.GlyphLoader.Tests
             double unit = 128;
             int roundDigits = 2;
             double x = 20;
-            string japaneseText = "���щΎR";
+            string japaneseText = "風林火山";
 
             svg.AppendLine("<svg width='552' height='188' viewBox='0 0 552 188' xmlns='http://www.w3.org/2000/svg' version='1.1'>");
 
