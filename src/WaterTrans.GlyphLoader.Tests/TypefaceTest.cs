@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -11,11 +12,11 @@ namespace WaterTrans.GlyphLoader.Tests
     public class TypefaceTest
     {
         private readonly string[] _fontFiles = {
-            "NotoSansJP-Regular.otf",
-            "NotoSerifJP-Regular.otf",
             "Roboto-Regular.ttf",
             "RobotoMono-Regular.ttf",
             "Lora-VariableFont_wght.ttf",
+            "NotoSansJP-Regular.otf",
+            "NotoSerifJP-Regular.otf",
         };
 
         private const string GlyphWarningMessage = @"
@@ -165,8 +166,7 @@ namespace WaterTrans.GlyphLoader.Tests
             }
         }
 
-        // TODO
-        //[TestMethod]
+        [TestMethod]
         public void AdvanceWidths_OK_SameResultsAsGlyphTypeface()
         {
             foreach (string fontFile in _fontFiles)
@@ -178,14 +178,14 @@ namespace WaterTrans.GlyphLoader.Tests
                     var tf = new Typeface(fontStream);
                     for (ushort i = 0; i < tf.GlyphCount; i++)
                     {
-                        Assert.AreEqual(tf.AdvanceWidths[i], gt.AdvanceWidths[i], "GlyphIndex:" + i);
+                        Assert.AreEqual(tf.AdvanceWidths[i], gt.AdvanceWidths[i], "Font:" + fontFile + " GlyphIndex:" + i);
                     }
                 }
             }
         }
 
         // TODO
-        //[TestMethod]
+        // [TestMethod]
         public void AdvanceHeights_OK_SameResultsAsGlyphTypeface()
         {
             foreach (string fontFile in _fontFiles)
@@ -197,12 +197,11 @@ namespace WaterTrans.GlyphLoader.Tests
                     var tf = new Typeface(fontStream);
                     for (ushort i = 0; i < tf.GlyphCount; i++)
                     {
-                        Assert.AreEqual(tf.AdvanceHeights[i], gt.AdvanceHeights[i], "GlyphIndex:" + i);
+                        Assert.AreEqual(tf.AdvanceHeights[i], gt.AdvanceHeights[i], "Font:" + fontFile + " GlyphIndex:" + i);
                     }
                 }
             }
         }
-
 
         [TestMethod]
         public void CharacterToGlyphMap_OK_SameResultsAsGlyphTypeface()
@@ -216,7 +215,7 @@ namespace WaterTrans.GlyphLoader.Tests
                     var tf = new Typeface(fontStream);
                     foreach (int charCode in gt.CharacterToGlyphMap.Keys)
                     {
-                        Assert.AreEqual(tf.CharacterToGlyphMap[charCode], gt.CharacterToGlyphMap[charCode], "CharCode:" + charCode);
+                        Assert.AreEqual(tf.CharacterToGlyphMap[charCode], gt.CharacterToGlyphMap[charCode], "Font:" + fontFile + " CharCode:" + charCode);
                     }
                 }
             }
@@ -235,7 +234,7 @@ namespace WaterTrans.GlyphLoader.Tests
                     var tf = new Typeface(fontStream);
                     for (ushort i = 0; i < tf.GlyphCount; i++)
                     {
-                        Assert.AreEqual(tf.LeftSideBearings[i], gt.LeftSideBearings[i], "GlyphIndex:" + i);
+                        Assert.AreEqual(tf.LeftSideBearings[i], gt.LeftSideBearings[i], "Font:" + fontFile + " GlyphIndex:" + i);
                     }
                 }
             }
@@ -254,7 +253,7 @@ namespace WaterTrans.GlyphLoader.Tests
                     var tf = new Typeface(fontStream);
                     for (ushort i = 0; i < tf.GlyphCount; i++)
                     {
-                        Assert.AreEqual(tf.TopSideBearings[i], gt.TopSideBearings[i], "GlyphIndex:" + i);
+                        Assert.AreEqual(tf.TopSideBearings[i], gt.TopSideBearings[i], "Font:" + fontFile + " GlyphIndex:" + i);
                     }
                 }
             }
@@ -297,7 +296,24 @@ namespace WaterTrans.GlyphLoader.Tests
             }
         }
 
-        //[TestMethod]
+        // For analysis
+        // [TestMethod]
+        public void GetGlyphOutline_TESTRUN()
+        {
+            foreach (string fontFile in _fontFiles)
+            {
+                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
+                var gt = new GlyphTypeface(new Uri(fontPath));
+                using (var fontStream = File.OpenRead(fontPath))
+                {
+                    var tf = new Typeface(fontStream);
+                    var mediaGeometry1 = tf.GetGlyphOutline(106, 128);
+                    var mediaGeometry2 = gt.GetGlyphOutline(106, 128, 128);
+                }
+            }
+        }
+
+        [TestMethod]
         public void GetGlyphOutline_OK_SameResultsAsGlyphTypeface()
         {
             foreach (string fontFile in _fontFiles)
@@ -317,77 +333,88 @@ namespace WaterTrans.GlyphLoader.Tests
                         var mediaGeometry2 = gt.GetGlyphOutline(i, 128, 128);
                         mediaGeometry2.Transform = new TranslateTransform(0, gt.Baseline * 128);
 
-                        var byteArray1 = RenderBitmap(mediaGeometry1);
-                        var byteArray2 = RenderBitmap(mediaGeometry2);
+                        var flatGeometry1 = mediaGeometry1.GetFlattenedPathGeometry();
+                        var flatGeometry2 = mediaGeometry2.GetFlattenedPathGeometry();
 
-                        int hitCount = 0;
-                        for (int j = 0; j < byteArray1.Length; j++)
-                        {
-                            if (RoundByte(byteArray1[j]) == RoundByte(byteArray2[j]))
-                            {
-                                hitCount++;
-                            }
-                        }
 
-                        // Match at least 99.5%
-                        if (hitCount < 65208)
+                        double totalDistance1 = GetTotalDistance(flatGeometry1);
+                        double totalDistance2 = GetTotalDistance(flatGeometry2);
+                        double errorRate = Math.Abs(totalDistance1 - totalDistance2) / totalDistance1;
+
+                        // Over 99% match
+                        if (errorRate > 0.01)
                         {
                             // Please see with your own eyes.
-                            System.Diagnostics.Trace.WriteLine(GlyphWarningMessage
+                            string message = GlyphWarningMessage
                                 .Replace("{fontFile}", fontFile)
                                 .Replace("{glyphIndex}", i.ToString())
                                 .Replace("{pathData1}", mediaGeometry1.GetOutlinedPathGeometry().ToString().Remove(0, 2))
-                                .Replace("{pathData2}", mediaGeometry2.GetOutlinedPathGeometry().ToString().Remove(0, 2)));
+                                .Replace("{pathData2}", mediaGeometry2.GetOutlinedPathGeometry().ToString().Remove(0, 2));
+                            System.Diagnostics.Trace.WriteLine(message);
+                            Assert.Fail(message);
                         }
 
-                        GC.Collect();
-                        GC.WaitForPendingFinalizers();
-                        GC.Collect();
+                        if (i % 500 == 0)
+                        {
+                            GC.Collect();
+                            GC.WaitForPendingFinalizers();
+                            GC.Collect();
+                        }
                     }
                 }
             }
         }
 
-        private byte RoundByte(byte value)
-        {
-            if (value < 32)
-            {
-                return 0;
-            }
-            else if (value < 64)
-            {
-                return 31;
-            }
-            else if (value < 96)
-            {
-                return 63;
-            }
-            else if (value < 128)
-            {
-                return 95;
-            }
-            else if (value < 160)
-            {
-                return 127;
-            }
-            else if (value < 192)
-            {
-                return 159;
-            }
-            else if (value < 224)
-            {
-                return 191;
-            }
-            else if (value < 255)
-            {
-                return 223;
-            }
-            return 255;
-        }
-
         private System.Windows.Media.Geometry ConvetToWpfPathGeometry(WaterTrans.GlyphLoader.Geometry.PathGeometry geometry)
         {
             return System.Windows.Media.Geometry.Parse(geometry.ToString(0, 0, 4)).Clone();
+        }
+
+        private double GetTotalDistance(System.Windows.Media.PathGeometry path)
+        {
+            var pointList = GetPointList(path);
+            double result = 0;
+
+            for (int i = 0; i < pointList.Count; i++)
+            {
+                var points = pointList[i];
+                for (int j = 0; j < points.Count; j++)
+                {
+                    if (j + 1 >= points.Count)
+                    {
+                        result += GetDistance(points[j], points[0]);
+                    }
+                    else
+                    {
+                        result += GetDistance(points[j], points[j + 1]);
+                    }
+                }
+            }
+            return result;
+        }
+
+        private List<List<System.Windows.Point>> GetPointList(System.Windows.Media.PathGeometry path)
+        {
+            var result = new List<List<System.Windows.Point>>();
+
+            for (int i = 0; i < path.Figures.Count; i++)
+            {
+                var list = new List<System.Windows.Point>();
+                list.Add(path.Figures[i].StartPoint);
+                for (int j = 0; j < path.Figures[i].Segments.Count; j++)
+                {
+                    var poly = (PolyLineSegment)path.Figures[i].Segments[j];
+                    list.AddRange(poly.Points);
+                }
+                result.Add(list);
+            }
+
+            return result;
+        }
+
+        private double GetDistance(System.Windows.Point p1, System.Windows.Point p2)
+        {
+            return Math.Abs(Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2)));
         }
 
         private byte[] RenderBitmap(System.Windows.Media.Geometry geometry)

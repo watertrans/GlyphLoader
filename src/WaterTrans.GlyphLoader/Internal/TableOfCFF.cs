@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using WaterTrans.GlyphLoader.Geometry;
 using WaterTrans.GlyphLoader.Internal.OpenType.CFF;
 
 namespace WaterTrans.GlyphLoader.Internal
@@ -63,6 +64,13 @@ namespace WaterTrans.GlyphLoader.Internal
                 int privateOffset = ((int[])TopDictionary["Private"])[1];
                 reader.Stream.Position = startPosition + privateOffset;
                 TopPrivateDictionary = new DictionaryData(reader.ReadBytes(privateSize), StringIndex.Strings, true);
+
+                if (TopPrivateDictionary.ContainsKey("Subrs"))
+                {
+                    int localSubrsOffset = (int)TopPrivateDictionary["Subrs"];
+                    reader.Stream.Position = startPosition + privateOffset + localSubrsOffset;
+                    TopLocalSubroutines = new IndexDataOfSubroutines(reader);
+                }
             }
 
             reader.Stream.Position = startPosition + (int)TopDictionary["CharStrings"];
@@ -92,13 +100,17 @@ namespace WaterTrans.GlyphLoader.Internal
                         {
                             int localSubrsOffset = (int)FontPrivateDictionaries[i]["Subrs"];
                             reader.Stream.Position = startPosition + privateOffset + localSubrsOffset;
-                            LocalSubroutines.Add(new IndexDataOfSubroutines(reader));
+                            LocalSubroutinesList.Add(new IndexDataOfSubroutines(reader));
+                        }
+                        else
+                        {
+                            LocalSubroutinesList.Add(null);
                         }
                     }
                     else
                     {
                         FontPrivateDictionaries.Add(null);
-                        LocalSubroutines.Add(null);
+                        LocalSubroutinesList.Add(null);
                     }
                 }
 
@@ -175,6 +187,9 @@ namespace WaterTrans.GlyphLoader.Internal
         /// <summary>Gets the Private DICT Data of Top DICT.</summary>
         public DictionaryData TopPrivateDictionary { get; }
 
+        /// <summary>Gets the Local Subrs INDEX of Top DICT.</summary>
+        public IndexDataOfSubroutines TopLocalSubroutines { get; }
+
         /// <summary>Gets a list of the Font DICT Data.</summary>
         public List<DictionaryData> FontDictionaries { get; } = new List<DictionaryData>();
 
@@ -182,28 +197,47 @@ namespace WaterTrans.GlyphLoader.Internal
         public List<DictionaryData> FontPrivateDictionaries { get; } = new List<DictionaryData>();
 
         /// <summary>Gets a list of the Local Subrs INDEX.</summary>
-        public List<IndexDataOfSubroutines> LocalSubroutines { get; } = new List<IndexDataOfSubroutines>();
+        public List<IndexDataOfSubroutines> LocalSubroutinesList { get; } = new List<IndexDataOfSubroutines>();
 
         /// <summary>Gets the Font DICT INDEX by glyph index.</summary>
         public Dictionary<ushort, int> FDSelect { get; } = new Dictionary<ushort, int>();
 
-        private int CalcSubroutineBias(int count)
+        /// <summary>
+        /// Parse to glyph data to <see cref="CharString"/>.
+        /// </summary>
+        /// <param name="glyphIndex">The index of the glyph.</param>
+        /// <returns>Returns the <see cref="CharString"/>.</returns>
+        public CharString ParseCharString(ushort glyphIndex)
         {
-            int bias;
-            if (count < 1240)
+            IndexDataOfSubroutines subrs;
+            int defaultWidthX;
+            int nominalWidthX;
+
+            if (FDSelect.Count > 0)
             {
-                bias = 107;
-            }
-            else if (count < 33900)
-            {
-                bias = 1131;
+                var fdIndex = FDSelect[glyphIndex];
+                var fdDict = FontPrivateDictionaries[fdIndex];
+                subrs = LocalSubroutinesList[fdIndex];
+                defaultWidthX = fdDict.ContainsKey("defaultWidthX") ? (int)fdDict["defaultWidthX"] : 0;
+                nominalWidthX = fdDict.ContainsKey("nominalWidthX") ? (int)fdDict["nominalWidthX"] : 0;
             }
             else
             {
-                bias = 32768;
+                subrs = TopLocalSubroutines;
+                defaultWidthX = TopPrivateDictionary.ContainsKey("defaultWidthX") ? (int)TopPrivateDictionary["defaultWidthX"] : 0;
+                nominalWidthX = TopPrivateDictionary.ContainsKey("nominalWidthX") ? (int)TopPrivateDictionary["nominalWidthX"] : 0;
             }
 
-            return bias;
+            var charstring = new CharString(GlobalSubroutines, subrs);
+            charstring.Width = defaultWidthX;
+            charstring.Parse(CharStrings.Objects[glyphIndex], null);
+
+            if (charstring.Width != defaultWidthX)
+            {
+                charstring.Width += nominalWidthX;
+            }
+
+            return charstring;
         }
     }
 }

@@ -8,6 +8,7 @@ using System.IO;
 using WaterTrans.GlyphLoader.Geometry;
 using WaterTrans.GlyphLoader.Internal;
 using WaterTrans.GlyphLoader.Internal.AAT;
+using WaterTrans.GlyphLoader.Internal.OpenType.CFF;
 
 namespace WaterTrans.GlyphLoader
 {
@@ -17,6 +18,8 @@ namespace WaterTrans.GlyphLoader
     public class Typeface
     {
         private readonly Dictionary<ushort, GlyphData> _glyphDataCache = new Dictionary<ushort, GlyphData>();
+        private readonly Dictionary<ushort, CharString> _charStringCache = new Dictionary<ushort, CharString>();
+        private readonly Dictionary<ushort, double> _cffAdvancedWidths = new Dictionary<ushort, double>();
         private readonly Dictionary<string, TableDirectory> _tableDirectories = new Dictionary<string, TableDirectory>(StringComparer.OrdinalIgnoreCase);
         private readonly Stream _stream;
         private TableOfCMAP _tableOfCMAP;
@@ -215,7 +218,21 @@ namespace WaterTrans.GlyphLoader
         /// </summary>
         public IDictionary<ushort, double> AdvanceWidths
         {
-            get { return _tableOfHMTX.AdvanceWidths; }
+            get
+            {
+                if (_tableOfCFF == null)
+                {
+                    return _tableOfHMTX.AdvanceWidths;
+                }
+                else
+                {
+                    if (_cffAdvancedWidths.Count == 0)
+                    {
+                        ReadCFFAdvancedWidths();
+                    }
+                    return _cffAdvancedWidths;
+                }
+            }
         }
 
         /// <summary>
@@ -301,14 +318,18 @@ namespace WaterTrans.GlyphLoader
                 double scale = (double)renderingEmSize / _tableOfHEAD.UnitsPerEm;
                 if (_tableDirectories.ContainsKey(TableNames.GLYF))
                 {
+                    // TODO result path data from cache
                     var glyph = ReadGLYF(reader, glyphIndex);
                     return glyph.ConvertToPathGeometry(scale);
                 }
-                else
+                else if  (_tableDirectories.ContainsKey(TableNames.CFF))
                 {
-                    // TODO
+                    // TODO result path data from cache
+                    var charString = ReadCFFCharString(glyphIndex);
+                    return charString.ConvertToPathGeometry(scale);
                 }
 
+                // TODO not supported format
                 return new PathGeometry();
             }
         }
@@ -502,9 +523,38 @@ namespace WaterTrans.GlyphLoader
             _tableOfCFF = new TableOfCFF(reader);
         }
 
+        private CharString ReadCFFCharString(ushort glyphIndex)
+        {
+            CharString result = null;
+
+            if (_charStringCache.ContainsKey(glyphIndex))
+            {
+                return _charStringCache[glyphIndex];
+            }
+
+            result = _tableOfCFF.ParseCharString(glyphIndex);
+            _charStringCache[glyphIndex] = result;
+            return result;
+        }
+
+        private void ReadCFFAdvancedWidths()
+        {
+            for (ushort i = 0; i < _tableOfCFF.CharStrings.Count; i++)
+            {
+                var charString = ReadCFFCharString(i);
+                _cffAdvancedWidths[i] = (double)charString.Width / _tableOfHEAD.UnitsPerEm;
+            }
+        }
+
         private GlyphData ReadGLYF(TypefaceReader reader, ushort glyphIndex)
         {
             GlyphData result = null;
+
+            if (_glyphDataCache.ContainsKey(glyphIndex))
+            {
+                return _glyphDataCache[glyphIndex];
+            }
+
             if (_tableOfLOCA.Offsets[glyphIndex] == uint.MaxValue)
             {
                 // No glyph data
