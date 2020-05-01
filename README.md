@@ -14,7 +14,7 @@ In WebAssembly environment, it can be used for application development using gly
 ### 0.1.2-alpha
 
 - Add support for TrueType glyph outline in glyf table
-- Add support fot OpenType glyph outline in CFF table
+- Add support for OpenType glyph outline in CFF table
 
 ## Supported Platforms
 This library is compiled for .NET Standard 2.0. Supports following platforms:
