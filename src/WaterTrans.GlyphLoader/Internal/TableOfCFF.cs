@@ -20,13 +20,13 @@ namespace WaterTrans.GlyphLoader.Internal
         /// <param name="reader">The <see cref="TypefaceReader"/>.</param>
         internal TableOfCFF(TypefaceReader reader)
         {
-            var startPosition = reader.Stream.Position;
+            var startPosition = reader.Position;
             TableVersionNumberMajor = reader.ReadByte();
             TableVersionNumberMinor = reader.ReadByte();
             HeaderSize = reader.ReadByte();
             Offset = reader.ReadByte();
 
-            reader.Stream.Position = startPosition + HeaderSize;
+            reader.Position = startPosition + HeaderSize;
             NameIndex = new IndexDataOfName(reader);
 
             if (NameIndex.Objects.Count != 1)
@@ -62,24 +62,24 @@ namespace WaterTrans.GlyphLoader.Internal
                 // TODO Not tested. Please provide the font file.
                 int privateSize = ((int[])TopDictionary["Private"])[0];
                 int privateOffset = ((int[])TopDictionary["Private"])[1];
-                reader.Stream.Position = startPosition + privateOffset;
+                reader.Position = startPosition + privateOffset;
                 TopPrivateDictionary = new DictionaryData(reader.ReadBytes(privateSize), StringIndex.Strings, true);
 
                 if (TopPrivateDictionary.ContainsKey("Subrs"))
                 {
                     int localSubrsOffset = (int)TopPrivateDictionary["Subrs"];
-                    reader.Stream.Position = startPosition + privateOffset + localSubrsOffset;
+                    reader.Position = startPosition + privateOffset + localSubrsOffset;
                     TopLocalSubroutines = new IndexDataOfSubroutines(reader);
                 }
             }
 
-            reader.Stream.Position = startPosition + (int)TopDictionary["CharStrings"];
+            reader.Position = startPosition + (int)TopDictionary["CharStrings"];
             CharStrings = new IndexDataOfCharStrings(reader);
 
             // The CIDFonts require the additional Top DICT operators.
             if (TopDictionary.ContainsKey("ROS") && TopDictionary.ContainsKey("FDSelect") && TopDictionary.ContainsKey("FDArray"))
             {
-                reader.Stream.Position = startPosition + (int)TopDictionary["FDArray"];
+                reader.Position = startPosition + (int)TopDictionary["FDArray"];
                 FontDictionaryIndex = new IndexDataOfFontDictionary(reader);
 
                 for (int i = 0; i < FontDictionaryIndex.Objects.Count; i++)
@@ -93,13 +93,13 @@ namespace WaterTrans.GlyphLoader.Internal
                     {
                         int privateSize = ((int[])FontDictionaries[i]["Private"])[0];
                         int privateOffset = ((int[])FontDictionaries[i]["Private"])[1];
-                        reader.Stream.Position = startPosition + privateOffset;
+                        reader.Position = startPosition + privateOffset;
                         FontPrivateDictionaries.Add(new DictionaryData(reader.ReadBytes(privateSize), StringIndex.Strings, true));
 
                         if (FontPrivateDictionaries[i].ContainsKey("Subrs"))
                         {
                             int localSubrsOffset = (int)FontPrivateDictionaries[i]["Subrs"];
-                            reader.Stream.Position = startPosition + privateOffset + localSubrsOffset;
+                            reader.Position = startPosition + privateOffset + localSubrsOffset;
                             LocalSubroutinesList.Add(new IndexDataOfSubroutines(reader));
                         }
                         else
@@ -114,7 +114,7 @@ namespace WaterTrans.GlyphLoader.Internal
                     }
                 }
 
-                reader.Stream.Position = startPosition + (int)TopDictionary["FDSelect"];
+                reader.Position = startPosition + (int)TopDictionary["FDSelect"];
                 var format = reader.ReadByte();
 
                 if (format == 0)

@@ -52,7 +52,7 @@ namespace WaterTrans.GlyphLoader.Internal.AAT
             }
             else
             {
-                reader.Stream.Seek(Length - 8, SeekOrigin.Current);
+                reader.Position += Length - 8;
             }
         }
 

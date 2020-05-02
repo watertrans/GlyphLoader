@@ -17,7 +17,7 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType
         /// <param name="reader">The <see cref="TypefaceReader"/>.</param>
         internal CommonTable(TypefaceReader reader)
         {
-            Offset = reader.Stream.Position;
+            Offset = reader.Position;
 
             TableVersionNumberMajor = reader.ReadUInt16();
             TableVersionNumberMinor = reader.ReadUInt16();
@@ -25,7 +25,7 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType
             OffsetFeatureList = reader.ReadUInt16();
             OffsetLookupList = reader.ReadUInt16();
 
-            reader.Stream.Position = Offset + OffsetScriptList;
+            reader.Position = Offset + OffsetScriptList;
 
             ScriptCount = reader.ReadUInt16();
 
@@ -36,7 +36,7 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType
 
             foreach (var sr in ScriptList)
             {
-                reader.Stream.Position = Offset + OffsetScriptList + sr.Offset;
+                reader.Position = Offset + OffsetScriptList + sr.Offset;
 
                 sr.DefaultLanguageSystemOffset = reader.ReadUInt16();
                 sr.LanguageSystemOffset = reader.ReadUInt16();
@@ -53,12 +53,12 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType
 
                 foreach (var ls in sr.LanguageSystemRecords)
                 {
-                    reader.Stream.Position = Offset + OffsetScriptList + sr.Offset + ls.Offset;
+                    reader.Position = Offset + OffsetScriptList + sr.Offset + ls.Offset;
                     sr.LanguageSystemTables.Add(new LanguageSystemTable(reader));
                 }
             }
 
-            reader.Stream.Position = Offset + OffsetFeatureList;
+            reader.Position = Offset + OffsetFeatureList;
 
             FeatureCount = reader.ReadUInt16();
 
@@ -69,7 +69,7 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType
 
             foreach (var ft in FeatureList)
             {
-                reader.Stream.Position = Offset + OffsetFeatureList + ft.Offset;
+                reader.Position = Offset + OffsetFeatureList + ft.Offset;
 
                 ft.FeatureParams = reader.ReadUInt16();
                 ft.LookupCount = reader.ReadUInt16();
@@ -80,7 +80,7 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType
                 }
             }
 
-            reader.Stream.Position = Offset + OffsetLookupList;
+            reader.Position = Offset + OffsetLookupList;
 
             LookupCount = reader.ReadUInt16();
 
@@ -91,7 +91,7 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType
 
             foreach (var lt in LookupList)
             {
-                reader.Stream.Position = Offset + OffsetLookupList + lt.Offset;
+                reader.Position = Offset + OffsetLookupList + lt.Offset;
 
                 lt.LookupType = reader.ReadUInt16();
                 lt.LookupFlag = reader.ReadUInt16();

@@ -25,7 +25,7 @@ namespace WaterTrans.GlyphLoader.Internal
             {
                 foreach (ushort offset in lt.SubTableList)
                 {
-                    reader.Stream.Position = Offset + OffsetLookupList + lt.Offset + offset;
+                    reader.Position = Offset + OffsetLookupList + lt.Offset + offset;
 
                     if (lt.LookupType == (ushort)LookupType.SingleAdjustment)
                     {
@@ -37,7 +37,7 @@ namespace WaterTrans.GlyphLoader.Internal
                                 ushort coverageOffset = reader.ReadUInt16();
                                 ushort valueFormat = reader.ReadUInt16();
                                 var valueRecord = new ValueRecord(reader, valueFormat);
-                                reader.Stream.Position = Offset + OffsetLookupList + lt.Offset + offset + coverageOffset;
+                                reader.Position = Offset + OffsetLookupList + lt.Offset + offset + coverageOffset;
                                 List<ushort> coverages = ReadCoverage(reader);
 
                                 for (int i = 0; i <= coverages.Count - 1; i++)
@@ -58,7 +58,7 @@ namespace WaterTrans.GlyphLoader.Internal
                                     valueRecords.Add(new ValueRecord(reader, valueFormat));
                                 }
 
-                                reader.Stream.Position = Offset + OffsetLookupList + lt.Offset + offset + coverageOffset;
+                                reader.Position = Offset + OffsetLookupList + lt.Offset + offset + coverageOffset;
                                 List<ushort> coverages = ReadCoverage(reader);
                                 for (int i = 0; i <= coverages.Count - 1; i++)
                                 {
@@ -86,12 +86,12 @@ namespace WaterTrans.GlyphLoader.Internal
                                     pairsetOffset.Add(reader.ReadUInt16());
                                 }
 
-                                reader.Stream.Position = Offset + OffsetLookupList + lt.Offset + offset + coverageOffset;
+                                reader.Position = Offset + OffsetLookupList + lt.Offset + offset + coverageOffset;
                                 List<ushort> coverages = ReadCoverage(reader);
 
                                 for (int i = 0; i <= pairsetOffset.Count - 1; i++)
                                 {
-                                    reader.Stream.Position = Offset + OffsetLookupList + lt.Offset + offset + pairsetOffset[i];
+                                    reader.Position = Offset + OffsetLookupList + lt.Offset + offset + pairsetOffset[i];
                                     ushort pairValueCount = reader.ReadUInt16();
                                     for (int j = 1; j <= pairValueCount; j++)
                                     {
@@ -125,11 +125,11 @@ namespace WaterTrans.GlyphLoader.Internal
                                     }
                                 }
 
-                                reader.Stream.Position = Offset + OffsetLookupList + lt.Offset + offset + coverageOffset;
+                                reader.Position = Offset + OffsetLookupList + lt.Offset + offset + coverageOffset;
                                 List<ushort> coverages = ReadCoverage(reader);
-                                reader.Stream.Position = Offset + OffsetLookupList + lt.Offset + offset + classDefOffset1;
+                                reader.Position = Offset + OffsetLookupList + lt.Offset + offset + classDefOffset1;
                                 Dictionary<ushort, ushort> classDef1 = ReadClass(reader);
-                                reader.Stream.Position = Offset + OffsetLookupList + lt.Offset + offset + classDefOffset2;
+                                reader.Position = Offset + OffsetLookupList + lt.Offset + offset + classDefOffset2;
                                 Dictionary<ushort, ushort> classDef2 = ReadClass(reader);
 
                                 foreach (ushort gid1 in classDef1.Keys)

@@ -21,7 +21,7 @@ namespace WaterTrans.GlyphLoader
         private readonly Dictionary<ushort, CharString> _charStringCache = new Dictionary<ushort, CharString>();
         private readonly Dictionary<ushort, double> _cffAdvancedWidths = new Dictionary<ushort, double>();
         private readonly Dictionary<string, TableDirectory> _tableDirectories = new Dictionary<string, TableDirectory>(StringComparer.OrdinalIgnoreCase);
-        private readonly Stream _stream;
+        private byte[] _byteArray;
         private TableOfCMAP _tableOfCMAP;
         private TableOfMAXP _tableOfMAXP;
         private TableOfHEAD _tableOfHEAD;
@@ -63,17 +63,19 @@ namespace WaterTrans.GlyphLoader
                 throw new NotSupportedException("The stream does not support reading.");
             }
 
-            _stream = new MemoryStream();
-            stream.CopyTo(_stream);
-            _stream.Position = 0;
-
-            if (IsCollection(_stream))
+            using (var memoryStream = new MemoryStream())
             {
-                ReadCollectionTypeface(_stream, index);
+                stream.CopyTo(memoryStream);
+                _byteArray = memoryStream.ToArray();
+            }
+
+            if (IsCollection())
+            {
+                ReadCollectionTypeface(index);
             }
             else
             {
-                ReadTypeface(_stream);
+                ReadTypeface(_byteArray, 0);
             }
         }
 
@@ -313,57 +315,48 @@ namespace WaterTrans.GlyphLoader
         /// <returns>A <see cref="PathGeometry"/> value that represents the path of the glyph.</returns>
         public PathGeometry GetGlyphOutline(ushort glyphIndex, double renderingEmSize)
         {
-            using (var reader = new TypefaceReader(_stream))
+            var reader = new TypefaceReader(_byteArray, 0);
+            double scale = (double)renderingEmSize / _tableOfHEAD.UnitsPerEm;
+            if (_tableDirectories.ContainsKey(TableNames.GLYF))
             {
-                double scale = (double)renderingEmSize / _tableOfHEAD.UnitsPerEm;
-                if (_tableDirectories.ContainsKey(TableNames.GLYF))
-                {
-                    // TODO result path data from cache
-                    var glyph = ReadGLYF(reader, glyphIndex);
-                    return glyph.ConvertToPathGeometry(scale);
-                }
-                else if  (_tableDirectories.ContainsKey(TableNames.CFF))
-                {
-                    // TODO result path data from cache
-                    var charString = ReadCFFCharString(glyphIndex);
-                    return charString.ConvertToPathGeometry(scale);
-                }
-
-                // TODO not supported format
-                return new PathGeometry();
+                // TODO result path data from cache
+                var glyph = ReadGLYF(reader, glyphIndex);
+                return glyph.ConvertToPathGeometry(scale);
             }
+            else if  (_tableDirectories.ContainsKey(TableNames.CFF))
+            {
+                // TODO result path data from cache
+                var charString = ReadCFFCharString(glyphIndex);
+                return charString.ConvertToPathGeometry(scale);
+            }
+
+            // TODO not supported format
+            return new PathGeometry();
         }
 
-        private bool IsCollection(Stream stream)
+        private bool IsCollection()
         {
             bool result;
-            stream.Position = 0;
-            using (var reader = new TypefaceReader(stream))
-            {
-                result = reader.ReadCharArray(4) == "ttcf";
-            }
-            stream.Position = 0;
+            var reader = new TypefaceReader(_byteArray, 0);
+            result = reader.ReadCharArray(4) == "ttcf";
             return result;
         }
 
-        private void ReadCollectionTypeface(Stream stream, int index)
+        private void ReadCollectionTypeface(int index)
         {
-            using (var reader = new TypefaceReader(stream))
-            {
-                string ttctag = reader.ReadCharArray(4);
-                ushort ttcVersionMajor = reader.ReadUInt16();
-                ushort ttcVersionMinor = reader.ReadUInt16();
-                uint ttcDirectoryCount = reader.ReadUInt32();
+            var reader = new TypefaceReader(_byteArray, 0);
+            string ttctag = reader.ReadCharArray(4);
+            ushort ttcVersionMajor = reader.ReadUInt16();
+            ushort ttcVersionMinor = reader.ReadUInt16();
+            uint ttcDirectoryCount = reader.ReadUInt32();
 
-                for (int i = 0; i <= Convert.ToInt32(ttcDirectoryCount - 1); i++)
+            for (int i = 0; i <= Convert.ToInt32(ttcDirectoryCount - 1); i++)
+            {
+                uint ttcDirectoryOffset = reader.ReadUInt32();
+                if (i == index)
                 {
-                    uint ttcDirectoryOffset = reader.ReadUInt32();
-                    if (i == index)
-                    {
-                        stream.Position = ttcDirectoryOffset;
-                        ReadTypeface(stream);
-                        return;
-                    }
+                    ReadTypeface(_byteArray, ttcDirectoryOffset);
+                    return;
                 }
             }
             throw new ArgumentOutOfRangeException("Font index out of range.");
@@ -376,7 +369,7 @@ namespace WaterTrans.GlyphLoader
                 return;
             }
 
-            _stream.Position = _tableDirectories[TableNames.CMAP].Offset;
+            reader.Position = _tableDirectories[TableNames.CMAP].Offset;
             _tableOfCMAP = new TableOfCMAP(reader);
         }
 
@@ -387,7 +380,7 @@ namespace WaterTrans.GlyphLoader
                 return;
             }
 
-            _stream.Position = _tableDirectories[TableNames.MAXP].Offset;
+            reader.Position = _tableDirectories[TableNames.MAXP].Offset;
             _tableOfMAXP = new TableOfMAXP(reader);
         }
 
@@ -398,7 +391,7 @@ namespace WaterTrans.GlyphLoader
                 return;
             }
 
-            _stream.Position = _tableDirectories[TableNames.HEAD].Offset;
+            reader.Position = _tableDirectories[TableNames.HEAD].Offset;
             _tableOfHEAD = new TableOfHEAD(reader);
         }
 
@@ -409,7 +402,7 @@ namespace WaterTrans.GlyphLoader
                 return;
             }
 
-            _stream.Position = _tableDirectories[TableNames.HHEA].Offset;
+            reader.Position = _tableDirectories[TableNames.HHEA].Offset;
             _tableOfHHEA = new TableOfHHEA(reader);
         }
 
@@ -420,7 +413,7 @@ namespace WaterTrans.GlyphLoader
                 return;
             }
 
-            _stream.Position = _tableDirectories[TableNames.HMTX].Offset;
+            reader.Position = _tableDirectories[TableNames.HMTX].Offset;
             _tableOfHMTX = new TableOfHMTX(reader, _tableOfHHEA.NumberOfHMetrics, _tableOfMAXP.NumGlyphs, _tableOfHEAD.UnitsPerEm);
         }
 
@@ -431,7 +424,7 @@ namespace WaterTrans.GlyphLoader
                 return;
             }
 
-            _stream.Position = _tableDirectories[TableNames.OS2].Offset;
+            reader.Position = _tableDirectories[TableNames.OS2].Offset;
             _tableOfOS2 = new TableOfOS2(reader);
         }
 
@@ -442,7 +435,7 @@ namespace WaterTrans.GlyphLoader
                 return;
             }
 
-            _stream.Position = _tableDirectories[TableNames.POST].Offset;
+            reader.Position = _tableDirectories[TableNames.POST].Offset;
             _tableOfPOST = new TableOfPOST(reader);
         }
 
@@ -453,7 +446,7 @@ namespace WaterTrans.GlyphLoader
                 return;
             }
 
-            _stream.Position = _tableDirectories[TableNames.LOCA].Offset;
+            reader.Position = _tableDirectories[TableNames.LOCA].Offset;
             _tableOfLOCA = new TableOfLOCA(reader, _tableOfMAXP.NumGlyphs, _tableOfHEAD.IndexToLocFormat);
         }
 
@@ -464,7 +457,7 @@ namespace WaterTrans.GlyphLoader
                 return;
             }
 
-            _stream.Position = _tableDirectories[TableNames.VHEA].Offset;
+            reader.Position = _tableDirectories[TableNames.VHEA].Offset;
             _tableOfVHEA = new TableOfVHEA(reader);
         }
 
@@ -475,7 +468,7 @@ namespace WaterTrans.GlyphLoader
                 return;
             }
 
-            _stream.Position = _tableDirectories[TableNames.VMTX].Offset;
+            reader.Position = _tableDirectories[TableNames.VMTX].Offset;
             _tableOfVMTX = new TableOfVMTX(reader, _tableOfVHEA.NumberOfVMetrics, _tableOfMAXP.NumGlyphs, _tableOfHEAD.UnitsPerEm);
         }
 
@@ -486,7 +479,7 @@ namespace WaterTrans.GlyphLoader
                 return;
             }
 
-            _stream.Position = _tableDirectories[TableNames.MORT].Offset;
+            reader.Position = _tableDirectories[TableNames.MORT].Offset;
             _tableOfMORT = new TableOfMORT(reader);
         }
 
@@ -497,7 +490,7 @@ namespace WaterTrans.GlyphLoader
                 return;
             }
 
-            _stream.Position = _tableDirectories[TableNames.GSUB].Offset;
+            reader.Position = _tableDirectories[TableNames.GSUB].Offset;
             _tableOfGSUB = new TableOfGSUB(reader);
         }
 
@@ -508,7 +501,7 @@ namespace WaterTrans.GlyphLoader
                 return;
             }
 
-            _stream.Position = _tableDirectories[TableNames.GPOS].Offset;
+            reader.Position = _tableDirectories[TableNames.GPOS].Offset;
             _tableOfGPOS = new TableOfGPOS(reader);
         }
 
@@ -519,7 +512,7 @@ namespace WaterTrans.GlyphLoader
                 return;
             }
 
-            _stream.Position = _tableDirectories[TableNames.CFF].Offset;
+            reader.Position = _tableDirectories[TableNames.CFF].Offset;
             _tableOfCFF = new TableOfCFF(reader);
         }
 
@@ -562,7 +555,7 @@ namespace WaterTrans.GlyphLoader
             }
             else
             {
-                _stream.Position = _tableDirectories[TableNames.GLYF].Offset + _tableOfLOCA.Offsets[glyphIndex];
+                reader.Position = _tableDirectories[TableNames.GLYF].Offset + _tableOfLOCA.Offsets[glyphIndex];
                 result = new GlyphData(reader, glyphIndex);
             }
 
@@ -584,26 +577,24 @@ namespace WaterTrans.GlyphLoader
             return result;
         }
 
-        private void ReadTypeface(Stream stream)
+        private void ReadTypeface(byte[] byteArray, long position)
         {
-            using (var reader = new TypefaceReader(stream))
-            {
-                ReadDirectory(reader);
-                ReadCMAP(reader);
-                ReadMAXP(reader);
-                ReadHEAD(reader);
-                ReadHHEA(reader);
-                ReadHMTX(reader);
-                ReadOS2(reader);
-                ReadPOST(reader);
-                ReadLOCA(reader);
-                ReadVHEA(reader);
-                ReadVMTX(reader);
-                ReadMORT(reader);
-                ReadGSUB(reader);
-                ReadGPOS(reader);
-                ReadCFF(reader);
-            }
+            var reader = new TypefaceReader(byteArray, position);
+            ReadDirectory(reader);
+            ReadCMAP(reader);
+            ReadMAXP(reader);
+            ReadHEAD(reader);
+            ReadHHEA(reader);
+            ReadHMTX(reader);
+            ReadOS2(reader);
+            ReadPOST(reader);
+            ReadLOCA(reader);
+            ReadVHEA(reader);
+            ReadVMTX(reader);
+            ReadMORT(reader);
+            ReadGSUB(reader);
+            ReadGPOS(reader);
+            ReadCFF(reader);
         }
 
         private void ReadDirectory(TypefaceReader reader)

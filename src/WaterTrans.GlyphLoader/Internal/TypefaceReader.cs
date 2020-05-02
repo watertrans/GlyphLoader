@@ -11,30 +11,25 @@ namespace WaterTrans.GlyphLoader.Internal
     /// <summary>
     /// Internal processing class for accessing font data.
     /// </summary>
-    internal sealed class TypefaceReader : IDisposable
+    internal sealed class TypefaceReader
     {
-        private readonly BinaryReader _reader;
-        private bool _disposedValue = false;
+        private byte[] _byteArray;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TypefaceReader"/> class.
         /// </summary>
-        /// <param name="stream">The font file stream.</param>
-        internal TypefaceReader(Stream stream)
+        /// <param name="byteArray">The font file byte array.</param>
+        /// <param name="position">The byte array position.</param>
+        internal TypefaceReader(byte[] byteArray, long position)
         {
-            _reader = new BinaryReader(stream, Encoding.UTF8, true);
+            _byteArray = byteArray;
+            Position = position;
         }
 
         /// <summary>
-        /// Gets stream.
+        /// Gets or sets the stream position.
         /// </summary>
-        public Stream Stream
-        {
-            get
-            {
-                return _reader.BaseStream;
-            }
-        }
+        public long Position { get; set; }
 
         /// <summary>
         /// Read char array.
@@ -58,7 +53,10 @@ namespace WaterTrans.GlyphLoader.Internal
         /// <returns>Read result.</returns>
         public byte[] ReadBytes(int len)
         {
-            return _reader.ReadBytes(len);
+            byte[] result = new byte[len];
+            Array.Copy(_byteArray, Position, result, 0, len);
+            Position += len;
+            return result;
         }
 
         /// <summary>
@@ -97,7 +95,7 @@ namespace WaterTrans.GlyphLoader.Internal
         /// <returns>Read result.</returns>
         public sbyte ReadSByte()
         {
-            return _reader.ReadSByte();
+            return unchecked((sbyte)ReadByte());
         }
 
         /// <summary>
@@ -106,7 +104,9 @@ namespace WaterTrans.GlyphLoader.Internal
         /// <returns>Read result.</returns>
         public byte ReadByte()
         {
-            return _reader.ReadByte();
+            byte result = _byteArray[Position];
+            Position += 1;
+            return result;
         }
 
         /// <summary>
@@ -200,30 +200,11 @@ namespace WaterTrans.GlyphLoader.Internal
             return (float)ReadInt16() / 16384;
         }
 
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-        }
-
         private byte[] ReadBytesInternal(int count)
         {
-            byte[] buff = _reader.ReadBytes(count);
+            byte[] buff = ReadBytes(count);
             Array.Reverse(buff);
             return buff;
-        }
-
-        private void Dispose(bool disposing)
-        {
-            if (!_disposedValue)
-            {
-                if (disposing)
-                {
-                    _reader.Dispose();
-                }
-
-                _disposedValue = true;
-            }
         }
     }
 }

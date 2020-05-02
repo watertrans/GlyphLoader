@@ -22,7 +22,7 @@ namespace WaterTrans.GlyphLoader.Internal
         /// <param name="reader">The <see cref="TypefaceReader"/>.</param>
         internal TableOfCMAP(TypefaceReader reader)
         {
-            long basePosition = reader.Stream.Position;
+            long basePosition = reader.Position;
             TableVersionNumber = reader.ReadUInt16();
             NumTables = reader.ReadUInt16();
 
@@ -33,7 +33,7 @@ namespace WaterTrans.GlyphLoader.Internal
 
             foreach (var record in EncodingRecords)
             {
-                reader.Stream.Position = basePosition + record.Offset;
+                reader.Position = basePosition + record.Offset;
                 ushort format = reader.ReadUInt16();
 
                 if (format == 0) // Byte encoding table
@@ -101,7 +101,7 @@ namespace WaterTrans.GlyphLoader.Internal
                         idRangeOffsets.Add(reader.ReadUInt16());
                     }
 
-                    long currentPosition = reader.Stream.Position;
+                    long currentPosition = reader.Position;
                     for (int i = 0; i < segCount; i++)
                     {
                         ushort start = startCodes[i];
@@ -119,7 +119,7 @@ namespace WaterTrans.GlyphLoader.Internal
                                 else
                                 {
                                     long glyphOffset = currentPosition + (((rangeOffset / 2) + (j - start) + (i - segCount)) * 2);
-                                    reader.Stream.Position = glyphOffset;
+                                    reader.Position = glyphOffset;
                                     int glyphIndex = reader.ReadUInt16();
                                     if (glyphIndex != 0)
                                     {
@@ -240,7 +240,7 @@ namespace WaterTrans.GlyphLoader.Internal
                         // nonDefaultUVSOffset
                         if (variationSelectors[i].Item3 > 0)
                         {
-                            reader.Stream.Position = basePosition + record.Offset + variationSelectors[i].Item3;
+                            reader.Position = basePosition + record.Offset + variationSelectors[i].Item3;
                             uint numUVSMappings = reader.ReadUInt32();
                             var uvsMappings = new List<Tuple<uint, ushort>>();
                             for (int j = 0; j < numUVSMappings; j++)

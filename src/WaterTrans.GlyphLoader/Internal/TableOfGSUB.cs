@@ -24,7 +24,7 @@ namespace WaterTrans.GlyphLoader.Internal
             {
                 foreach (ushort offset in lt.SubTableList)
                 {
-                    reader.Stream.Position = Offset + OffsetLookupList + lt.Offset + offset;
+                    reader.Position = Offset + OffsetLookupList + lt.Offset + offset;
 
                     if (lt.LookupType == (ushort)LookupType.SingleSubstitution)
                     {
@@ -35,7 +35,7 @@ namespace WaterTrans.GlyphLoader.Internal
                             {
                                 ushort coverageOffset = reader.ReadUInt16();
                                 ushort glyphID = reader.ReadUInt16();
-                                reader.Stream.Position = Offset + OffsetLookupList + lt.Offset + offset + coverageOffset;
+                                reader.Position = Offset + OffsetLookupList + lt.Offset + offset + coverageOffset;
                                 List<ushort> coverages = ReadCoverage(reader);
                                 for (int i = 0; i <= coverages.Count - 1; i++)
                                 {
@@ -53,7 +53,7 @@ namespace WaterTrans.GlyphLoader.Internal
                                     glyphList.Add(reader.ReadUInt16());
                                 }
 
-                                reader.Stream.Position = Offset + OffsetLookupList + lt.Offset + offset + coverageOffset;
+                                reader.Position = Offset + OffsetLookupList + lt.Offset + offset + coverageOffset;
                                 List<ushort> coverages = ReadCoverage(reader);
                                 for (int i = 0; i <= coverages.Count - 1; i++)
                                 {
@@ -74,13 +74,13 @@ namespace WaterTrans.GlyphLoader.Internal
                             sequenceList.Add(reader.ReadUInt16());
                         }
 
-                        reader.Stream.Position = Offset + OffsetLookupList + lt.Offset + offset + coverageOffset;
+                        reader.Position = Offset + OffsetLookupList + lt.Offset + offset + coverageOffset;
                         List<ushort> coverage = ReadCoverage(reader);
                         for (int i = 0; i <= coverage.Count - 1; i++)
                         {
                             var substitutionGlyphIndex = new List<ushort>();
                             ushort sequenceOffset = sequenceList[i];
-                            reader.Stream.Position = Offset + OffsetLookupList + lt.Offset + offset + sequenceOffset;
+                            reader.Position = Offset + OffsetLookupList + lt.Offset + offset + sequenceOffset;
                             ushort glyphCount = reader.ReadUInt16();
                             for (int j = 1; j <= glyphCount; j++)
                             {
@@ -100,13 +100,13 @@ namespace WaterTrans.GlyphLoader.Internal
                             alternateSetList.Add(reader.ReadUInt16());
                         }
 
-                        reader.Stream.Position = Offset + OffsetLookupList + lt.Offset + offset + coverageOffset;
+                        reader.Position = Offset + OffsetLookupList + lt.Offset + offset + coverageOffset;
                         List<ushort> coverage = ReadCoverage(reader);
                         for (int i = 0; i <= coverage.Count - 1; i++)
                         {
                             var substitutionGlyphIndex = new List<ushort>();
                             ushort alternateSetOffset = alternateSetList[i];
-                            reader.Stream.Position = Offset + OffsetLookupList + lt.Offset + offset + alternateSetOffset;
+                            reader.Position = Offset + OffsetLookupList + lt.Offset + offset + alternateSetOffset;
                             ushort glyphCount = reader.ReadUInt16();
                             for (int j = 1; j <= glyphCount; j++)
                             {
@@ -126,12 +126,12 @@ namespace WaterTrans.GlyphLoader.Internal
                             ligatureSetList.Add(reader.ReadUInt16());
                         }
 
-                        reader.Stream.Position = Offset + OffsetLookupList + lt.Offset + offset + coverageOffset;
+                        reader.Position = Offset + OffsetLookupList + lt.Offset + offset + coverageOffset;
                         List<ushort> coverages = ReadCoverage(reader);
                         for (int i = 0; i <= coverages.Count - 1; i++)
                         {
                             ushort ligatureSetOffset = ligatureSetList[i];
-                            reader.Stream.Position = Offset + OffsetLookupList + lt.Offset + offset + ligatureSetOffset;
+                            reader.Position = Offset + OffsetLookupList + lt.Offset + offset + ligatureSetOffset;
                             ushort ligatureCount = reader.ReadUInt16();
                             List<ushort> ligatureList = new List<ushort>();
                             for (int j = 1; j <= ligatureCount; j++)
@@ -142,7 +142,7 @@ namespace WaterTrans.GlyphLoader.Internal
                             {
                                 var glyphIndex = new List<ushort>();
                                 glyphIndex.Add(coverages[i]);
-                                reader.Stream.Position = Offset + OffsetLookupList + lt.Offset + offset + ligatureSetOffset + ligatureOffset;
+                                reader.Position = Offset + OffsetLookupList + lt.Offset + offset + ligatureSetOffset + ligatureOffset;
                                 ushort substitutionGlyphIndex = reader.ReadUInt16();
                                 ushort componentCount = reader.ReadUInt16();
                                 for (int k = 1; k <= componentCount - 1; k++)
