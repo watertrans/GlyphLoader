@@ -21,7 +21,7 @@ namespace WaterTrans.GlyphLoader
         private readonly Dictionary<ushort, CharString> _charStringCache = new Dictionary<ushort, CharString>();
         private readonly Dictionary<ushort, double> _cffAdvancedWidths = new Dictionary<ushort, double>();
         private readonly Dictionary<string, TableDirectory> _tableDirectories = new Dictionary<string, TableDirectory>(StringComparer.OrdinalIgnoreCase);
-        private byte[] _byteArray;
+        private readonly byte[] _byteArray;
         private TableOfCMAP _tableOfCMAP;
         private TableOfMAXP _tableOfMAXP;
         private TableOfHEAD _tableOfHEAD;
@@ -63,10 +63,17 @@ namespace WaterTrans.GlyphLoader
                 throw new NotSupportedException("The stream does not support reading.");
             }
 
-            using (var memoryStream = new MemoryStream())
+            if (stream is MemoryStream)
             {
-                stream.CopyTo(memoryStream);
-                _byteArray = memoryStream.ToArray();
+                _byteArray = ((MemoryStream)stream).ToArray();
+            }
+            else
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    stream.CopyTo(memoryStream);
+                    _byteArray = memoryStream.ToArray();
+                }
             }
 
             if (IsCollection())
@@ -77,6 +84,8 @@ namespace WaterTrans.GlyphLoader
             {
                 ReadTypeface(_byteArray, 0);
             }
+
+            _byteArray = null;
         }
 
         /// <summary>
@@ -228,10 +237,6 @@ namespace WaterTrans.GlyphLoader
                 }
                 else
                 {
-                    if (_cffAdvancedWidths.Count == 0)
-                    {
-                        ReadCFFAdvancedWidths();
-                    }
                     return _cffAdvancedWidths;
                 }
             }
@@ -319,13 +324,11 @@ namespace WaterTrans.GlyphLoader
             double scale = (double)renderingEmSize / _tableOfHEAD.UnitsPerEm;
             if (_tableDirectories.ContainsKey(TableNames.GLYF))
             {
-                // TODO result path data from cache
                 var glyph = ReadGLYF(reader, glyphIndex);
                 return glyph.ConvertToPathGeometry(scale);
             }
             else if  (_tableDirectories.ContainsKey(TableNames.CFF))
             {
-                // TODO result path data from cache
                 var charString = ReadCFFCharString(glyphIndex);
                 return charString.ConvertToPathGeometry(scale);
             }
@@ -514,6 +517,20 @@ namespace WaterTrans.GlyphLoader
 
             reader.Position = _tableDirectories[TableNames.CFF].Offset;
             _tableOfCFF = new TableOfCFF(reader);
+            ReadCFFAdvancedWidths();
+        }
+
+        private void ReadGLYF(TypefaceReader reader)
+        {
+            if (!_tableDirectories.ContainsKey(TableNames.GLYF))
+            {
+                return;
+            }
+
+            for (ushort i = 0; i < _tableOfMAXP.NumGlyphs; i++)
+            {
+                ReadGLYF(reader, i);
+            }
         }
 
         private CharString ReadCFFCharString(ushort glyphIndex)
@@ -595,6 +612,7 @@ namespace WaterTrans.GlyphLoader
             ReadGSUB(reader);
             ReadGPOS(reader);
             ReadCFF(reader);
+            ReadGLYF(reader);
         }
 
         private void ReadDirectory(TypefaceReader reader)

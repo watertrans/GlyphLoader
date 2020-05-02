@@ -11,13 +11,16 @@ namespace WaterTrans.GlyphLoader.Tests
     [TestClass]
     public class TypefaceTest
     {
-        private readonly string[] _fontFiles = {
+        private static readonly string[] _fontFiles = {
             "Roboto-Regular.ttf",
             "RobotoMono-Regular.ttf",
             "Lora-VariableFont_wght.ttf",
             "NotoSansJP-Regular.otf",
             "NotoSerifJP-Regular.otf",
         };
+
+        private static readonly Dictionary<string, Typeface> _typefaceCache = LoadAllTypeface();
+        private static readonly Dictionary<string, GlyphTypeface> _glyphTypefaceCache = LoadAllGlyphTypeface();
 
         private const string GlyphWarningMessage = @"
             <!DOCTYPE html><html><head><style>dt { font-weight: bold; } svg { border: 1px solid #000; }</style></head>
@@ -36,13 +39,9 @@ namespace WaterTrans.GlyphLoader.Tests
         {
             foreach (string fontFile in _fontFiles)
             {
-                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
-                var gt = new GlyphTypeface(new Uri(fontPath));
-                using (var fontStream = File.OpenRead(fontPath))
-                {
-                    var tf = new Typeface(fontStream);
-                    Assert.AreEqual(tf.Baseline, gt.Baseline);
-                }
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+                Assert.AreEqual(tf.Baseline, gt.Baseline);
             }
         }
 
@@ -51,13 +50,9 @@ namespace WaterTrans.GlyphLoader.Tests
         {
             foreach (string fontFile in _fontFiles)
             {
-                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
-                var gt = new GlyphTypeface(new Uri(fontPath));
-                using (var fontStream = File.OpenRead(fontPath))
-                {
-                    var tf = new Typeface(fontStream);
-                    Assert.AreEqual(tf.StrikethroughPosition, gt.StrikethroughPosition);
-                }
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+                Assert.AreEqual(tf.StrikethroughPosition, gt.StrikethroughPosition);
             }
         }
 
@@ -66,13 +61,9 @@ namespace WaterTrans.GlyphLoader.Tests
         {
             foreach (string fontFile in _fontFiles)
             {
-                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
-                var gt = new GlyphTypeface(new Uri(fontPath));
-                using (var fontStream = File.OpenRead(fontPath))
-                {
-                    var tf = new Typeface(fontStream);
-                    Assert.AreEqual(tf.StrikethroughThickness, gt.StrikethroughThickness);
-                }
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+                Assert.AreEqual(tf.StrikethroughThickness, gt.StrikethroughThickness);
             }
         }
 
@@ -81,13 +72,9 @@ namespace WaterTrans.GlyphLoader.Tests
         {
             foreach (string fontFile in _fontFiles)
             {
-                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
-                var gt = new GlyphTypeface(new Uri(fontPath));
-                using (var fontStream = File.OpenRead(fontPath))
-                {
-                    var tf = new Typeface(fontStream);
-                    Assert.AreEqual(tf.UnderlinePosition, gt.UnderlinePosition);
-                }
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+                Assert.AreEqual(tf.UnderlinePosition, gt.UnderlinePosition);
             }
         }
 
@@ -96,13 +83,9 @@ namespace WaterTrans.GlyphLoader.Tests
         {
             foreach (string fontFile in _fontFiles)
             {
-                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
-                var gt = new GlyphTypeface(new Uri(fontPath));
-                using (var fontStream = File.OpenRead(fontPath))
-                {
-                    var tf = new Typeface(fontStream);
-                    Assert.AreEqual(tf.UnderlineThickness, gt.UnderlineThickness);
-                }
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+                Assert.AreEqual(tf.UnderlineThickness, gt.UnderlineThickness);
             }
         }
 
@@ -111,13 +94,9 @@ namespace WaterTrans.GlyphLoader.Tests
         {
             foreach (string fontFile in _fontFiles)
             {
-                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
-                var gt = new GlyphTypeface(new Uri(fontPath));
-                using (var fontStream = File.OpenRead(fontPath))
-                {
-                    var tf = new Typeface(fontStream);
-                    Assert.AreEqual(tf.CapsHeight, gt.CapsHeight);
-                }
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+                Assert.AreEqual(tf.CapsHeight, gt.CapsHeight);
             }
         }
 
@@ -126,13 +105,9 @@ namespace WaterTrans.GlyphLoader.Tests
         {
             foreach (string fontFile in _fontFiles)
             {
-                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
-                var gt = new GlyphTypeface(new Uri(fontPath));
-                using (var fontStream = File.OpenRead(fontPath))
-                {
-                    var tf = new Typeface(fontStream);
-                    Assert.AreEqual(tf.Height, gt.Height);
-                }
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+                Assert.AreEqual(tf.Height, gt.Height);
             }
         }
 
@@ -141,13 +116,9 @@ namespace WaterTrans.GlyphLoader.Tests
         {
             foreach (string fontFile in _fontFiles)
             {
-                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
-                var gt = new GlyphTypeface(new Uri(fontPath));
-                using (var fontStream = File.OpenRead(fontPath))
-                {
-                    var tf = new Typeface(fontStream);
-                    Assert.AreEqual(tf.XHeight, gt.XHeight);
-                }
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+                Assert.AreEqual(tf.XHeight, gt.XHeight);
             }
         }
 
@@ -156,13 +127,9 @@ namespace WaterTrans.GlyphLoader.Tests
         {
             foreach (string fontFile in _fontFiles)
             {
-                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
-                var gt = new GlyphTypeface(new Uri(fontPath));
-                using (var fontStream = File.OpenRead(fontPath))
-                {
-                    var tf = new Typeface(fontStream);
-                    Assert.AreEqual(tf.GlyphCount, gt.GlyphCount);
-                }
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+                Assert.AreEqual(tf.GlyphCount, gt.GlyphCount);
             }
         }
 
@@ -171,15 +138,11 @@ namespace WaterTrans.GlyphLoader.Tests
         {
             foreach (string fontFile in _fontFiles)
             {
-                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
-                var gt = new GlyphTypeface(new Uri(fontPath));
-                using (var fontStream = File.OpenRead(fontPath))
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+                for (ushort i = 0; i < tf.GlyphCount; i++)
                 {
-                    var tf = new Typeface(fontStream);
-                    for (ushort i = 0; i < tf.GlyphCount; i++)
-                    {
-                        Assert.AreEqual(tf.AdvanceWidths[i], gt.AdvanceWidths[i], "Font:" + fontFile + " GlyphIndex:" + i);
-                    }
+                    Assert.AreEqual(tf.AdvanceWidths[i], gt.AdvanceWidths[i], "Font:" + fontFile + " GlyphIndex:" + i);
                 }
             }
         }
@@ -190,15 +153,11 @@ namespace WaterTrans.GlyphLoader.Tests
         {
             foreach (string fontFile in _fontFiles)
             {
-                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
-                var gt = new GlyphTypeface(new Uri(fontPath));
-                using (var fontStream = File.OpenRead(fontPath))
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+                for (ushort i = 0; i < tf.GlyphCount; i++)
                 {
-                    var tf = new Typeface(fontStream);
-                    for (ushort i = 0; i < tf.GlyphCount; i++)
-                    {
-                        Assert.AreEqual(tf.AdvanceHeights[i], gt.AdvanceHeights[i], "Font:" + fontFile + " GlyphIndex:" + i);
-                    }
+                    Assert.AreEqual(tf.AdvanceHeights[i], gt.AdvanceHeights[i], "Font:" + fontFile + " GlyphIndex:" + i);
                 }
             }
         }
@@ -208,15 +167,11 @@ namespace WaterTrans.GlyphLoader.Tests
         {
             foreach (string fontFile in _fontFiles)
             {
-                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
-                var gt = new GlyphTypeface(new Uri(fontPath));
-                using (var fontStream = File.OpenRead(fontPath))
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+                foreach (int charCode in gt.CharacterToGlyphMap.Keys)
                 {
-                    var tf = new Typeface(fontStream);
-                    foreach (int charCode in gt.CharacterToGlyphMap.Keys)
-                    {
-                        Assert.AreEqual(tf.CharacterToGlyphMap[charCode], gt.CharacterToGlyphMap[charCode], "Font:" + fontFile + " CharCode:" + charCode);
-                    }
+                    Assert.AreEqual(tf.CharacterToGlyphMap[charCode], gt.CharacterToGlyphMap[charCode], "Font:" + fontFile + " CharCode:" + charCode);
                 }
             }
         }
@@ -227,15 +182,11 @@ namespace WaterTrans.GlyphLoader.Tests
         {
             foreach (string fontFile in _fontFiles)
             {
-                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
-                var gt = new GlyphTypeface(new Uri(fontPath));
-                using (var fontStream = File.OpenRead(fontPath))
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+                for (ushort i = 0; i < tf.GlyphCount; i++)
                 {
-                    var tf = new Typeface(fontStream);
-                    for (ushort i = 0; i < tf.GlyphCount; i++)
-                    {
-                        Assert.AreEqual(tf.LeftSideBearings[i], gt.LeftSideBearings[i], "Font:" + fontFile + " GlyphIndex:" + i);
-                    }
+                    Assert.AreEqual(tf.LeftSideBearings[i], gt.LeftSideBearings[i], "Font:" + fontFile + " GlyphIndex:" + i);
                 }
             }
         }
@@ -246,15 +197,11 @@ namespace WaterTrans.GlyphLoader.Tests
         {
             foreach (string fontFile in _fontFiles)
             {
-                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
-                var gt = new GlyphTypeface(new Uri(fontPath));
-                using (var fontStream = File.OpenRead(fontPath))
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+                for (ushort i = 0; i < tf.GlyphCount; i++)
                 {
-                    var tf = new Typeface(fontStream);
-                    for (ushort i = 0; i < tf.GlyphCount; i++)
-                    {
-                        Assert.AreEqual(tf.TopSideBearings[i], gt.TopSideBearings[i], "Font:" + fontFile + " GlyphIndex:" + i);
-                    }
+                    Assert.AreEqual(tf.TopSideBearings[i], gt.TopSideBearings[i], "Font:" + fontFile + " GlyphIndex:" + i);
                 }
             }
         }
@@ -302,14 +249,10 @@ namespace WaterTrans.GlyphLoader.Tests
         {
             foreach (string fontFile in _fontFiles)
             {
-                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
-                var gt = new GlyphTypeface(new Uri(fontPath));
-                using (var fontStream = File.OpenRead(fontPath))
-                {
-                    var tf = new Typeface(fontStream);
-                    var mediaGeometry1 = tf.GetGlyphOutline(106, 128);
-                    var mediaGeometry2 = gt.GetGlyphOutline(106, 128, 128);
-                }
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+                var mediaGeometry1 = tf.GetGlyphOutline(106, 128);
+                var mediaGeometry2 = gt.GetGlyphOutline(106, 128, 128);
             }
         }
 
@@ -318,51 +261,72 @@ namespace WaterTrans.GlyphLoader.Tests
         {
             foreach (string fontFile in _fontFiles)
             {
-                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
-                var gt = new GlyphTypeface(new Uri(fontPath));
-                using (var fontStream = File.OpenRead(fontPath))
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+
+                for (ushort i = 0; i < tf.GlyphCount; i++)
                 {
-                    var tf = new Typeface(fontStream);
+                    var sourceGeometry = tf.GetGlyphOutline(i, 128);
+                    var mediaGeometry1 = ConvetToWpfPathGeometry(sourceGeometry);
+                    mediaGeometry1.Transform = new TranslateTransform(0, tf.Baseline * 128);
 
-                    for (ushort i = 0; i < tf.GlyphCount; i++)
+                    var mediaGeometry2 = gt.GetGlyphOutline(i, 128, 128);
+                    mediaGeometry2.Transform = new TranslateTransform(0, gt.Baseline * 128);
+
+                    var flatGeometry1 = mediaGeometry1.GetFlattenedPathGeometry();
+                    var flatGeometry2 = mediaGeometry2.GetFlattenedPathGeometry();
+
+
+                    double totalDistance1 = GetTotalDistance(flatGeometry1);
+                    double totalDistance2 = GetTotalDistance(flatGeometry2);
+                    double errorRate = Math.Abs(totalDistance1 - totalDistance2) / totalDistance1;
+
+                    // Over 99% match
+                    if (errorRate > 0.01)
                     {
-                        var sourceGeometry = tf.GetGlyphOutline(i, 128);
-                        var mediaGeometry1 = ConvetToWpfPathGeometry(sourceGeometry);
-                        mediaGeometry1.Transform = new TranslateTransform(0, tf.Baseline * 128);
+                        // Please see with your own eyes.
+                        string message = GlyphWarningMessage
+                            .Replace("{fontFile}", fontFile)
+                            .Replace("{glyphIndex}", i.ToString())
+                            .Replace("{pathData1}", mediaGeometry1.GetOutlinedPathGeometry().ToString().Remove(0, 2))
+                            .Replace("{pathData2}", mediaGeometry2.GetOutlinedPathGeometry().ToString().Remove(0, 2));
+                        System.Diagnostics.Trace.WriteLine(message);
+                        Assert.Fail(message);
+                    }
 
-                        var mediaGeometry2 = gt.GetGlyphOutline(i, 128, 128);
-                        mediaGeometry2.Transform = new TranslateTransform(0, gt.Baseline * 128);
-
-                        var flatGeometry1 = mediaGeometry1.GetFlattenedPathGeometry();
-                        var flatGeometry2 = mediaGeometry2.GetFlattenedPathGeometry();
-
-
-                        double totalDistance1 = GetTotalDistance(flatGeometry1);
-                        double totalDistance2 = GetTotalDistance(flatGeometry2);
-                        double errorRate = Math.Abs(totalDistance1 - totalDistance2) / totalDistance1;
-
-                        // Over 99% match
-                        if (errorRate > 0.01)
-                        {
-                            // Please see with your own eyes.
-                            string message = GlyphWarningMessage
-                                .Replace("{fontFile}", fontFile)
-                                .Replace("{glyphIndex}", i.ToString())
-                                .Replace("{pathData1}", mediaGeometry1.GetOutlinedPathGeometry().ToString().Remove(0, 2))
-                                .Replace("{pathData2}", mediaGeometry2.GetOutlinedPathGeometry().ToString().Remove(0, 2));
-                            System.Diagnostics.Trace.WriteLine(message);
-                            Assert.Fail(message);
-                        }
-
-                        if (i % 500 == 0)
-                        {
-                            GC.Collect();
-                            GC.WaitForPendingFinalizers();
-                            GC.Collect();
-                        }
+                    if (i % 500 == 0)
+                    {
+                        GC.Collect();
+                        GC.WaitForPendingFinalizers();
+                        GC.Collect();
                     }
                 }
             }
+        }
+
+        private static Dictionary<string, Typeface> LoadAllTypeface()
+        {
+            var result = new Dictionary<string, Typeface>();
+            foreach (string fontFile in _fontFiles)
+            {
+                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
+                using (var fontStream = File.OpenRead(fontPath))
+                {
+                    result[fontFile] = new Typeface(fontStream);
+                }
+            }
+            return result;
+        }
+
+        private static Dictionary<string, GlyphTypeface> LoadAllGlyphTypeface()
+        {
+            var result = new Dictionary<string, GlyphTypeface>();
+            foreach (string fontFile in _fontFiles)
+            {
+                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
+                result[fontFile] = new GlyphTypeface(new Uri(fontPath));
+            }
+            return result;
         }
 
         private System.Windows.Media.Geometry ConvetToWpfPathGeometry(WaterTrans.GlyphLoader.Geometry.PathGeometry geometry)
