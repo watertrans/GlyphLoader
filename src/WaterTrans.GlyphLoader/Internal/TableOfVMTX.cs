@@ -17,20 +17,19 @@ namespace WaterTrans.GlyphLoader.Internal
         /// <param name="reader">The <see cref="TypefaceReader"/>.</param>
         /// <param name="numberOfVMetrics">The number of vMetrics in ‘vhea’ table.</param>
         /// <param name="numGlyphs">The number of glyphs in ‘maxp’ table.</param>
-        /// <param name="unitsPerEm">The unitsPerEm in ‘head’ table.</param>
-        internal TableOfVMTX(TypefaceReader reader, ushort numberOfVMetrics, ushort numGlyphs, ushort unitsPerEm)
+        internal TableOfVMTX(TypefaceReader reader, ushort numberOfVMetrics, ushort numGlyphs)
         {
-            double ah = 0;
-            double tsb = 0;
+            ushort ah = 0;
+            short tsb = 0;
 
             for (ushort i = 0; i < numGlyphs; i++)
             {
                 if (i < numberOfVMetrics)
                 {
-                    ah = (double)reader.ReadUInt16() / unitsPerEm;
+                    ah = reader.ReadUInt16();
                 }
 
-                tsb = (double)reader.ReadInt16() / unitsPerEm;
+                tsb = reader.ReadInt16();
 
                 AdvanceHeights[i] = ah;
                 TopSideBearings[i] = tsb;
@@ -38,9 +37,9 @@ namespace WaterTrans.GlyphLoader.Internal
         }
 
         /// <summary>Gets an advance height, in font design units.</summary>
-        public IDictionary<ushort, double> AdvanceHeights { get; } = new Dictionary<ushort, double>();
+        public Dictionary<ushort, ushort> AdvanceHeights { get; } = new Dictionary<ushort, ushort>();
 
         /// <summary>Gets an glyph top side bearing, in font design units.</summary>
-        public IDictionary<ushort, double> TopSideBearings { get; } = new Dictionary<ushort, double>();
+        public Dictionary<ushort, short> TopSideBearings { get; } = new Dictionary<ushort, short>();
     }
 }

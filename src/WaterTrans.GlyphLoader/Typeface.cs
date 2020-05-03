@@ -9,6 +9,7 @@ using WaterTrans.GlyphLoader.Geometry;
 using WaterTrans.GlyphLoader.Internal;
 using WaterTrans.GlyphLoader.Internal.AAT;
 using WaterTrans.GlyphLoader.Internal.OpenType.CFF;
+using WaterTrans.GlyphLoader.Internal.SFNT;
 
 namespace WaterTrans.GlyphLoader
 {
@@ -19,10 +20,14 @@ namespace WaterTrans.GlyphLoader
     {
         private readonly Dictionary<ushort, GlyphData> _glyphDataCache = new Dictionary<ushort, GlyphData>();
         private readonly Dictionary<ushort, CharString> _charStringCache = new Dictionary<ushort, CharString>();
-        private readonly Dictionary<ushort, double> _cffAdvancedWidths = new Dictionary<ushort, double>();
-        private readonly Dictionary<ushort, double> _alternativeAdvancedHeights = new Dictionary<ushort, double>();
         private readonly Dictionary<string, TableDirectory> _tableDirectories = new Dictionary<string, TableDirectory>(StringComparer.OrdinalIgnoreCase);
         private readonly byte[] _byteArray;
+        private IDictionary<ushort, double> _alternativeAdvancedHeights;
+        private IDictionary<ushort, double> _cffAdvancedWidths;
+        private IDictionary<ushort, double> _designUnitsAdvanceWidths;
+        private IDictionary<ushort, double> _designUnitsLeftSideBearings;
+        private IDictionary<ushort, double> _designUnitsAdvanceHeights;
+        private IDictionary<ushort, double> _designUnitsTopSideBearings;
         private TableOfCMAP _tableOfCMAP;
         private TableOfMAXP _tableOfMAXP;
         private TableOfHEAD _tableOfHEAD;
@@ -234,7 +239,7 @@ namespace WaterTrans.GlyphLoader
             {
                 if (_tableOfCFF == null)
                 {
-                    return _tableOfHMTX.DesignUnitsAdvanceWidths;
+                    return _designUnitsAdvanceWidths;
                 }
                 else
                 {
@@ -256,7 +261,7 @@ namespace WaterTrans.GlyphLoader
                 }
                 else
                 {
-                    return _tableOfVMTX.AdvanceHeights;
+                    return _designUnitsAdvanceHeights;
                 }
             }
         }
@@ -266,7 +271,7 @@ namespace WaterTrans.GlyphLoader
         /// </summary>
         public IDictionary<ushort, double> LeftSideBearings
         {
-            get { return _tableOfHMTX.DesignUnitsLeftSideBearings; }
+            get { return _designUnitsLeftSideBearings; }
         }
 
         /// <summary>
@@ -274,7 +279,7 @@ namespace WaterTrans.GlyphLoader
         /// </summary>
         public IDictionary<ushort, double> TopSideBearings
         {
-            get { return _tableOfVMTX.TopSideBearings; }
+            get { return _designUnitsTopSideBearings; }
         }
 
         /// <summary>
@@ -428,7 +433,9 @@ namespace WaterTrans.GlyphLoader
             }
 
             reader.Position = _tableDirectories[TableNames.HMTX].Offset;
-            _tableOfHMTX = new TableOfHMTX(reader, _tableOfHHEA.NumberOfHMetrics, _tableOfMAXP.NumGlyphs, _tableOfHEAD.UnitsPerEm);
+            _tableOfHMTX = new TableOfHMTX(reader, _tableOfHHEA.NumberOfHMetrics, _tableOfMAXP.NumGlyphs);
+            _designUnitsAdvanceWidths = new GlyphMetricsDictionary<ushort>(_tableOfHMTX.AdvanceWidths, _tableOfHEAD.UnitsPerEm);
+            _designUnitsLeftSideBearings = new GlyphMetricsDictionary<short>(_tableOfHMTX.LeftSideBearings, _tableOfHEAD.UnitsPerEm);
         }
 
         private void ReadOS2(TypefaceReader reader)
@@ -479,25 +486,29 @@ namespace WaterTrans.GlyphLoader
         {
             if (!_tableDirectories.ContainsKey(TableNames.VMTX))
             {
-                double height;
+                var internalDictionary = new Dictionary<ushort, short>();
+                short height;
                 if (_tableOfOS2 == null)
                 {
-                    height = (double)(_tableOfHHEA.Ascender - _tableOfHHEA.Descender) / _tableOfHEAD.UnitsPerEm;
+                    height = (short)(_tableOfHHEA.Ascender - _tableOfHHEA.Descender);
                 }
                 else
                 {
-                    height = (double)(_tableOfOS2.TypoAscender - _tableOfOS2.TypoDescender) / _tableOfHEAD.UnitsPerEm;
+                    height = (short)(_tableOfOS2.TypoAscender - _tableOfOS2.TypoDescender);
                 }
 
                 for (ushort i = 0; i < _tableOfMAXP.NumGlyphs; i++)
                 {
-                    _alternativeAdvancedHeights[i] = height;
+                    internalDictionary[i] = height;
                 }
+                _alternativeAdvancedHeights = new GlyphMetricsDictionary<short>(internalDictionary, _tableOfHEAD.UnitsPerEm);
                 return;
             }
 
             reader.Position = _tableDirectories[TableNames.VMTX].Offset;
-            _tableOfVMTX = new TableOfVMTX(reader, _tableOfVHEA.NumberOfVMetrics, _tableOfMAXP.NumGlyphs, _tableOfHEAD.UnitsPerEm);
+            _tableOfVMTX = new TableOfVMTX(reader, _tableOfVHEA.NumberOfVMetrics, _tableOfMAXP.NumGlyphs);
+            _designUnitsAdvanceHeights = new GlyphMetricsDictionary<ushort>(_tableOfVMTX.AdvanceHeights, _tableOfHEAD.UnitsPerEm);
+            _designUnitsTopSideBearings = new GlyphMetricsDictionary<short>(_tableOfVMTX.TopSideBearings, _tableOfHEAD.UnitsPerEm);
         }
 
         private void ReadMORT(TypefaceReader reader)
@@ -574,11 +585,13 @@ namespace WaterTrans.GlyphLoader
 
         private void ReadCFFAdvancedWidths()
         {
+            var internalDictionary = new Dictionary<ushort, int>();
             for (ushort i = 0; i < _tableOfCFF.CharStrings.Count; i++)
             {
                 var charString = ReadCFFCharString(i);
-                _cffAdvancedWidths[i] = (double)charString.Width / _tableOfHEAD.UnitsPerEm;
+                internalDictionary[i] = charString.Width;
             }
+            _cffAdvancedWidths = new GlyphMetricsDictionary<int>(internalDictionary, _tableOfHEAD.UnitsPerEm);
         }
 
         private GlyphData ReadGLYF(TypefaceReader reader, ushort glyphIndex)
