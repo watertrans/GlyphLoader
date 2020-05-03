@@ -20,6 +20,7 @@ namespace WaterTrans.GlyphLoader
         private readonly Dictionary<ushort, GlyphData> _glyphDataCache = new Dictionary<ushort, GlyphData>();
         private readonly Dictionary<ushort, CharString> _charStringCache = new Dictionary<ushort, CharString>();
         private readonly Dictionary<ushort, double> _cffAdvancedWidths = new Dictionary<ushort, double>();
+        private readonly Dictionary<ushort, double> _alternativeAdvancedHeights = new Dictionary<ushort, double>();
         private readonly Dictionary<string, TableDirectory> _tableDirectories = new Dictionary<string, TableDirectory>(StringComparer.OrdinalIgnoreCase);
         private readonly byte[] _byteArray;
         private TableOfCMAP _tableOfCMAP;
@@ -247,7 +248,17 @@ namespace WaterTrans.GlyphLoader
         /// </summary>
         public IDictionary<ushort, double> AdvanceHeights
         {
-            get { return _tableOfVMTX.AdvanceHeights; }
+            get
+            {
+                if (_tableOfVMTX == null)
+                {
+                    return _alternativeAdvancedHeights;
+                }
+                else
+                {
+                    return _tableOfVMTX.AdvanceHeights;
+                }
+            }
         }
 
         /// <summary>
@@ -468,6 +479,20 @@ namespace WaterTrans.GlyphLoader
         {
             if (!_tableDirectories.ContainsKey(TableNames.VMTX))
             {
+                double height;
+                if (_tableOfOS2 == null)
+                {
+                    height = (double)(_tableOfHHEA.Ascender - _tableOfHHEA.Descender) / _tableOfHEAD.UnitsPerEm;
+                }
+                else
+                {
+                    height = (double)(_tableOfOS2.TypoAscender - _tableOfOS2.TypoDescender) / _tableOfHEAD.UnitsPerEm;
+                }
+
+                for (ushort i = 0; i < _tableOfMAXP.NumGlyphs; i++)
+                {
+                    _alternativeAdvancedHeights[i] = height;
+                }
                 return;
             }
 

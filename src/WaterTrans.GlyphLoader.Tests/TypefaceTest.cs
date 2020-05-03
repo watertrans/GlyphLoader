@@ -148,8 +148,7 @@ namespace WaterTrans.GlyphLoader.Tests
             }
         }
 
-        // TODO
-        // [TestMethod]
+        [TestMethod]
         public void AdvanceHeights_OK_SameResultsAsGlyphTypeface()
         {
             foreach (string fontFile in _fontFiles)
