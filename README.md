@@ -34,6 +34,12 @@ Supports following font file format:
 - OpenType(OTF) and OpenType collections(OTC)
 - Web Open Font Format 2(WOFF2) [comming soon]
 
+## Limitations
+GlyphLoader has the following limitations:
+
+- CFF2 table will be supported in future version
+- Variable fonts will be supported in future version
+
 ## License
 MIT
 
