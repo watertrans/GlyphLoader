@@ -233,7 +233,7 @@ namespace WaterTrans.GlyphLoader
             {
                 if (_tableOfCFF == null)
                 {
-                    return _tableOfHMTX.AdvanceWidths;
+                    return _tableOfHMTX.DesignUnitsAdvanceWidths;
                 }
                 else
                 {
@@ -255,7 +255,7 @@ namespace WaterTrans.GlyphLoader
         /// </summary>
         public IDictionary<ushort, double> LeftSideBearings
         {
-            get { return _tableOfHMTX.LeftSideBearings; }
+            get { return _tableOfHMTX.DesignUnitsLeftSideBearings; }
         }
 
         /// <summary>
@@ -542,7 +542,7 @@ namespace WaterTrans.GlyphLoader
                 return _charStringCache[glyphIndex];
             }
 
-            result = _tableOfCFF.ParseCharString(glyphIndex);
+            result = _tableOfCFF.ParseCharString(glyphIndex, _tableOfHMTX.AdvanceWidths[glyphIndex]);
             _charStringCache[glyphIndex] = result;
             return result;
         }

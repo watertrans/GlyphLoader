@@ -20,27 +20,35 @@ namespace WaterTrans.GlyphLoader.Internal
         /// <param name="unitsPerEm">The unitsPerEm in ‘head’ table.</param>
         internal TableOfHMTX(TypefaceReader reader, ushort numberOfHMetrics, ushort numGlyphs, ushort unitsPerEm)
         {
-            double aw = 0;
-            double lsb = 0;
+            ushort aw = 0;
+            short lsb = 0;
 
             for (ushort i = 0; i < numGlyphs; i++)
             {
                 if (i < numberOfHMetrics)
                 {
-                    aw = (double)reader.ReadUInt16() / unitsPerEm;
+                    aw = reader.ReadUInt16();
                 }
 
-                lsb = (double)reader.ReadInt16() / unitsPerEm;
+                lsb = reader.ReadInt16();
 
                 AdvanceWidths[i] = aw;
                 LeftSideBearings[i] = lsb;
+                DesignUnitsAdvanceWidths[i] = (double)aw / unitsPerEm;
+                DesignUnitsLeftSideBearings[i] = (double)lsb / unitsPerEm;
             }
         }
 
+        /// <summary>Gets an advance width.</summary>
+        public IDictionary<ushort, ushort> AdvanceWidths { get; } = new Dictionary<ushort, ushort>();
+
+        /// <summary>Gets an glyph left side bearing.</summary>
+        public IDictionary<ushort, short> LeftSideBearings { get; } = new Dictionary<ushort, short>();
+
         /// <summary>Gets an advance width, in font design units.</summary>
-        public IDictionary<ushort, double> AdvanceWidths { get; } = new Dictionary<ushort, double>();
+        public IDictionary<ushort, double> DesignUnitsAdvanceWidths { get; } = new Dictionary<ushort, double>();
 
         /// <summary>Gets an glyph left side bearing, in font design units.</summary>
-        public IDictionary<ushort, double> LeftSideBearings { get; } = new Dictionary<ushort, double>();
+        public IDictionary<ushort, double> DesignUnitsLeftSideBearings { get; } = new Dictionary<ushort, double>();
     }
 }

@@ -206,8 +206,9 @@ namespace WaterTrans.GlyphLoader.Internal
         /// Parse to glyph data to <see cref="CharString"/>.
         /// </summary>
         /// <param name="glyphIndex">The index of the glyph.</param>
+        /// <param name="width">The advance width in 'htmx' table.</param>
         /// <returns>Returns the <see cref="CharString"/>.</returns>
-        public CharString ParseCharString(ushort glyphIndex)
+        public CharString ParseCharString(ushort glyphIndex, ushort width)
         {
             IndexDataOfSubroutines subrs;
             int defaultWidthX;
@@ -218,13 +219,13 @@ namespace WaterTrans.GlyphLoader.Internal
                 var fdIndex = FDSelect[glyphIndex];
                 var fdDict = FontPrivateDictionaries[fdIndex];
                 subrs = LocalSubroutinesList[fdIndex];
-                defaultWidthX = fdDict.ContainsKey("defaultWidthX") ? (int)fdDict["defaultWidthX"] : 0;
+                defaultWidthX = fdDict.ContainsKey("defaultWidthX") ? (int)fdDict["defaultWidthX"] : width;
                 nominalWidthX = fdDict.ContainsKey("nominalWidthX") ? (int)fdDict["nominalWidthX"] : 0;
             }
             else
             {
                 subrs = TopLocalSubroutines;
-                defaultWidthX = TopPrivateDictionary.ContainsKey("defaultWidthX") ? (int)TopPrivateDictionary["defaultWidthX"] : 0;
+                defaultWidthX = TopPrivateDictionary.ContainsKey("defaultWidthX") ? (int)TopPrivateDictionary["defaultWidthX"] : width;
                 nominalWidthX = TopPrivateDictionary.ContainsKey("nominalWidthX") ? (int)TopPrivateDictionary["nominalWidthX"] : 0;
             }
 

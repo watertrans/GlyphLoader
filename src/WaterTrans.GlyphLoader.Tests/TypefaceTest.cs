@@ -17,6 +17,7 @@ namespace WaterTrans.GlyphLoader.Tests
             "Lora-VariableFont_wght.ttf",
             "NotoSansJP-Regular.otf",
             "NotoSerifJP-Regular.otf",
+            // "KozGoPr6N-Medium.otf",
         };
 
         private static readonly Dictionary<string, Typeface> _typefaceCache = LoadAllTypeface();
@@ -247,12 +248,16 @@ namespace WaterTrans.GlyphLoader.Tests
         // [TestMethod]
         public void GetGlyphOutline_TESTRUN()
         {
+            // TODO analysis GLYF 106
             foreach (string fontFile in _fontFiles)
             {
-                var gt = _glyphTypefaceCache[fontFile];
-                var tf = _typefaceCache[fontFile];
-                var mediaGeometry1 = tf.GetGlyphOutline(106, 128);
-                var mediaGeometry2 = gt.GetGlyphOutline(106, 128, 128);
+                Typeface tf;
+                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
+                using (var fontStream = File.OpenRead(fontPath))
+                {
+                    tf = new Typeface(fontStream);
+                }
+                var geometry = tf.GetGlyphOutline(150, 128);
             }
         }
 
