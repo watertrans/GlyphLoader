@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>0.1.2-alpha</Version>
+    <Version>1.0-alpha</Version>
     <Authors>WaterTrans</Authors>
     <Product>GlyphLoader</Product>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -16,6 +16,7 @@ In WebAssembly environment, it can be used for application development using gly
     <PackageTags>OpenType, TrueType, TypeLoader, WebAssembly</PackageTags>
     <PackageReleaseNotes>https://github.com/WaterTrans/GlyphLoader</PackageReleaseNotes>
     <RepositoryUrl>https://github.com/WaterTrans/GlyphLoader</RepositoryUrl>
+    <Company>WaterTrans</Company>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

@@ -11,7 +11,7 @@ In WebAssembly environment, it can be used for application development using gly
 
 ## Release Notes
 
-### 0.1.2-alpha
+### 1.0-alpha
 
 - Add support for TrueType glyph outline in glyf table
 - Add support for OpenType glyph outline in CFF table
