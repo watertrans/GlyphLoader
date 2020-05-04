@@ -261,6 +261,20 @@ namespace WaterTrans.GlyphLoader.Tests
         }
 
         [TestMethod]
+        public void GetGlyphOutline_OK_IfGlyphIndexOutOfRange()
+        {
+            var gt = _glyphTypefaceCache[_fontFiles[0]];
+            var tf = _typefaceCache[_fontFiles[0]];
+            Assert.AreEqual(
+                gt.GetGlyphOutline(ushort.MaxValue, 100, 100).ToString(),
+                gt.GetGlyphOutline(0, 100, 100).ToString());
+
+            Assert.AreEqual(
+                tf.GetGlyphOutline(ushort.MaxValue, 100).ToString(),
+                tf.GetGlyphOutline(0, 100).ToString());
+        }
+
+        [TestMethod]
         public void GetGlyphOutline_OK_SameResultsAsGlyphTypeface()
         {
             foreach (string fontFile in _fontFiles)

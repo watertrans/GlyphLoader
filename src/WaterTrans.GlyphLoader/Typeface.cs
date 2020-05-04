@@ -21,7 +21,6 @@ namespace WaterTrans.GlyphLoader
         private readonly Dictionary<ushort, GlyphData> _glyphDataCache = new Dictionary<ushort, GlyphData>();
         private readonly Dictionary<ushort, CharString> _charStringCache = new Dictionary<ushort, CharString>();
         private readonly Dictionary<string, TableDirectory> _tableDirectories = new Dictionary<string, TableDirectory>(StringComparer.OrdinalIgnoreCase);
-        private readonly byte[] _byteArray;
         private IDictionary<ushort, double> _alternativeAdvancedHeights;
         private IDictionary<ushort, double> _cffAdvancedWidths;
         private IDictionary<ushort, double> _designUnitsAdvanceWidths;
@@ -69,29 +68,29 @@ namespace WaterTrans.GlyphLoader
                 throw new NotSupportedException("The stream does not support reading.");
             }
 
+            byte[] byteArray;
+
             if (stream is MemoryStream)
             {
-                _byteArray = ((MemoryStream)stream).ToArray();
+                byteArray = ((MemoryStream)stream).ToArray();
             }
             else
             {
                 using (var memoryStream = new MemoryStream())
                 {
                     stream.CopyTo(memoryStream);
-                    _byteArray = memoryStream.ToArray();
+                    byteArray = memoryStream.ToArray();
                 }
             }
 
-            if (IsCollection())
+            if (IsCollection(byteArray))
             {
-                ReadCollectionTypeface(index);
+                ReadCollectionTypeface(byteArray, index);
             }
             else
             {
-                ReadTypeface(_byteArray, 0);
+                ReadTypeface(byteArray, 0);
             }
-
-            _byteArray = null;
         }
 
         /// <summary>
@@ -336,16 +335,15 @@ namespace WaterTrans.GlyphLoader
         /// <returns>A <see cref="PathGeometry"/> value that represents the path of the glyph.</returns>
         public PathGeometry GetGlyphOutline(ushort glyphIndex, double renderingEmSize)
         {
-            var reader = new TypefaceReader(_byteArray, 0);
             double scale = (double)renderingEmSize / _tableOfHEAD.UnitsPerEm;
             if (_tableDirectories.ContainsKey(TableNames.GLYF))
             {
-                var glyph = ReadGLYF(reader, glyphIndex);
+                var glyph = GetGlyphData(glyphIndex);
                 return glyph.ConvertToPathGeometry(scale);
             }
             else if  (_tableDirectories.ContainsKey(TableNames.CFF))
             {
-                var charString = ReadCFFCharString(glyphIndex);
+                var charString = GetCharString(glyphIndex);
                 return charString.ConvertToPathGeometry(scale);
             }
 
@@ -353,17 +351,35 @@ namespace WaterTrans.GlyphLoader
             return new PathGeometry();
         }
 
-        private bool IsCollection()
+        private GlyphData GetGlyphData(ushort glyphIndex)
+        {
+            if (!_glyphDataCache.ContainsKey(glyphIndex))
+            {
+                return _glyphDataCache[0];
+            }
+            return _glyphDataCache[glyphIndex];
+        }
+
+        private CharString GetCharString(ushort glyphIndex)
+        {
+            if (!_charStringCache.ContainsKey(glyphIndex))
+            {
+                return _charStringCache[0];
+            }
+            return _charStringCache[glyphIndex];
+        }
+
+        private bool IsCollection(byte[] byteArray)
         {
             bool result;
-            var reader = new TypefaceReader(_byteArray, 0);
+            var reader = new TypefaceReader(byteArray, 0);
             result = reader.ReadCharArray(4) == "ttcf";
             return result;
         }
 
-        private void ReadCollectionTypeface(int index)
+        private void ReadCollectionTypeface(byte[] byteArray, int index)
         {
-            var reader = new TypefaceReader(_byteArray, 0);
+            var reader = new TypefaceReader(byteArray, 0);
             string ttctag = reader.ReadCharArray(4);
             ushort ttcVersionMajor = reader.ReadUInt16();
             ushort ttcVersionMinor = reader.ReadUInt16();
@@ -374,7 +390,7 @@ namespace WaterTrans.GlyphLoader
                 uint ttcDirectoryOffset = reader.ReadUInt32();
                 if (i == index)
                 {
-                    ReadTypeface(_byteArray, ttcDirectoryOffset);
+                    ReadTypeface(byteArray, ttcDirectoryOffset);
                     return;
                 }
             }
