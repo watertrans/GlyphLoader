@@ -6,27 +6,7 @@ namespace WaterTrans.GlyphLoader.Tests
     [TestClass]
     public class TypefaceExample
     {
-        private readonly string[] _fontFiles = {
-            "Roboto-Regular.ttf",
-            "RobotoMono-Regular.ttf",
-            "Lora-VariableFont_wght.ttf",
-            "NotoSansJP-Regular.otf",
-            "NotoSerifJP-Regular.otf",
-        };
-
-        private const string GlyphWarningMessage = @"
-            <!DOCTYPE html><html><head><style>dt { font-weight: bold; } svg { border: 1px solid #000; }</style></head>
-            <body><h1>This glyph may be incorrect.</h1>
-            <dl><dt>File: </dt><dd>{fontFile}</dd></dl>
-            <dl><dt>GlyphIndex: </dt><dd>{glyphIndex}</dd></dl>
-            <dl><dt>Typeface: </dt><dd><svg width='128' height='128' viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg' version='1.1'><path d='{pathData1}' fill='black' stroke='black' stroke-width='1' /></svg></dd></dl>
-            <dl><dt>GlyphTypeface: </dt><dd><svg width='128' height='128' viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg' version='1.1'><path d='{pathData2}' fill='black' stroke='black' stroke-width='1' /></svg></dd></dl>
-            </body></html>
-        ";
-
-        public TestContext TestContext { get; set; }
-
-        [TestMethod]
+        // [TestMethod]
         public void CreateGlyphOutlineFurinkazan()
         {
             string fontPath = System.IO.Path.Combine(Environment.CurrentDirectory, "NotoSansJP-Regular.otf");
