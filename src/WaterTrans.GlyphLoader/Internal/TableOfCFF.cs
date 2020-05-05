@@ -238,6 +238,8 @@ namespace WaterTrans.GlyphLoader.Internal
                 charstring.Width += nominalWidthX;
             }
 
+            charstring.CalcMetrics();
+
             return charstring;
         }
     }

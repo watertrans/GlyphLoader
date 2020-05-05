@@ -326,12 +326,12 @@ namespace WaterTrans.GlyphLoader.Internal.AAT
                     // Values are offset
                     for (int i = 0; i < glyphData.NumberOfCoordinates; i++)
                     {
-                        glyphData.XCoordinates[i] = (short)((component.XScale * glyphData.XCoordinates[i])
-                            + (component.Scale01 * glyphData.YCoordinates[i])
+                        glyphData.XCoordinates[i] = (short)(Math.Truncate(component.XScale * glyphData.XCoordinates[i])
+                            + Math.Truncate(component.Scale01 * glyphData.YCoordinates[i])
                             + component.XOffsetOrPointNumber);
 
-                        glyphData.YCoordinates[i] = (short)((component.Scale10 * glyphData.XCoordinates[i])
-                            + (component.YScale * glyphData.YCoordinates[i])
+                        glyphData.YCoordinates[i] = (short)(Math.Truncate(component.Scale10 * glyphData.XCoordinates[i])
+                            + Math.Truncate(component.YScale * glyphData.YCoordinates[i])
                             + component.YOffsetOrPointNumber);
                     }
                 }
@@ -346,19 +346,19 @@ namespace WaterTrans.GlyphLoader.Internal.AAT
 
                     var firstPointX = XCoordinates[component.XOffsetOrPointNumber];
                     var firstPointY = YCoordinates[component.XOffsetOrPointNumber];
-                    var secondPointX = (short)((component.XScale * glyphData.XCoordinates[component.YOffsetOrPointNumber])
-                                     + (component.Scale01 * glyphData.YCoordinates[component.YOffsetOrPointNumber]));
-                    var secondPointY = (short)((component.Scale10 * glyphData.XCoordinates[component.YOffsetOrPointNumber])
-                                     + (component.YScale * glyphData.YCoordinates[component.YOffsetOrPointNumber]));
+                    var secondPointX = (short)(Math.Truncate(component.XScale * glyphData.XCoordinates[component.YOffsetOrPointNumber])
+                                     + Math.Truncate(component.Scale01 * glyphData.YCoordinates[component.YOffsetOrPointNumber]));
+                    var secondPointY = (short)(Math.Truncate(component.Scale10 * glyphData.XCoordinates[component.YOffsetOrPointNumber])
+                                     + Math.Truncate(component.YScale * glyphData.YCoordinates[component.YOffsetOrPointNumber]));
 
                     for (int i = 0; i < glyphData.NumberOfCoordinates; i++)
                     {
-                        glyphData.XCoordinates[i] = (short)((component.XScale * glyphData.XCoordinates[i])
-                            + (component.Scale01 * glyphData.YCoordinates[i])
+                        glyphData.XCoordinates[i] = (short)(Math.Truncate(component.XScale * glyphData.XCoordinates[i])
+                            + Math.Truncate(component.Scale01 * glyphData.YCoordinates[i])
                             + firstPointX - secondPointX);
 
-                        glyphData.YCoordinates[i] = (short)((component.Scale10 * glyphData.XCoordinates[i])
-                            + (component.YScale * glyphData.YCoordinates[i])
+                        glyphData.YCoordinates[i] = (short)(Math.Truncate(component.Scale10 * glyphData.XCoordinates[i])
+                            + Math.Truncate(component.YScale * glyphData.YCoordinates[i])
                             + firstPointY - secondPointY);
                     }
                 }

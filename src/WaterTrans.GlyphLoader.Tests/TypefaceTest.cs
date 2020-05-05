@@ -3,6 +3,7 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -22,16 +23,6 @@ namespace WaterTrans.GlyphLoader.Tests
 
         private static readonly Dictionary<string, Typeface> _typefaceCache = LoadAllTypeface();
         private static readonly Dictionary<string, GlyphTypeface> _glyphTypefaceCache = LoadAllGlyphTypeface();
-
-        private const string GlyphWarningMessage = @"
-            <!DOCTYPE html><html><head><style>dt { font-weight: bold; } svg { border: 1px solid #000; }</style></head>
-            <body><h1>This glyph may be incorrect.</h1>
-            <dl><dt>File: </dt><dd>{fontFile}</dd></dl>
-            <dl><dt>GlyphIndex: </dt><dd>{glyphIndex}</dd></dl>
-            <dl><dt>Typeface: </dt><dd><svg width='128' height='128' viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg' version='1.1'><path d='{pathData1}' fill='black' stroke='black' stroke-width='1' /></svg></dd></dl>
-            <dl><dt>GlyphTypeface: </dt><dd><svg width='128' height='128' viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg' version='1.1'><path d='{pathData2}' fill='black' stroke='black' stroke-width='1' /></svg></dd></dl>
-            </body></html>
-        ";
 
         public TestContext TestContext { get; set; }
 
@@ -143,6 +134,10 @@ namespace WaterTrans.GlyphLoader.Tests
                 var tf = _typefaceCache[fontFile];
                 for (ushort i = 0; i < tf.GlyphCount; i++)
                 {
+                    if (tf.AdvanceWidths[i] != gt.AdvanceWidths[i])
+                    {
+                        System.Diagnostics.Trace.WriteLine(CreateGlyphComparison(fontFile, i));
+                    }
                     Assert.AreEqual(tf.AdvanceWidths[i], gt.AdvanceWidths[i], "Font:" + fontFile + " GlyphIndex:" + i);
                 }
             }
@@ -157,6 +152,10 @@ namespace WaterTrans.GlyphLoader.Tests
                 var tf = _typefaceCache[fontFile];
                 for (ushort i = 0; i < tf.GlyphCount; i++)
                 {
+                    if (tf.AdvanceHeights[i] != gt.AdvanceHeights[i])
+                    {
+                        System.Diagnostics.Trace.WriteLine(CreateGlyphComparison(fontFile, i));
+                    }
                     Assert.AreEqual(tf.AdvanceHeights[i], gt.AdvanceHeights[i], "Font:" + fontFile + " GlyphIndex:" + i);
                 }
             }
@@ -176,8 +175,7 @@ namespace WaterTrans.GlyphLoader.Tests
             }
         }
 
-        // TODO 
-        // [TestMethod]
+        [TestMethod]
         public void LeftSideBearings_OK_SameResultsAsGlyphTypeface()
         {
             foreach (string fontFile in _fontFiles)
@@ -186,13 +184,34 @@ namespace WaterTrans.GlyphLoader.Tests
                 var tf = _typefaceCache[fontFile];
                 for (ushort i = 0; i < tf.GlyphCount; i++)
                 {
+                    if (tf.LeftSideBearings[i] != gt.LeftSideBearings[i])
+                    {
+                        System.Diagnostics.Trace.WriteLine(CreateGlyphComparison(fontFile, i));
+                    }
                     Assert.AreEqual(tf.LeftSideBearings[i], gt.LeftSideBearings[i], "Font:" + fontFile + " GlyphIndex:" + i);
                 }
             }
         }
 
-        // TODO
-        // [TestMethod]
+        [TestMethod]
+        public void RightSideBearings_OK_SameResultsAsGlyphTypeface()
+        {
+            foreach (string fontFile in _fontFiles)
+            {
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+                for (ushort i = 0; i < tf.GlyphCount; i++)
+                {
+                    if (tf.RightSideBearings[i] != gt.RightSideBearings[i])
+                    {
+                        System.Diagnostics.Trace.WriteLine(CreateGlyphComparison(fontFile, i));
+                    }
+                    Assert.AreEqual(tf.RightSideBearings[i], gt.RightSideBearings[i], "Font:" + fontFile + " GlyphIndex:" + i);
+                }
+            }
+        }
+
+        [TestMethod]
         public void TopSideBearings_OK_SameResultsAsGlyphTypeface()
         {
             foreach (string fontFile in _fontFiles)
@@ -201,6 +220,10 @@ namespace WaterTrans.GlyphLoader.Tests
                 var tf = _typefaceCache[fontFile];
                 for (ushort i = 0; i < tf.GlyphCount; i++)
                 {
+                    if (tf.TopSideBearings[i] != gt.TopSideBearings[i])
+                    {
+                        System.Diagnostics.Trace.WriteLine(CreateGlyphComparison(fontFile, i));
+                    }
                     Assert.AreEqual(tf.TopSideBearings[i], gt.TopSideBearings[i], "Font:" + fontFile + " GlyphIndex:" + i);
                 }
             }
@@ -243,23 +266,6 @@ namespace WaterTrans.GlyphLoader.Tests
             }
         }
 
-        // For analysis
-        // [TestMethod]
-        public void GetGlyphOutline_TESTRUN()
-        {
-            // TODO analysis GLYF 106
-            foreach (string fontFile in _fontFiles)
-            {
-                Typeface tf;
-                string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
-                using (var fontStream = File.OpenRead(fontPath))
-                {
-                    tf = new Typeface(fontStream);
-                }
-                var geometry = tf.GetGlyphOutline(150, 128);
-            }
-        }
-
         [TestMethod]
         public void GetGlyphOutline_OK_IfGlyphIndexOutOfRange()
         {
@@ -286,11 +292,7 @@ namespace WaterTrans.GlyphLoader.Tests
                 {
                     var sourceGeometry = tf.GetGlyphOutline(i, 128);
                     var mediaGeometry1 = ConvetToWpfPathGeometry(sourceGeometry);
-                    mediaGeometry1.Transform = new TranslateTransform(0, tf.Baseline * 128);
-
                     var mediaGeometry2 = gt.GetGlyphOutline(i, 128, 128);
-                    mediaGeometry2.Transform = new TranslateTransform(0, gt.Baseline * 128);
-
                     var flatGeometry1 = mediaGeometry1.GetFlattenedPathGeometry();
                     var flatGeometry2 = mediaGeometry2.GetFlattenedPathGeometry();
 
@@ -302,14 +304,8 @@ namespace WaterTrans.GlyphLoader.Tests
                     // Over 99% match
                     if (errorRate > 0.01)
                     {
-                        // Please see with your own eyes.
-                        string message = GlyphWarningMessage
-                            .Replace("{fontFile}", fontFile)
-                            .Replace("{glyphIndex}", i.ToString())
-                            .Replace("{pathData1}", mediaGeometry1.GetOutlinedPathGeometry().ToString().Remove(0, 2))
-                            .Replace("{pathData2}", mediaGeometry2.GetOutlinedPathGeometry().ToString().Remove(0, 2));
-                        System.Diagnostics.Trace.WriteLine(message);
-                        Assert.Fail(message);
+                        System.Diagnostics.Trace.WriteLine(CreateGlyphComparison(fontFile, i));
+                        Assert.Fail("Match rate is less than 99%. " + "Font:" + fontFile + " GlyphIndex:" + i);
                     }
 
                     if (i % 500 == 0)
@@ -321,6 +317,210 @@ namespace WaterTrans.GlyphLoader.Tests
                 }
             }
         }
+
+        // For individual glyph analysis
+        // [TestMethod]
+        public void CreateGraphPaper()
+        {
+            // TODO analysis GLYF 106 Roboto
+            // TODO analysis GLYF 117 NotoSans
+            string fontFile = "Lora-VariableFont_wght.ttf";
+            ushort glyphIndex = 819;
+            System.Diagnostics.Trace.WriteLine(CreateGlyphComparison(fontFile, glyphIndex));
+        }
+
+        #region Private method
+
+        #region Graph
+
+        private const int graphOffsetX = 100;
+        private const int graphOffsetY = 300;
+        private const int graphEmSize = 200;
+
+        public string CreateGlyphComparison(string fontFile, ushort glyphIndex)
+        {
+            return string.Format(
+                TextResources.GlyphComparison,
+                fontFile,
+                glyphIndex,
+                CreateTypefaceGraphPaper(fontFile, glyphIndex),
+                CreateGlyphTypefaceGraphPaper(fontFile, glyphIndex));
+        }
+
+        public string CreateTypefaceGraphPaper(string fontFile, ushort glyphIndex)
+        {
+            var tf = _typefaceCache[fontFile];
+
+            var geometry = tf.GetGlyphOutline(glyphIndex, graphEmSize);
+            var miniLanguage = geometry.Figures.ToString();
+
+            var glyphAnalysis = new StringBuilder();
+            var glyphPath = string.Format(TextResources.StrokePath, miniLanguage, graphOffsetX, graphOffsetY);
+            glyphAnalysis.AppendLine(glyphPath);
+
+            // advance box
+            glyphAnalysis.AppendLine(GetAdvanceBox(tf.AdvanceWidths[glyphIndex] * graphEmSize));
+
+            // origin point
+            glyphAnalysis.AppendLine(GetOriginPoint(0, 0));
+
+            // black box
+            glyphAnalysis.AppendLine(GetBlackBox(tf.LeftSideBearings[glyphIndex] * graphEmSize,
+                tf.TopSideBearings[glyphIndex] * graphEmSize,
+                (tf.AdvanceWidths[glyphIndex] - tf.LeftSideBearings[glyphIndex] - tf.RightSideBearings[glyphIndex]) * graphEmSize,
+                tf.Height * graphEmSize));
+
+            foreach (var figure in geometry.Figures)
+            {
+                glyphAnalysis.AppendLine(GetCurvePoint(figure.StartPoint.X, figure.StartPoint.Y));
+
+                foreach (var segment in figure.Segments)
+                {
+                    if (segment is WaterTrans.GlyphLoader.Geometry.LineSegment l)
+                    {
+                        glyphAnalysis.AppendLine(GetCurvePoint(l.Point.X, l.Point.Y));
+                    }
+                    else if (segment is WaterTrans.GlyphLoader.Geometry.QuadraticBezierSegment q)
+                    {
+                        glyphAnalysis.AppendLine(GetControlPoint(q.Point1.X, q.Point1.Y));
+                        glyphAnalysis.AppendLine(GetCurvePoint(q.Point2.X, q.Point2.Y));
+                    }
+                    else if (segment is WaterTrans.GlyphLoader.Geometry.BezierSegment b)
+                    {
+                        glyphAnalysis.AppendLine(GetControlPoint(b.Point1.X, b.Point1.Y));
+                        glyphAnalysis.AppendLine(GetControlPoint(b.Point2.X, b.Point2.Y));
+                        glyphAnalysis.AppendLine(GetCurvePoint(b.Point3.X, b.Point3.Y));
+                    }
+                }
+            }
+
+            return string.Format(TextResources.GraphPaper, glyphAnalysis.ToString());
+        }
+
+        public string CreateGlyphTypefaceGraphPaper(string fontFile, ushort glyphIndex)
+        {
+            var gt = _glyphTypefaceCache[fontFile];
+
+            var original = gt.GetGlyphOutline(glyphIndex, graphEmSize, graphEmSize);
+            PathGeometry geometry;
+            if (original is PathGeometry)
+            {
+                geometry = (PathGeometry)original;
+            }
+            else
+            {
+                geometry = original.GetOutlinedPathGeometry();
+            }
+            
+            var miniLanguage = geometry.Figures.ToString();
+
+            var glyphAnalysis = new StringBuilder();
+            var glyphPath = string.Format(TextResources.StrokePath, miniLanguage, graphOffsetX, graphOffsetY);
+            glyphAnalysis.AppendLine(glyphPath);
+
+            // advance box
+            glyphAnalysis.AppendLine(GetAdvanceBox(gt.AdvanceWidths[glyphIndex] * graphEmSize));
+
+            // origin point
+            glyphAnalysis.AppendLine(GetOriginPoint(0, 0));
+
+            // black box
+            glyphAnalysis.AppendLine(GetBlackBox(gt.LeftSideBearings[glyphIndex] * graphEmSize,
+                gt.TopSideBearings[glyphIndex] * graphEmSize,
+                (gt.AdvanceWidths[glyphIndex] - gt.LeftSideBearings[glyphIndex] - gt.RightSideBearings[glyphIndex]) * graphEmSize,
+                (gt.AdvanceHeights[glyphIndex] - gt.TopSideBearings[glyphIndex] - gt.DistancesFromHorizontalBaselineToBlackBoxBottom[glyphIndex]) * graphEmSize));
+
+            foreach (var figure in geometry.Figures)
+            {
+                glyphAnalysis.AppendLine(GetCurvePoint(figure.StartPoint.X, figure.StartPoint.Y));
+
+                foreach (var segment in figure.Segments)
+                {
+                    if (segment is LineSegment l)
+                    {
+                        glyphAnalysis.AppendLine(GetCurvePoint(l.Point.X, l.Point.Y));
+                    }
+                    else if (segment is PolyLineSegment pl)
+                    {
+                        foreach (var p in pl.Points)
+                        {
+                            glyphAnalysis.AppendLine(GetCurvePoint(p.X, p.Y));
+                        }
+                    }
+                    else if (segment is QuadraticBezierSegment q)
+                    {
+                        glyphAnalysis.AppendLine(GetControlPoint(q.Point1.X, q.Point1.Y));
+                        glyphAnalysis.AppendLine(GetCurvePoint(q.Point2.X, q.Point2.Y));
+                    }
+                    else if (segment is PolyQuadraticBezierSegment pq)
+                    {
+                        for (int i = 0; i < pq.Points.Count; i++)
+                        {
+                            if (i % 2 == 0)
+                            {
+                                glyphAnalysis.AppendLine(GetCurvePoint(pq.Points[i].X, pq.Points[i].Y));
+                            }
+                            else
+                            {
+                                glyphAnalysis.AppendLine(GetControlPoint(pq.Points[i].X, pq.Points[i].Y));
+                            }
+                        }
+                    }
+                    else if (segment is BezierSegment b)
+                    {
+                        glyphAnalysis.AppendLine(GetControlPoint(b.Point1.X, b.Point1.Y));
+                        glyphAnalysis.AppendLine(GetControlPoint(b.Point2.X, b.Point2.Y));
+                        glyphAnalysis.AppendLine(GetCurvePoint(b.Point3.X, b.Point3.Y));
+                    }
+                    else if (segment is PolyBezierSegment pb)
+                    {
+                        for (int i = 0; i < pb.Points.Count; i++)
+                        {
+                            if (i % 3 == 1 || i % 3 == 2)
+                            {
+                                glyphAnalysis.AppendLine(GetControlPoint(pb.Points[i].X, pb.Points[i].Y));
+                            }
+                            else
+                            {
+                                glyphAnalysis.AppendLine(GetCurvePoint(pb.Points[i].X, pb.Points[i].Y));
+                            }
+                        }
+                    }
+                }
+            }
+
+            return string.Format(TextResources.GraphPaper, glyphAnalysis.ToString());
+        }
+
+
+        private string GetBlackBox(double x, double y, double width, double height)
+        {
+            return string.Format(TextResources.BlackBox, x + graphOffsetX, y + graphOffsetY - graphEmSize, width, height);
+        }
+
+        private string GetAdvanceBox(double width)
+        {
+            return string.Format(TextResources.AdvanceBox, 100, 100, width, 200);
+        }
+
+        private string GetOriginPoint(double x, double y)
+        {
+            return string.Format(TextResources.OriginPoint, x + graphOffsetX, y + graphOffsetY, x, y);
+        }
+
+        private string GetCurvePoint(double x, double y)
+        {
+            return string.Format(TextResources.CurvePoint, x + graphOffsetX, y + graphOffsetY, x, y);
+        }
+
+        private string GetControlPoint(double x, double y)
+        {
+            return string.Format(TextResources.ControlPoint, x + graphOffsetX, y + graphOffsetY, x, y);
+        }
+
+        #endregion
+
+        #region Unit test
 
         private static Dictionary<string, Typeface> LoadAllTypeface()
         {
@@ -417,5 +617,9 @@ namespace WaterTrans.GlyphLoader.Tests
             viz = null;
             return result;
         }
+
+        #endregion
+
+        #endregion
     }
 }
