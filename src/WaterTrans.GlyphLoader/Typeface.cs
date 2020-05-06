@@ -22,13 +22,12 @@ namespace WaterTrans.GlyphLoader
         private readonly Dictionary<ushort, GlyphData> _glyphDataCache = new Dictionary<ushort, GlyphData>();
         private readonly Dictionary<ushort, CharString> _charStringCache = new Dictionary<ushort, CharString>();
         private readonly Dictionary<string, TableDirectory> _tableDirectories = new Dictionary<string, TableDirectory>(StringComparer.OrdinalIgnoreCase);
-        private IDictionary<ushort, double> _alternativeAdvancedHeights;
-        private IDictionary<ushort, double> _alternativeTopSideBearings;
         private IDictionary<ushort, double> _designUnitsAdvanceWidths;
         private IDictionary<ushort, double> _designUnitsLeftSideBearings;
         private IDictionary<ushort, double> _designUnitsRightSideBearings;
         private IDictionary<ushort, double> _designUnitsAdvanceHeights;
         private IDictionary<ushort, double> _designUnitsTopSideBearings;
+        private IDictionary<ushort, double> _designUnitsBottomSideBearings;
         private TableOfCMAP _tableOfCMAP;
         private TableOfMAXP _tableOfMAXP;
         private TableOfHEAD _tableOfHEAD;
@@ -106,13 +105,9 @@ namespace WaterTrans.GlyphLoader
                 {
                     return (double)(_tableOfHHEA.Ascender - _tableOfHHEA.Descender) / _tableOfHEAD.UnitsPerEm;
                 }
-                else if ((_tableOfOS2.Selection & 128) > 0) // USE_TYPO_METRICS
-                {
-                    return (double)(_tableOfOS2.TypoAscender - _tableOfOS2.TypoDescender) / _tableOfHEAD.UnitsPerEm;
-                }
                 else
                 {
-                    return (double)(_tableOfOS2.WinAscent + _tableOfOS2.WinDescent) / _tableOfHEAD.UnitsPerEm;
+                    return (double)(_tableOfOS2.TypoAscender - _tableOfOS2.TypoDescender) / _tableOfHEAD.UnitsPerEm;
                 }
             }
         }
@@ -128,13 +123,9 @@ namespace WaterTrans.GlyphLoader
                 {
                     return (double)_tableOfHHEA.Ascender / _tableOfHEAD.UnitsPerEm;
                 }
-                if ((_tableOfOS2.Selection & 128) > 0) // USE_TYPO_METRICS
-                {
-                    return (double)_tableOfOS2.TypoAscender / _tableOfHEAD.UnitsPerEm;
-                }
                 else
                 {
-                    return (double)_tableOfOS2.WinAscent / _tableOfHEAD.UnitsPerEm;
+                    return (double)_tableOfOS2.TypoAscender / _tableOfHEAD.UnitsPerEm;
                 }
             }
         }
@@ -244,17 +235,7 @@ namespace WaterTrans.GlyphLoader
         /// </summary>
         public IDictionary<ushort, double> AdvanceHeights
         {
-            get
-            {
-                if (_tableOfVMTX == null)
-                {
-                    return _alternativeAdvancedHeights;
-                }
-                else
-                {
-                    return _designUnitsAdvanceHeights;
-                }
-            }
+            get { return _designUnitsAdvanceHeights; }
         }
 
         /// <summary>
@@ -278,17 +259,15 @@ namespace WaterTrans.GlyphLoader
         /// </summary>
         public IDictionary<ushort, double> TopSideBearings
         {
-            get
-            {
-                if (_tableOfVMTX == null)
-                {
-                    return _alternativeTopSideBearings;
-                }
-                else
-                {
-                    return _designUnitsTopSideBearings;
-                }
-            }
+            get { return _designUnitsTopSideBearings; }
+        }
+
+        /// <summary>
+        /// Gets the distance from bottom edge of the black box to the bottom end of the advance vector for the glyphs represented by the Typeface object.
+        /// </summary>
+        public IDictionary<ushort, double> BottomSideBearings
+        {
+            get { return _designUnitsBottomSideBearings; }
         }
 
         /// <summary>
@@ -645,123 +624,87 @@ namespace WaterTrans.GlyphLoader
             {
                 CalcGLYFGlyphMetrics();
             }
-
-            if (_tableDirectories.ContainsKey(TableNames.VMTX))
-            {
-                _designUnitsAdvanceHeights = new GlyphMetricsDictionary<ushort>(_tableOfVMTX.AdvanceHeights, _tableOfHEAD.UnitsPerEm);
-                _designUnitsTopSideBearings = new GlyphMetricsDictionary<short>(_tableOfVMTX.TopSideBearings, _tableOfHEAD.UnitsPerEm);
-            }
-            else
-            {
-                CalcAlternativeAdvancedHeights();
-                CalcAlternativeTopSideBearings();
-            }
-        }
-
-        private void CalcAlternativeTopSideBearings()
-        {
-            var alternativeTopSideBearings = new Dictionary<ushort, short>();
-            short ascender;
-            if (_tableOfOS2 == null)
-            {
-                ascender = _tableOfHHEA.Ascender;
-            }
-            else
-            {
-                ascender = _tableOfOS2.TypoAscender;
-            }
-
-            if (_tableDirectories.ContainsKey(TableNames.CFF))
-            {
-                for (ushort i = 0; i < _tableOfMAXP.NumGlyphs; i++)
-                {
-                    var charString = GetCharString(i);
-                    alternativeTopSideBearings[i] = (short)(ascender - charString.YMax);
-                }
-            }
-
-            if (_tableDirectories.ContainsKey(TableNames.GLYF) && (_tableOfHEAD.Flags & 2) > 0)
-            {
-                for (ushort i = 0; i < _tableOfMAXP.NumGlyphs; i++)
-                {
-                    var glyph = GetGlyphData(i);
-                    alternativeTopSideBearings[i] = (short)(ascender - glyph.YMax);
-                }
-            }
-            else if (_tableDirectories.ContainsKey(TableNames.GLYF))
-            {
-                // GlyphTypeface seems to prioritize measured values
-                for (ushort i = 0; i < _tableOfMAXP.NumGlyphs; i++)
-                {
-                    var glyph = GetGlyphData(i);
-                    alternativeTopSideBearings[i] = (short)(ascender -
-                        (glyph.YCoordinates.Count > 0 ? glyph.YCoordinates.Max() : glyph.YMax));
-                }
-            }
-
-            _alternativeTopSideBearings = new GlyphMetricsDictionary<short>(alternativeTopSideBearings, _tableOfHEAD.UnitsPerEm);
-        }
-
-        private void CalcAlternativeAdvancedHeights()
-        {
-            var alternativeAdvancedHeights = new Dictionary<ushort, short>();
-            short height;
-            if (_tableOfOS2 == null)
-            {
-                height = (short)(_tableOfHHEA.Ascender - _tableOfHHEA.Descender);
-            }
-            else
-            {
-                height = (short)(_tableOfOS2.TypoAscender - _tableOfOS2.TypoDescender);
-            }
-
-            for (ushort i = 0; i < _tableOfMAXP.NumGlyphs; i++)
-            {
-                alternativeAdvancedHeights[i] = height;
-            }
-            _alternativeAdvancedHeights = new GlyphMetricsDictionary<short>(alternativeAdvancedHeights, _tableOfHEAD.UnitsPerEm);
         }
 
         private void CalcGLYFGlyphMetrics()
         {
-            var glyfRightSideBearings = new Dictionary<ushort, short>();
-            if ((_tableOfHEAD.Flags & 2) > 0)
+            short ascender;
+            short descender;
+            if (_tableOfOS2 == null)
             {
-                for (ushort i = 0; i < _tableOfMAXP.NumGlyphs; i++)
-                {
-                    var glyph = GetGlyphData(i);
-                    glyfRightSideBearings[i] = (short)(_tableOfHMTX.AdvanceWidths[i] - (glyph.XMin + glyph.XMax - glyph.XMin));
-                }
+                ascender = _tableOfHHEA.Ascender;
+                descender = _tableOfHHEA.Descender;
             }
             else
             {
-                // GlyphTypeface seems to prioritize measured values
-                for (ushort i = 0; i < _tableOfMAXP.NumGlyphs; i++)
-                {
-                    var glyph = GetGlyphData(i);
-                    glyfRightSideBearings[i] = (short)(_tableOfHMTX.AdvanceWidths[i] - (_tableOfHMTX.LeftSideBearings[i] +
-                        (glyph.XCoordinates.Count > 0 ? glyph.XCoordinates.Max() : glyph.XMax) -
-                        (glyph.XCoordinates.Count > 0 ? glyph.XCoordinates.Min() : glyph.XMin)));
-                }
+                ascender = _tableOfOS2.TypoAscender;
+                descender = _tableOfOS2.TypoDescender;
             }
+
+            var glyfAdvancedHeights = new Dictionary<ushort, short>();
+            var glyfLeftSideBearings = new Dictionary<ushort, short>();
+            var glyfRightSideBearings = new Dictionary<ushort, short>();
+            var glyfTopSideBearings = new Dictionary<ushort, short>();
+            var glyfBottomSideBearings = new Dictionary<ushort, short>();
+
+            for (ushort i = 0; i < _tableOfMAXP.NumGlyphs; i++)
+            {
+                var glyph = GetGlyphData(i);
+                glyfAdvancedHeights[i] = (short)(ascender - descender);
+                glyfLeftSideBearings[i] = (short)(glyph.XCoordinates.Count > 0 ? glyph.XCoordinates.Min() : glyph.XMin);
+                glyfRightSideBearings[i] = (short)(_tableOfHMTX.AdvanceWidths[i] - (_tableOfHMTX.LeftSideBearings[i] +
+                    (glyph.XCoordinates.Count > 0 ? glyph.XCoordinates.Max() : glyph.XMax) -
+                    (glyph.XCoordinates.Count > 0 ? glyph.XCoordinates.Min() : glyph.XMin)));
+                glyfTopSideBearings[i] = (short)(ascender -
+                    (glyph.YCoordinates.Count > 0 ? glyph.YCoordinates.Max() : glyph.YMax));
+                glyfBottomSideBearings[i] = (short)(Math.Abs(descender) +
+                     (glyph.YCoordinates.Count > 0 ? glyph.YCoordinates.Min() : glyph.YMin));
+            }
+
+            _designUnitsAdvanceHeights = new GlyphMetricsDictionary<short>(glyfAdvancedHeights, _tableOfHEAD.UnitsPerEm);
+            _designUnitsLeftSideBearings = new GlyphMetricsDictionary<short>(glyfLeftSideBearings, _tableOfHEAD.UnitsPerEm);
             _designUnitsRightSideBearings = new GlyphMetricsDictionary<short>(glyfRightSideBearings, _tableOfHEAD.UnitsPerEm);
+            _designUnitsTopSideBearings = new GlyphMetricsDictionary<short>(glyfTopSideBearings, _tableOfHEAD.UnitsPerEm);
+            _designUnitsBottomSideBearings = new GlyphMetricsDictionary<short>(glyfBottomSideBearings, _tableOfHEAD.UnitsPerEm);
         }
 
         private void CalcCFFGlyphMetrics()
         {
-            var cffAdvancedWidths = new Dictionary<ushort, int>();
+            short ascender;
+            short descender;
+            if (_tableOfOS2 == null)
+            {
+                ascender = _tableOfHHEA.Ascender;
+                descender = _tableOfHHEA.Descender;
+            }
+            else
+            {
+                ascender = _tableOfOS2.TypoAscender;
+                descender = _tableOfOS2.TypoDescender;
+            }
+
+            var cffAdvancedWidths = new Dictionary<ushort, short>();
+            var cffAdvancedHeights = new Dictionary<ushort, short>();
             var cffLeftSideBearings = new Dictionary<ushort, short>();
             var cffRightSideBearings = new Dictionary<ushort, short>();
+            var cffTopSideBearings = new Dictionary<ushort, short>();
+            var cffBottomSideBearings = new Dictionary<ushort, short>();
             for (ushort i = 0; i < _tableOfMAXP.NumGlyphs; i++)
             {
                 var charString = GetCharString(i);
-                cffAdvancedWidths[i] = charString.Width;
+                cffAdvancedWidths[i] = (short)charString.Width;
+                cffAdvancedHeights[i] = (short)(ascender - descender);
                 cffLeftSideBearings[i] = charString.XMin;
                 cffRightSideBearings[i] = (short)(charString.Width - (charString.XMin + charString.XMax - charString.XMin));
+                cffTopSideBearings[i] = (short)(ascender - charString.YMax);
+                cffBottomSideBearings[i] = (short)(Math.Abs(descender) + charString.YMin);
             }
-            _designUnitsAdvanceWidths = new GlyphMetricsDictionary<int>(cffAdvancedWidths, _tableOfHEAD.UnitsPerEm);
+            _designUnitsAdvanceWidths = new GlyphMetricsDictionary<short>(cffAdvancedWidths, _tableOfHEAD.UnitsPerEm);
+            _designUnitsAdvanceHeights = new GlyphMetricsDictionary<short>(cffAdvancedHeights, _tableOfHEAD.UnitsPerEm);
             _designUnitsLeftSideBearings = new GlyphMetricsDictionary<short>(cffLeftSideBearings, _tableOfHEAD.UnitsPerEm);
             _designUnitsRightSideBearings = new GlyphMetricsDictionary<short>(cffRightSideBearings, _tableOfHEAD.UnitsPerEm);
+            _designUnitsTopSideBearings = new GlyphMetricsDictionary<short>(cffTopSideBearings, _tableOfHEAD.UnitsPerEm);
+            _designUnitsBottomSideBearings = new GlyphMetricsDictionary<short>(cffBottomSideBearings, _tableOfHEAD.UnitsPerEm);
         }
 
         private void ReadTypeface(byte[] byteArray, long position)

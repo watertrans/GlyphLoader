@@ -70,6 +70,15 @@ namespace WaterTrans.GlyphLoader.Tests {
         }
         
         /// <summary>
+        ///   &lt;line x1=&quot;0&quot; y1=&quot;{0}&quot; x2=&quot;400&quot; y2=&quot;{0}&quot; style=&quot;stroke:red;stroke-width:2&quot; /&gt; に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Baseline {
+            get {
+                return ResourceManager.GetString("Baseline", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   &lt;rect x=&quot;{0}&quot; y=&quot;{1}&quot; width=&quot;{2}&quot; height=&quot;{3}&quot; stroke=&quot;black&quot; stroke-width=&quot;1&quot;  fill=&quot;transparent&quot; /&gt; に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string BlackBox {
