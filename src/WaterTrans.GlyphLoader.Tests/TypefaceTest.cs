@@ -371,12 +371,11 @@ namespace WaterTrans.GlyphLoader.Tests
         }
 
         // For individual glyph analysis
-        [TestMethod]
+        // [TestMethod]
         public void CreateGraphPaper()
         {
-            // TODO analysis GLYF 935 Roboto
-            string fontFile = "RobotoMono-Regular.ttf";
-            ushort glyphIndex = 50;
+            string fontFile = "Roboto-Regular.ttf";
+            ushort glyphIndex = 935;
             System.Diagnostics.Trace.WriteLine(CreateGlyphComparison(fontFile, glyphIndex));
         }
 

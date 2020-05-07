@@ -662,7 +662,8 @@ namespace WaterTrans.GlyphLoader
                 var glyph = GetGlyphData(i);
                 glyfAdvancedHeights[i] = (short)(ascender - descender);
                 glyfLeftSideBearings[i] = (short)(glyph.XCoordinates.Count > 0 ? glyph.XCoordinates.Min() : glyph.XMin);
-                glyfRightSideBearings[i] = (short)(_tableOfHMTX.AdvanceWidths[i] - (_tableOfHMTX.LeftSideBearings[i] +
+                glyfRightSideBearings[i] = (short)(_tableOfHMTX.AdvanceWidths[i] -
+                    ((glyph.XCoordinates.Count > 0 ? glyph.XCoordinates.Min() : glyph.XMin) +
                     (glyph.XCoordinates.Count > 0 ? glyph.XCoordinates.Max() : glyph.XMax) -
                     (glyph.XCoordinates.Count > 0 ? glyph.XCoordinates.Min() : glyph.XMin)));
                 glyfTopSideBearings[i] = (short)(ascender -
