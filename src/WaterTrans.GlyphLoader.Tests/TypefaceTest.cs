@@ -30,19 +30,20 @@ namespace WaterTrans.GlyphLoader.Tests
         // see https://forum.glyphsapp.com/t/why-do-glyphs-fonts-seem-to-have-so-much-space-above-the-letters/266/3
         // see https://glyphsapp.com/tutorials/vertical-metrics
         // see https://social.msdn.microsoft.com/Forums/azure/en-US/7b21047f-bce9-41d3-ab39-55ab8850caca/how-to-get-glyphtypeface-line-gap?forum=wpf
-        // [TestMethod]
-        public void Baseline_OK_SameResultsAsGlyphTypeface()
+        [DataTestMethod]
+        [DataRow("Roboto-Regular.ttf", 0.75)]
+        [DataRow("RobotoMono-Regular.ttf", 1.0478515625)]
+        [DataRow("Lora-VariableFont_wght.ttf", 1.006)]
+        [DataRow("NotoSansJP-Regular.otf", 0.88)]
+        [DataRow("NotoSerifJP-Regular.otf", 0.88)]
+        public void Baseline_Equal_KnownValue(string fontFile, double baseline)
         {
-            foreach (string fontFile in _fontFiles)
-            {
-                var gt = _glyphTypefaceCache[fontFile];
-                var tf = _typefaceCache[fontFile];
-                Assert.AreEqual(tf.Baseline, gt.Baseline);
-            }
+            var tf = _typefaceCache[fontFile];
+            Assert.AreEqual(tf.Baseline, baseline);
         }
 
         [TestMethod]
-        public void StrikethroughPosition_OK_SameResultsAsGlyphTypeface()
+        public void StrikethroughPosition_Equal_GlyphTypefaceValue()
         {
             foreach (string fontFile in _fontFiles)
             {
@@ -53,7 +54,7 @@ namespace WaterTrans.GlyphLoader.Tests
         }
 
         [TestMethod]
-        public void StrikethroughThickness_OK_SameResultsAsGlyphTypeface()
+        public void StrikethroughThickness_Equal_GlyphTypefaceValue()
         {
             foreach (string fontFile in _fontFiles)
             {
@@ -64,7 +65,7 @@ namespace WaterTrans.GlyphLoader.Tests
         }
 
         [TestMethod]
-        public void UnderlinePosition_OK_SameResultsAsGlyphTypeface()
+        public void UnderlinePosition_Equal_GlyphTypefaceValue()
         {
             foreach (string fontFile in _fontFiles)
             {
@@ -75,7 +76,7 @@ namespace WaterTrans.GlyphLoader.Tests
         }
 
         [TestMethod]
-        public void UnderlineThickness_OK_SameResultsAsGlyphTypeface()
+        public void UnderlineThickness_Equal_GlyphTypefaceValue()
         {
             foreach (string fontFile in _fontFiles)
             {
@@ -86,7 +87,7 @@ namespace WaterTrans.GlyphLoader.Tests
         }
 
         [TestMethod]
-        public void CapsHeight_OK_SameResultsAsGlyphTypeface()
+        public void CapsHeight_Equal_GlyphTypefaceValue()
         {
             foreach (string fontFile in _fontFiles)
             {
@@ -100,19 +101,20 @@ namespace WaterTrans.GlyphLoader.Tests
         // see https://forum.glyphsapp.com/t/why-do-glyphs-fonts-seem-to-have-so-much-space-above-the-letters/266/3
         // see https://glyphsapp.com/tutorials/vertical-metrics -> 'winAscent' and 'winDescent' are FONT RENDERING BOX, It is Not ascent or descent.
         // see https://social.msdn.microsoft.com/Forums/azure/en-US/7b21047f-bce9-41d3-ab39-55ab8850caca/how-to-get-glyphtypeface-line-gap?forum=wpf
-        // [TestMethod]
-        public void Height_OK_SameResultsAsGlyphTypeface()
+        [DataTestMethod]
+        [DataRow("Roboto-Regular.ttf", 1.0)]
+        [DataRow("RobotoMono-Regular.ttf", 1.31884765625)]
+        [DataRow("Lora-VariableFont_wght.ttf", 1.28)]
+        [DataRow("NotoSansJP-Regular.otf", 1.0)]
+        [DataRow("NotoSerifJP-Regular.otf", 1.0)]
+        public void Height_Equal_KnownValue(string fontFile, double height)
         {
-            foreach (string fontFile in _fontFiles)
-            {
-                var gt = _glyphTypefaceCache[fontFile];
-                var tf = _typefaceCache[fontFile];
-                Assert.AreEqual(tf.Height, gt.Height);
-            }
+            var tf = _typefaceCache[fontFile];
+            Assert.AreEqual(tf.Height, height);
         }
 
         [TestMethod]
-        public void XHeight_OK_SameResultsAsGlyphTypeface()
+        public void XHeight_Equal_GlyphTypefaceValue()
         {
             foreach (string fontFile in _fontFiles)
             {
@@ -123,7 +125,7 @@ namespace WaterTrans.GlyphLoader.Tests
         }
 
         [TestMethod]
-        public void GlyphCount_OK_SameResultsAsGlyphTypeface()
+        public void GlyphCount_Equal_GlyphTypefaceValue()
         {
             foreach (string fontFile in _fontFiles)
             {
@@ -134,7 +136,7 @@ namespace WaterTrans.GlyphLoader.Tests
         }
 
         [TestMethod]
-        public void AdvanceWidths_OK_SameResultsAsGlyphTypeface()
+        public void AdvanceWidths_Equal_GlyphTypefaceValue()
         {
             foreach (string fontFile in _fontFiles)
             {
@@ -153,7 +155,7 @@ namespace WaterTrans.GlyphLoader.Tests
 
         // The GlyphTypeface is returning an incorrect value. Check the trace message with your own eyes.
         // [TestMethod]
-        public void AdvanceHeights_OK_SameResultsAsGlyphTypeface()
+        public void AdvanceHeights_Equal_GlyphTypefaceValue()
         {
             foreach (string fontFile in _fontFiles)
             {
@@ -171,7 +173,7 @@ namespace WaterTrans.GlyphLoader.Tests
         }
 
         [TestMethod]
-        public void CharacterToGlyphMap_OK_SameResultsAsGlyphTypeface()
+        public void CharacterToGlyphMap_Equal_GlyphTypefaceValue()
         {
             foreach (string fontFile in _fontFiles)
             {
@@ -186,7 +188,7 @@ namespace WaterTrans.GlyphLoader.Tests
 
         // The GlyphTypeface is returning an incorrect value. Check the trace message with your own eyes.
         // [TestMethod]
-        public void LeftSideBearings_OK_SameResultsAsGlyphTypeface()
+        public void LeftSideBearings_Equal_GlyphTypefaceValue()
         {
             foreach (string fontFile in _fontFiles)
             {
@@ -205,7 +207,7 @@ namespace WaterTrans.GlyphLoader.Tests
 
         // The GlyphTypeface is returning an incorrect value. Check the trace message with your own eyes.
         // [TestMethod]
-        public void RightSideBearings_OK_SameResultsAsGlyphTypeface()
+        public void RightSideBearings_Equal_GlyphTypefaceValue()
         {
             foreach (string fontFile in _fontFiles)
             {
@@ -224,7 +226,7 @@ namespace WaterTrans.GlyphLoader.Tests
 
         // The GlyphTypeface is returning an incorrect value. Check the trace message with your own eyes.
         // [TestMethod]
-        public void TopSideBearings_OK_SameResultsAsGlyphTypeface()
+        public void TopSideBearings_Equal_GlyphTypefaceValue()
         {
             foreach (string fontFile in _fontFiles)
             {
@@ -243,7 +245,7 @@ namespace WaterTrans.GlyphLoader.Tests
 
         // The GlyphTypeface is returning an incorrect value. Check the trace message with your own eyes.
         // [TestMethod]
-        public void BottomSideBearings_OK_SameResultsAsGlyphTypeface()
+        public void BottomSideBearings_Equal_GlyphTypefaceValue()
         {
             foreach (string fontFile in _fontFiles)
             {
@@ -275,7 +277,7 @@ namespace WaterTrans.GlyphLoader.Tests
         }
 
         [TestMethod]
-        public void Constructor_OK_IfStreamCanSeekIsFalse()
+        public void Constructor_NoException_IfStreamCanSeekIsFalse()
         {
             string fontPath = Path.Combine(Environment.CurrentDirectory, "Roboto-Regular.ttf");
             var stream = new Mock<MemoryStream>(File.ReadAllBytes(fontPath)) { CallBase = true };
@@ -284,7 +286,7 @@ namespace WaterTrans.GlyphLoader.Tests
         }
 
         [TestMethod]
-        public void Constructor_OK_TrueTypeCollection()
+        public void Constructor_NoException_TrueTypeCollection()
         {
             string fontPath = @"C:\Windows\Fonts\msgothic.ttc";
             if (!File.Exists(fontPath))
@@ -298,7 +300,7 @@ namespace WaterTrans.GlyphLoader.Tests
         }
 
         [TestMethod]
-        public void GetGlyphOutline_OK_IfGlyphIndexOutOfRange()
+        public void GetGlyphOutline_ZeroGlyphIndex_IfGlyphIndexOutOfRange()
         {
             var gt = _glyphTypefaceCache[_fontFiles[0]];
             var tf = _typefaceCache[_fontFiles[0]];
@@ -312,7 +314,7 @@ namespace WaterTrans.GlyphLoader.Tests
         }
 
         [TestMethod]
-        public void GetGlyphOutline_OK_SameResultsAsGlyphTypeface()
+        public void GetGlyphOutline_Equal_GlyphTypefaceValue()
         {
             foreach (string fontFile in _fontFiles)
             {
@@ -354,8 +356,8 @@ namespace WaterTrans.GlyphLoader.Tests
         public void CreateGraphPaper()
         {
             // TODO analysis GLYF 935 Roboto
-            string fontFile = "Roboto-Regular.ttf";
-            ushort glyphIndex = 935;
+            string fontFile = "RobotoMono-Regular.ttf";
+            ushort glyphIndex = 50;
             System.Diagnostics.Trace.WriteLine(CreateGlyphComparison(fontFile, glyphIndex));
         }
 
