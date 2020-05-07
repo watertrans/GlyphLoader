@@ -28,6 +28,7 @@ namespace WaterTrans.GlyphLoader
         private IDictionary<ushort, double> _designUnitsAdvanceHeights;
         private IDictionary<ushort, double> _designUnitsTopSideBearings;
         private IDictionary<ushort, double> _designUnitsBottomSideBearings;
+        private IDictionary<ushort, double> _designUnitsDistancesFromHorizontalBaselineToBlackBoxBottom;
         private TableOfCMAP _tableOfCMAP;
         private TableOfMAXP _tableOfMAXP;
         private TableOfHEAD _tableOfHEAD;
@@ -268,6 +269,14 @@ namespace WaterTrans.GlyphLoader
         public IDictionary<ushort, double> BottomSideBearings
         {
             get { return _designUnitsBottomSideBearings; }
+        }
+
+        /// <summary>
+        /// Gets the offset value from the horizontal Western baseline to the bottom of the glyph black box for the glyphs represented by the Typeface object.
+        /// </summary>
+        public IDictionary<ushort, double> DistancesFromHorizontalBaselineToBlackBoxBottom
+        {
+            get { return _designUnitsDistancesFromHorizontalBaselineToBlackBoxBottom; }
         }
 
         /// <summary>
@@ -646,6 +655,7 @@ namespace WaterTrans.GlyphLoader
             var glyfRightSideBearings = new Dictionary<ushort, short>();
             var glyfTopSideBearings = new Dictionary<ushort, short>();
             var glyfBottomSideBearings = new Dictionary<ushort, short>();
+            var glyfDistancesFromHorizontalBaselineToBlackBoxBottom = new Dictionary<ushort, short>();
 
             for (ushort i = 0; i < _tableOfMAXP.NumGlyphs; i++)
             {
@@ -659,6 +669,7 @@ namespace WaterTrans.GlyphLoader
                     (glyph.YCoordinates.Count > 0 ? glyph.YCoordinates.Max() : glyph.YMax));
                 glyfBottomSideBearings[i] = (short)(Math.Abs(descender) +
                      (glyph.YCoordinates.Count > 0 ? glyph.YCoordinates.Min() : glyph.YMin));
+                glyfDistancesFromHorizontalBaselineToBlackBoxBottom[i] = (short)-(glyph.YCoordinates.Count > 0 ? glyph.YCoordinates.Min() : glyph.YMin);
             }
 
             _designUnitsAdvanceHeights = new GlyphMetricsDictionary<short>(glyfAdvancedHeights, _tableOfHEAD.UnitsPerEm);
@@ -666,6 +677,7 @@ namespace WaterTrans.GlyphLoader
             _designUnitsRightSideBearings = new GlyphMetricsDictionary<short>(glyfRightSideBearings, _tableOfHEAD.UnitsPerEm);
             _designUnitsTopSideBearings = new GlyphMetricsDictionary<short>(glyfTopSideBearings, _tableOfHEAD.UnitsPerEm);
             _designUnitsBottomSideBearings = new GlyphMetricsDictionary<short>(glyfBottomSideBearings, _tableOfHEAD.UnitsPerEm);
+            _designUnitsDistancesFromHorizontalBaselineToBlackBoxBottom = new GlyphMetricsDictionary<short>(glyfDistancesFromHorizontalBaselineToBlackBoxBottom, _tableOfHEAD.UnitsPerEm);
         }
 
         private void CalcCFFGlyphMetrics()
@@ -689,6 +701,8 @@ namespace WaterTrans.GlyphLoader
             var cffRightSideBearings = new Dictionary<ushort, short>();
             var cffTopSideBearings = new Dictionary<ushort, short>();
             var cffBottomSideBearings = new Dictionary<ushort, short>();
+            var cffDistancesFromHorizontalBaselineToBlackBoxBottom = new Dictionary<ushort, short>();
+
             for (ushort i = 0; i < _tableOfMAXP.NumGlyphs; i++)
             {
                 var charString = GetCharString(i);
@@ -698,6 +712,7 @@ namespace WaterTrans.GlyphLoader
                 cffRightSideBearings[i] = (short)(charString.Width - (charString.XMin + charString.XMax - charString.XMin));
                 cffTopSideBearings[i] = (short)(ascender - charString.YMax);
                 cffBottomSideBearings[i] = (short)(Math.Abs(descender) + charString.YMin);
+                cffDistancesFromHorizontalBaselineToBlackBoxBottom[i] = (short)-charString.YMin;
             }
             _designUnitsAdvanceWidths = new GlyphMetricsDictionary<short>(cffAdvancedWidths, _tableOfHEAD.UnitsPerEm);
             _designUnitsAdvanceHeights = new GlyphMetricsDictionary<short>(cffAdvancedHeights, _tableOfHEAD.UnitsPerEm);
@@ -705,6 +720,7 @@ namespace WaterTrans.GlyphLoader
             _designUnitsRightSideBearings = new GlyphMetricsDictionary<short>(cffRightSideBearings, _tableOfHEAD.UnitsPerEm);
             _designUnitsTopSideBearings = new GlyphMetricsDictionary<short>(cffTopSideBearings, _tableOfHEAD.UnitsPerEm);
             _designUnitsBottomSideBearings = new GlyphMetricsDictionary<short>(cffBottomSideBearings, _tableOfHEAD.UnitsPerEm);
+            _designUnitsDistancesFromHorizontalBaselineToBlackBoxBottom = new GlyphMetricsDictionary<short>(cffDistancesFromHorizontalBaselineToBlackBoxBottom, _tableOfHEAD.UnitsPerEm);
         }
 
         private void ReadTypeface(byte[] byteArray, long position)

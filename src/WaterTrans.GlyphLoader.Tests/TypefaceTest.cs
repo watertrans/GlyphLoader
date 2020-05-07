@@ -153,7 +153,7 @@ namespace WaterTrans.GlyphLoader.Tests
             }
         }
 
-        // The GlyphTypeface is returning an incorrect value. Check the trace message with your own eyes.
+        // The Typeface gives priority to the measured values, therefore provides different values ​​than GlyphTypeface.
         // [TestMethod]
         public void AdvanceHeights_Equal_GlyphTypefaceValue()
         {
@@ -186,7 +186,7 @@ namespace WaterTrans.GlyphLoader.Tests
             }
         }
 
-        // The GlyphTypeface is returning an incorrect value. Check the trace message with your own eyes.
+        // The Typeface gives priority to the measured values, therefore provides different values ​​than GlyphTypeface.
         // [TestMethod]
         public void LeftSideBearings_Equal_GlyphTypefaceValue()
         {
@@ -205,7 +205,7 @@ namespace WaterTrans.GlyphLoader.Tests
             }
         }
 
-        // The GlyphTypeface is returning an incorrect value. Check the trace message with your own eyes.
+        // The Typeface gives priority to the measured values, therefore provides different values ​​than GlyphTypeface.
         // [TestMethod]
         public void RightSideBearings_Equal_GlyphTypefaceValue()
         {
@@ -224,7 +224,7 @@ namespace WaterTrans.GlyphLoader.Tests
             }
         }
 
-        // The GlyphTypeface is returning an incorrect value. Check the trace message with your own eyes.
+        // The Typeface gives priority to the measured values, therefore provides different values ​​than GlyphTypeface.
         // [TestMethod]
         public void TopSideBearings_Equal_GlyphTypefaceValue()
         {
@@ -243,7 +243,7 @@ namespace WaterTrans.GlyphLoader.Tests
             }
         }
 
-        // The GlyphTypeface is returning an incorrect value. Check the trace message with your own eyes.
+        // The Typeface gives priority to the measured values, therefore provides different values ​​than GlyphTypeface.
         // [TestMethod]
         public void BottomSideBearings_Equal_GlyphTypefaceValue()
         {
@@ -258,6 +258,25 @@ namespace WaterTrans.GlyphLoader.Tests
                         System.Diagnostics.Trace.WriteLine(CreateGlyphComparison(fontFile, i));
                     }
                     // Assert.AreEqual(tf.BottomSideBearings[i], gt.BottomSideBearings[i], "Font:" + fontFile + " GlyphIndex:" + i);
+                }
+            }
+        }
+
+        // The Typeface gives priority to the measured values, therefore provides different values ​​than GlyphTypeface.
+        // [TestMethod]
+        public void DistancesFromHorizontalBaselineToBlackBoxBottom_Equal_GlyphTypefaceValue()
+        {
+            foreach (string fontFile in _fontFiles)
+            {
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+                for (ushort i = 0; i < tf.GlyphCount; i++)
+                {
+                    if (tf.DistancesFromHorizontalBaselineToBlackBoxBottom[i] != gt.DistancesFromHorizontalBaselineToBlackBoxBottom[i])
+                    {
+                        System.Diagnostics.Trace.WriteLine(CreateGlyphComparison(fontFile, i));
+                    }
+                    // Assert.AreEqual(tf.DistancesFromHorizontalBaselineToBlackBoxBottom[i], gt.DistancesFromHorizontalBaselineToBlackBoxBottom[i], "Font:" + fontFile + " GlyphIndex:" + i);
                 }
             }
         }
