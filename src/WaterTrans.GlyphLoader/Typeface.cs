@@ -3,12 +3,14 @@
 // </copyright>
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using WaterTrans.GlyphLoader.Geometry;
 using WaterTrans.GlyphLoader.Internal;
 using WaterTrans.GlyphLoader.Internal.AAT;
+using WaterTrans.GlyphLoader.Internal.OpenType;
 using WaterTrans.GlyphLoader.Internal.OpenType.CFF;
 using WaterTrans.GlyphLoader.Internal.SFNT;
 
@@ -22,6 +24,7 @@ namespace WaterTrans.GlyphLoader
         private readonly Dictionary<ushort, GlyphData> _glyphDataCache = new Dictionary<ushort, GlyphData>();
         private readonly Dictionary<ushort, CharString> _charStringCache = new Dictionary<ushort, CharString>();
         private readonly Dictionary<string, TableDirectory> _tableDirectories = new Dictionary<string, TableDirectory>(StringComparer.OrdinalIgnoreCase);
+        private readonly ConcurrentDictionary<string, IDictionary<ushort, ushort>> _singleSubstitutionMaps = new ConcurrentDictionary<string, IDictionary<ushort, ushort>>(StringComparer.OrdinalIgnoreCase);
         private IDictionary<ushort, double> _designUnitsAdvanceWidths;
         private IDictionary<ushort, double> _designUnitsLeftSideBearings;
         private IDictionary<ushort, double> _designUnitsRightSideBearings;
@@ -326,6 +329,60 @@ namespace WaterTrans.GlyphLoader
         internal ushort RangeShift { get; private set; }
 
         /// <summary>
+        /// Gets the single substitution map by the font 'GSUB' table. Use the default language system.
+        /// </summary>
+        /// <param name="scriptTag">The OpenType script identification tag.</param>
+        /// <param name="featureTag">The OpenType feature identification tag.</param>
+        /// <returns>The single substitution map.</returns>
+        public IDictionary<ushort, ushort> GetSingleSubstitutionMap(string scriptTag, string featureTag)
+        {
+            if (!_tableDirectories.ContainsKey(TableNames.GSUB))
+            {
+                throw new NotSupportedException("This font file does not contain the 'GSUB' table.");
+            }
+
+            return GetSingleSubstitutionMap(scriptTag, featureTag, GetDefaultLangSys(_tableOfGSUB, scriptTag));
+        }
+
+        /// <summary>
+        /// Gets the single substitution map by the font 'GSUB' table.
+        /// </summary>
+        /// <param name="scriptTag">The OpenType script identification tag.</param>
+        /// <param name="featureTag">The OpenType feature identification tag.</param>
+        /// <param name="langSysTag">The OpenType language system identification tag.</param>
+        /// <returns>The single substitution map.</returns>
+        public IDictionary<ushort, ushort> GetSingleSubstitutionMap(string scriptTag, string featureTag, string langSysTag)
+        {
+            if (!_tableDirectories.ContainsKey(TableNames.GSUB))
+            {
+                throw new NotSupportedException("This font file does not contain the 'GSUB' table.");
+            }
+
+            string key = scriptTag + "_" + featureTag + "_" + langSysTag;
+            if (_singleSubstitutionMaps.ContainsKey(key))
+            {
+                return _singleSubstitutionMaps[key];
+            }
+
+            int featureIndex = -1;
+            featureIndex = GetFeatureIndex(_tableOfGSUB, scriptTag, featureTag, langSysTag);
+            if (featureIndex == -1)
+            {
+                throw new NotSupportedException("This font file does not contain the argument glyph substitution.");
+            }
+
+            var singleSubstitutionMap = new Dictionary<ushort, ushort>();
+            foreach (ushort lookupIndex in _tableOfGSUB.FeatureList[featureIndex].LookupListIndex)
+            {
+                foreach (var ssb in _tableOfGSUB.LookupList[lookupIndex].SingleSubstitutionList)
+                {
+                    singleSubstitutionMap[ssb.GlyphIndex] = ssb.SubstitutionGlyphIndex;
+                }
+            }
+            return _singleSubstitutionMaps.GetOrAdd(key, new GlyphMapDictionary(singleSubstitutionMap));
+        }
+
+        /// <summary>
         /// Returns a Geometry value describing the path for a single glyph in the font.
         /// </summary>
         /// <param name="glyphIndex">The index of the glyph to get the outline for.</param>
@@ -347,6 +404,52 @@ namespace WaterTrans.GlyphLoader
 
             // TODO not supported format
             return new PathGeometry();
+        }
+
+        private string GetDefaultLangSys(CommonTable common, string scriptTag)
+        {
+            foreach (var st in common.ScriptList)
+            {
+                if (st.Tag == scriptTag)
+                {
+                    foreach (var record in st.LanguageSystemRecords)
+                    {
+                        if (record.IsDefault)
+                        {
+                            return record.Tag;
+                        }
+                    }
+                    break;
+                }
+            }
+            throw new NotSupportedException($"The default language system is not defined in {scriptTag}.");
+        }
+
+        private int GetFeatureIndex(CommonTable common, string scriptTag, string featureTag, string langSysTag)
+        {
+            int ret = -1;
+            foreach (ScriptTable st in common.ScriptList)
+            {
+                if (st.Tag == scriptTag)
+                {
+                    foreach (var langSys in st.LanguageSystemTables)
+                    {
+                        if (langSys.Tag == langSysTag)
+                        {
+                            foreach (var featureIndex in langSys.FeatureIndexList)
+                            {
+                                if (common.FeatureList[featureIndex].Tag == featureTag)
+                                {
+                                    return featureIndex;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            return ret;
         }
 
         private GlyphData GetGlyphData(ushort glyphIndex)

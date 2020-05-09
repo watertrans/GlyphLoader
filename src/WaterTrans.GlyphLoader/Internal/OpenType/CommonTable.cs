@@ -39,14 +39,14 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType
                 reader.Position = Offset + OffsetScriptList + sr.Offset;
 
                 sr.DefaultLanguageSystemOffset = reader.ReadUInt16();
-                sr.LanguageSystemOffset = reader.ReadUInt16();
+                sr.LanguageSystemCount = reader.ReadUInt16();
 
                 if (sr.DefaultLanguageSystemOffset != 0)
                 {
                     sr.LanguageSystemRecords.Add(new LanguageSystemRecord(true, sr.DefaultLanguageSystemOffset));
                 }
 
-                for (int i = 1; i <= sr.LanguageSystemOffset; i++)
+                for (int i = 1; i <= sr.LanguageSystemCount; i++)
                 {
                     sr.LanguageSystemRecords.Add(new LanguageSystemRecord(reader));
                 }
@@ -54,7 +54,7 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType
                 foreach (var ls in sr.LanguageSystemRecords)
                 {
                     reader.Position = Offset + OffsetScriptList + sr.Offset + ls.Offset;
-                    sr.LanguageSystemTables.Add(new LanguageSystemTable(reader));
+                    sr.LanguageSystemTables.Add(new LanguageSystemTable(reader, ls.Tag));
                 }
             }
 

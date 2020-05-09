@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace WaterTrans.GlyphLoader.Internal.OpenType
 {
     /// <summary>
-    /// The OpenType language sytem table.
+    /// The OpenType language system table.
     /// </summary>
     internal sealed class LanguageSystemTable
     {
@@ -15,16 +15,22 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType
         /// Initializes a new instance of the <see cref="LanguageSystemTable"/> class.
         /// </summary>
         /// <param name="reader">The <see cref="TypefaceReader"/>.</param>
-        internal LanguageSystemTable(TypefaceReader reader)
+        /// <param name="tag">The language system identification tag.</param>
+        internal LanguageSystemTable(TypefaceReader reader, string tag)
         {
             LookupOrder = reader.ReadUInt16();
             ReqFeatureIndex = reader.ReadUInt16();
             FeatureCount = reader.ReadUInt16();
+            Tag = tag;
             for (int i = 1; i <= FeatureCount; i++)
             {
                 FeatureIndexList.Add(reader.ReadUInt16());
             }
         }
+
+        /// <summary>Gets Tag.</summary>
+        /// <remarks>4-byte language system identification tag.</remarks>
+        public string Tag { get; }
 
         /// <summary>Gets LookupOrder.</summary>
         /// <remarks>Reserved for an offset to a reordering table.</remarks>

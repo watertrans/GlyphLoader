@@ -33,9 +33,9 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType
         /// <remarks>Offset to DefaultLanguageSystem table.— from beginning of Script table.</remarks>
         public ushort DefaultLanguageSystemOffset { get; internal set; }
 
-        /// <summary>Gets or Sets LanguageSystemOffset.</summary>
+        /// <summary>Gets or Sets LanguageSystemCount.</summary>
         /// <remarks>Number of LanguageSystemRecords for this script.— excluding the DefaultLangSys.</remarks>
-        public ushort LanguageSystemOffset { get; internal set; }
+        public ushort LanguageSystemCount { get; internal set; }
 
         /// <summary>Gets LanguageSystemRecords.</summary>
         /// <remarks>List of LanguageSystemRecord.</remarks>
