@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Text;
+using WaterTrans.GlyphLoader.Internal;
 
 namespace WaterTrans.GlyphLoader.Geometry
 {
@@ -32,6 +33,17 @@ namespace WaterTrans.GlyphLoader.Geometry
         public override string ToString()
         {
             return ToString(0, 0, Constants.RoundDigits);
+        }
+
+        /// <summary>
+        /// Returns a string that represents the current object.
+        /// </summary>
+        /// <param name="x">X coordinates offset.</param>
+        /// <param name="y">Y coordinates offset.</param>
+        /// <returns>A string that represents the current object.</returns>
+        public string ToString(double x, double y)
+        {
+            return ToString(x, y, Constants.RoundDigits);
         }
 
         /// <summary>

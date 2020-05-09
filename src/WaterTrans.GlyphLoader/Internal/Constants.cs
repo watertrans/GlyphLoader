@@ -2,7 +2,7 @@
 // © 2020 WaterTrans
 // </copyright>
 
-namespace WaterTrans.GlyphLoader
+namespace WaterTrans.GlyphLoader.Internal
 {
     /// <summary>
     /// The GlyphLoader internal constans.

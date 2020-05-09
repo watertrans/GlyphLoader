@@ -4,6 +4,7 @@
 
 using System;
 using System.Text;
+using WaterTrans.GlyphLoader.Internal;
 
 namespace WaterTrans.GlyphLoader.Geometry
 {
@@ -46,6 +47,12 @@ namespace WaterTrans.GlyphLoader.Geometry
         public override string ToString()
         {
             return ToString(0, 0, Constants.RoundDigits);
+        }
+
+        /// <inheritdoc />
+        public override string ToString(double x, double y)
+        {
+            return ToString(x, y, Constants.RoundDigits);
         }
 
         /// <inheritdoc />
