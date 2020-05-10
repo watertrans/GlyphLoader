@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using WaterTrans.GlyphLoader.Geometry;
@@ -13,6 +14,7 @@ using WaterTrans.GlyphLoader.Internal.AAT;
 using WaterTrans.GlyphLoader.Internal.OpenType;
 using WaterTrans.GlyphLoader.Internal.OpenType.CFF;
 using WaterTrans.GlyphLoader.Internal.SFNT;
+using WaterTrans.GlyphLoader.OpenType;
 
 namespace WaterTrans.GlyphLoader
 {
@@ -21,6 +23,8 @@ namespace WaterTrans.GlyphLoader
     /// </summary>
     public class Typeface
     {
+        private readonly Dictionary<string, FeatureRecord> _gsubFeatures = new Dictionary<string, FeatureRecord>();
+        private readonly Dictionary<string, FeatureRecord> _gposFeatures = new Dictionary<string, FeatureRecord>();
         private readonly Dictionary<ushort, GlyphData> _glyphDataCache = new Dictionary<ushort, GlyphData>();
         private readonly Dictionary<ushort, CharString> _charStringCache = new Dictionary<ushort, CharString>();
         private readonly Dictionary<string, TableDirectory> _tableDirectories = new Dictionary<string, TableDirectory>(StringComparer.OrdinalIgnoreCase);
@@ -299,6 +303,22 @@ namespace WaterTrans.GlyphLoader
         }
 
         /// <summary>
+        /// Gets the GSUB feature list.
+        /// </summary>
+        public ReadOnlyDictionary<string, FeatureRecord> GSUBFeatures
+        {
+            get { return new ReadOnlyDictionary<string, FeatureRecord>(_gsubFeatures); }
+        }
+
+        /// <summary>
+        /// Gets the GPOS feature list.
+        /// </summary>
+        public ReadOnlyDictionary<string, FeatureRecord> GPOSFeatures
+        {
+            get { return new ReadOnlyDictionary<string, FeatureRecord>(_gposFeatures); }
+        }
+
+        /// <summary>
         /// Gets sfnt Major Version.
         /// </summary>
         internal ushort SfntVersionMajor { get; private set; }
@@ -329,57 +349,55 @@ namespace WaterTrans.GlyphLoader
         internal ushort RangeShift { get; private set; }
 
         /// <summary>
-        /// Gets the single substitution map by the font 'GSUB' table. Use the default language system.
-        /// </summary>
-        /// <param name="scriptTag">The OpenType script identification tag.</param>
-        /// <param name="featureTag">The OpenType feature identification tag.</param>
-        /// <returns>The single substitution map.</returns>
-        public IDictionary<ushort, ushort> GetSingleSubstitutionMap(string scriptTag, string featureTag)
-        {
-            if (!_tableDirectories.ContainsKey(TableNames.GSUB))
-            {
-                throw new NotSupportedException("This font file does not contain the 'GSUB' table.");
-            }
-
-            return GetSingleSubstitutionMap(scriptTag, featureTag, GetDefaultLangSys(_tableOfGSUB, scriptTag));
-        }
-
-        /// <summary>
         /// Gets the single substitution map by the font 'GSUB' table.
         /// </summary>
-        /// <param name="scriptTag">The OpenType script identification tag.</param>
-        /// <param name="featureTag">The OpenType feature identification tag.</param>
-        /// <param name="langSysTag">The OpenType language system identification tag.</param>
+        /// <param name="id">The feture record id by GSUBFeatures method result.</param>
         /// <returns>The single substitution map.</returns>
-        public IDictionary<ushort, ushort> GetSingleSubstitutionMap(string scriptTag, string featureTag, string langSysTag)
+        public IDictionary<ushort, ushort> GetSingleSubstitutionMap(string id)
         {
             if (!_tableDirectories.ContainsKey(TableNames.GSUB))
             {
                 throw new NotSupportedException("This font file does not contain the 'GSUB' table.");
             }
 
-            string key = scriptTag + "_" + featureTag + "_" + langSysTag;
-            if (_singleSubstitutionMaps.ContainsKey(key))
+            var record = _gsubFeatures[id];
+            if (_singleSubstitutionMaps.ContainsKey(id))
             {
-                return _singleSubstitutionMaps[key];
-            }
-
-            int featureIndex = -1;
-            featureIndex = GetFeatureIndex(_tableOfGSUB, scriptTag, featureTag, langSysTag);
-            if (featureIndex == -1)
-            {
-                throw new NotSupportedException("This font file does not contain the argument glyph substitution.");
+                return _singleSubstitutionMaps[id];
             }
 
             var singleSubstitutionMap = new Dictionary<ushort, ushort>();
-            foreach (ushort lookupIndex in _tableOfGSUB.FeatureList[featureIndex].LookupListIndex)
+            foreach (ushort lookupIndex in _tableOfGSUB.FeatureList[record.FeatureIndex].LookupListIndex)
             {
                 foreach (var ssb in _tableOfGSUB.LookupList[lookupIndex].SingleSubstitutionList)
                 {
                     singleSubstitutionMap[ssb.GlyphIndex] = ssb.SubstitutionGlyphIndex;
                 }
             }
-            return _singleSubstitutionMaps.GetOrAdd(key, new GlyphMapDictionary(singleSubstitutionMap));
+            return _singleSubstitutionMaps.GetOrAdd(id, new GlyphMapDictionary(singleSubstitutionMap));
+        }
+
+        /// <summary>
+        /// Gets the single substitution map by the font 'GSUB' table.
+        /// </summary>
+        /// <param name="scriptTag">The OpenType script identification tag.</param>
+        /// <param name="langSysTag">The OpenType language system identification tag.</param>
+        /// <param name="featureTag">The OpenType feature identification tag.</param>
+        /// <returns>The single substitution map.</returns>
+        public IDictionary<ushort, ushort> GetSingleSubstitutionMap(string scriptTag, string langSysTag, string featureTag)
+        {
+            if (!_tableDirectories.ContainsKey(TableNames.GSUB))
+            {
+                throw new NotSupportedException("This font file does not contain the 'GSUB' table.");
+            }
+
+            string id = scriptTag + "." + langSysTag + "." + featureTag;
+            if (!_gsubFeatures.ContainsKey(id))
+            {
+                throw new NotSupportedException("This font file does not contain the argument glyph substitution.");
+            }
+
+            return GetSingleSubstitutionMap(id);
         }
 
         /// <summary>
@@ -404,25 +422,6 @@ namespace WaterTrans.GlyphLoader
 
             // TODO not supported format
             return new PathGeometry();
-        }
-
-        private string GetDefaultLangSys(CommonTable common, string scriptTag)
-        {
-            foreach (var st in common.ScriptList)
-            {
-                if (st.Tag == scriptTag)
-                {
-                    foreach (var record in st.LanguageSystemRecords)
-                    {
-                        if (record.IsDefault)
-                        {
-                            return record.Tag;
-                        }
-                    }
-                    break;
-                }
-            }
-            throw new NotSupportedException($"The default language system is not defined in {scriptTag}.");
         }
 
         private int GetFeatureIndex(CommonTable common, string scriptTag, string featureTag, string langSysTag)
@@ -827,6 +826,46 @@ namespace WaterTrans.GlyphLoader
             _designUnitsDistancesFromHorizontalBaselineToBlackBoxBottom = new GlyphMetricsDictionary<short>(cffDistancesFromHorizontalBaselineToBlackBoxBottom, _tableOfHEAD.UnitsPerEm);
         }
 
+        private void BuildGSUBFeatureRecord()
+        {
+            if (_tableOfGSUB == null)
+            {
+                return;
+            }
+
+            foreach (var st in _tableOfGSUB.ScriptList)
+            {
+                foreach (var ls in st.LanguageSystemTables)
+                {
+                    foreach (var featureIndex in ls.FeatureIndexList)
+                    {
+                        var featureRecord = new FeatureRecord(st.Tag, ls.Tag, _tableOfGSUB.FeatureList[featureIndex].Tag, featureIndex);
+                        _gsubFeatures[featureRecord.Id] = featureRecord;
+                    }
+                }
+            }
+        }
+
+        private void BuildGPOSFeatureRecord()
+        {
+            if (_tableOfGPOS == null)
+            {
+                return;
+            }
+
+            foreach (var st in _tableOfGPOS.ScriptList)
+            {
+                foreach (var ls in st.LanguageSystemTables)
+                {
+                    foreach (var featureIndex in ls.FeatureIndexList)
+                    {
+                        var featureRecord = new FeatureRecord(st.Tag, ls.Tag, _tableOfGPOS.FeatureList[featureIndex].Tag, featureIndex);
+                        _gposFeatures[featureRecord.Id] = featureRecord;
+                    }
+                }
+            }
+        }
+
         private void ReadTypeface(byte[] byteArray, long position)
         {
             var reader = new TypefaceReader(byteArray, position);
@@ -847,6 +886,8 @@ namespace WaterTrans.GlyphLoader
             ReadCFF(reader);
             ReadGLYF(reader);
             CalcGlyphMetrics();
+            BuildGSUBFeatureRecord();
+            BuildGPOSFeatureRecord();
         }
 
         private void ReadDirectory(TypefaceReader reader)

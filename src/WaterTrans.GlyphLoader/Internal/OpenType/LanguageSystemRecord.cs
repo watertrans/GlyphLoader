@@ -28,7 +28,7 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType
         internal LanguageSystemRecord(bool isDefault, ushort offset)
         {
             IsDefault = isDefault;
-            Tag = string.Empty;
+            Tag = "DFLT";
             Offset = offset;
         }
 
@@ -37,7 +37,7 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType
         public bool IsDefault { get; }
 
         /// <summary>Gets Tag.</summary>
-        /// <remarks>4-byte LangSysTag identifier.</remarks>
+        /// <remarks>LangSysTag identifier.</remarks>
         public string Tag { get; }
 
         /// <summary>Gets Offset.</summary>
