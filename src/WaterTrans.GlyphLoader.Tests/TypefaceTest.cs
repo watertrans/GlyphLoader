@@ -370,12 +370,28 @@ namespace WaterTrans.GlyphLoader.Tests
             }
         }
 
-        // For individual glyph analysis
         // [TestMethod]
+        public void OtherFont()
+        {
+            string fontFile = "FontAwesome.otf";
+            string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
+            using (var fontStream = File.OpenRead(fontPath))
+            {
+                var tf = new Typeface(fontStream);
+            }
+        }
+
+        // For individual glyph analysis
+        [TestMethod]
         public void CreateGraphPaper()
         {
-            string fontFile = "Roboto-Regular.ttf";
+            string fontFile = "NotoSansJP-Regular.otf";
             ushort glyphIndex = 935;
+            var tf = _typefaceCache[fontFile];
+            glyphIndex = tf.CharacterToGlyphMap[(char)'「'];
+            var features = tf.GSUBFeatures;
+            var mapper = tf.GetSingleSubstitutionMap("DFLT.DFLT.vert");
+            glyphIndex = mapper.ContainsKey(glyphIndex) ? mapper[glyphIndex] : glyphIndex;
             System.Diagnostics.Trace.WriteLine(CreateGlyphComparison(fontFile, glyphIndex));
         }
 
