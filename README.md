@@ -11,6 +11,10 @@ In WebAssembly environment, it can be used for application development using gly
 
 ## Release Notes
 
+### 1.0-beta
+
+- Add support for vertical writing in Japanese
+
 ### 1.0-alpha
 
 - Add support for TrueType glyph outline in glyf table
