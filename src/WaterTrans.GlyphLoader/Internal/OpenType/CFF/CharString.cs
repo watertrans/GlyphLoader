@@ -126,7 +126,7 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                 }
                 else if (data[index] == 12)
                 {
-                    Expressions.Add(new CharStringExpression(data[index + 1] + 1200, operand.Reverse().ToArray()));
+                    Expressions.Add(new CharStringExpression(data[index + 1] + 0x0c00, operand.Reverse().ToArray()));
                     operand.Clear();
                     advance = 2;
                 }

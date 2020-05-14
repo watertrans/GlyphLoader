@@ -2,6 +2,7 @@
 // © 2020 WaterTrans
 // </copyright>
 
+using System;
 using System.Collections.Generic;
 
 namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
@@ -53,6 +54,11 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
         /// <param name="operands">The array of operand.</param>
         internal CharStringExpression(int opCode, int[] operands)
         {
+            if (!Operators.ContainsKey(opCode))
+            {
+                throw new NotSupportedException($"It is not supported operator code  0x{opCode:x4}.");
+            }
+
             OpCode = opCode;
             Operator = Operators[opCode];
             Operands = operands;

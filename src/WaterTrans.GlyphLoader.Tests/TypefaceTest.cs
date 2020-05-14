@@ -375,23 +375,20 @@ namespace WaterTrans.GlyphLoader.Tests
         {
             string fontFile = "FontAwesome.otf";
             string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
+            
             using (var fontStream = File.OpenRead(fontPath))
             {
                 var tf = new Typeface(fontStream);
+                var gt = new GlyphTypeface(new Uri(fontPath));
             }
         }
 
         // For individual glyph analysis
-        [TestMethod]
+        // [TestMethod]
         public void CreateGraphPaper()
         {
-            string fontFile = "NotoSansJP-Regular.otf";
-            ushort glyphIndex = 935;
-            var tf = _typefaceCache[fontFile];
-            glyphIndex = tf.CharacterToGlyphMap[(char)'「'];
-            var features = tf.GSUBFeatures;
-            var mapper = tf.GetSingleSubstitutionMap("DFLT.DFLT.vert");
-            glyphIndex = mapper.ContainsKey(glyphIndex) ? mapper[glyphIndex] : glyphIndex;
+            string fontFile = "Roboto-Regular.ttf";
+            ushort glyphIndex = 58;
             System.Diagnostics.Trace.WriteLine(CreateGlyphComparison(fontFile, glyphIndex));
         }
 
@@ -475,7 +472,7 @@ namespace WaterTrans.GlyphLoader.Tests
                             b.Point1.X,
                             b.Point1.Y));
 
-                        glyphAnalysis.AppendLine(GetControlPoint(b.Point1.X,
+                        glyphAnalysis.AppendLine(GetControlPoint(b.Point2.X,
                             b.Point2.Y + tf.Baseline * graphEmSize,
                             b.Point2.X,
                             b.Point2.Y));
@@ -595,7 +592,7 @@ namespace WaterTrans.GlyphLoader.Tests
                             b.Point1.X,
                             b.Point1.Y));
 
-                        glyphAnalysis.AppendLine(GetControlPoint(b.Point1.X,
+                        glyphAnalysis.AppendLine(GetControlPoint(b.Point2.X,
                             b.Point2.Y + tf.Baseline * graphEmSize,
                             b.Point2.X,
                             b.Point2.Y));
