@@ -11,7 +11,6 @@ using System.Linq;
 using WaterTrans.GlyphLoader.Geometry;
 using WaterTrans.GlyphLoader.Internal;
 using WaterTrans.GlyphLoader.Internal.AAT;
-using WaterTrans.GlyphLoader.Internal.OpenType;
 using WaterTrans.GlyphLoader.Internal.OpenType.CFF;
 using WaterTrans.GlyphLoader.Internal.SFNT;
 using WaterTrans.GlyphLoader.OpenType;

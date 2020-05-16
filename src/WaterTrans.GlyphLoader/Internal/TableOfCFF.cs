@@ -4,7 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using WaterTrans.GlyphLoader.Geometry;
 using WaterTrans.GlyphLoader.Internal.OpenType.CFF;
 
 namespace WaterTrans.GlyphLoader.Internal

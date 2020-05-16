@@ -2,8 +2,6 @@
 // © 2020 WaterTrans
 // </copyright>
 
-using System.Collections.Generic;
-
 namespace WaterTrans.GlyphLoader.Internal.OpenType.GSUB
 {
     /// <summary>
