@@ -115,6 +115,7 @@ namespace WaterTrans.GlyphLoader.Tests
                                 ligatureGlyphList.Add(ligaMap[key]);
                                 i += j - 1;
                                 found = true;
+                                break;
                             }
                         }
                     }
