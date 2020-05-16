@@ -29,6 +29,7 @@ namespace WaterTrans.GlyphLoader
         private readonly Dictionary<ushort, CharString> _charStringCache = new Dictionary<ushort, CharString>();
         private readonly Dictionary<string, TableDirectory> _tableDirectories = new Dictionary<string, TableDirectory>(StringComparer.OrdinalIgnoreCase);
         private readonly ConcurrentDictionary<string, IDictionary<ushort, ushort>> _singleSubstitutionMaps = new ConcurrentDictionary<string, IDictionary<ushort, ushort>>(StringComparer.OrdinalIgnoreCase);
+        private readonly ConcurrentDictionary<string, IDictionary<ushort[], ushort>> _ligatureSubstitutionMaps = new ConcurrentDictionary<string, IDictionary<ushort[], ushort>>(StringComparer.OrdinalIgnoreCase);
         private IDictionary<ushort, double> _designUnitsAdvanceWidths;
         private IDictionary<ushort, double> _designUnitsLeftSideBearings;
         private IDictionary<ushort, double> _designUnitsRightSideBearings;
@@ -401,6 +402,58 @@ namespace WaterTrans.GlyphLoader
         }
 
         /// <summary>
+        /// Gets the ligature substitution map by the font 'GSUB' table.
+        /// </summary>
+        /// <param name="id">The feture record id by GSUBFeatures method result.</param>
+        /// <returns>The ligature substitution map.</returns>
+        public IDictionary<ushort[], ushort> GetLigatureSubstitutionMap(string id)
+        {
+            if (!_tableDirectories.ContainsKey(TableNames.GSUB))
+            {
+                throw new NotSupportedException("This font file does not contain the 'GSUB' table.");
+            }
+
+            var record = _gsubFeatures[id];
+            if (_ligatureSubstitutionMaps.ContainsKey(id))
+            {
+                return _ligatureSubstitutionMaps[id];
+            }
+
+            var ligatureSubstitutionMap = new Dictionary<ushort[], ushort>(new LigatureGlyphMapComparer());
+            foreach (ushort lookupIndex in _tableOfGSUB.FeatureList[record.FeatureIndex].LookupListIndex)
+            {
+                foreach (var ssb in _tableOfGSUB.LookupList[lookupIndex].LigatureSubstitutionList)
+                {
+                    ligatureSubstitutionMap[ssb.GlyphIndex] = ssb.SubstitutionGlyphIndex;
+                }
+            }
+            return _ligatureSubstitutionMaps.GetOrAdd(id, new LigatureGlyphMapDictionary(ligatureSubstitutionMap));
+        }
+
+        /// <summary>
+        /// Gets the ligature substitution map by the font 'GSUB' table.
+        /// </summary>
+        /// <param name="scriptTag">The OpenType script identification tag.</param>
+        /// <param name="langSysTag">The OpenType language system identification tag.</param>
+        /// <param name="featureTag">The OpenType feature identification tag.</param>
+        /// <returns>The ligature substitution map.</returns>
+        public IDictionary<ushort[], ushort> GetLigatureSubstitutionMap(string scriptTag, string langSysTag, string featureTag)
+        {
+            if (!_tableDirectories.ContainsKey(TableNames.GSUB))
+            {
+                throw new NotSupportedException("This font file does not contain the 'GSUB' table.");
+            }
+
+            string id = scriptTag + "." + langSysTag + "." + featureTag;
+            if (!_gsubFeatures.ContainsKey(id))
+            {
+                throw new NotSupportedException("This font file does not contain the argument glyph substitution.");
+            }
+
+            return GetLigatureSubstitutionMap(id);
+        }
+
+        /// <summary>
         /// Returns a Geometry value describing the path for a single glyph in the font.
         /// </summary>
         /// <param name="glyphIndex">The index of the glyph to get the outline for.</param>
@@ -422,33 +475,6 @@ namespace WaterTrans.GlyphLoader
 
             // TODO not supported format
             return new PathGeometry();
-        }
-
-        private int GetFeatureIndex(CommonTable common, string scriptTag, string featureTag, string langSysTag)
-        {
-            int ret = -1;
-            foreach (ScriptTable st in common.ScriptList)
-            {
-                if (st.Tag == scriptTag)
-                {
-                    foreach (var langSys in st.LanguageSystemTables)
-                    {
-                        if (langSys.Tag == langSysTag)
-                        {
-                            foreach (var featureIndex in langSys.FeatureIndexList)
-                            {
-                                if (common.FeatureList[featureIndex].Tag == featureTag)
-                                {
-                                    return featureIndex;
-                                }
-                            }
-                            break;
-                        }
-                    }
-                    break;
-                }
-            }
-            return ret;
         }
 
         private GlyphData GetGlyphData(ushort glyphIndex)

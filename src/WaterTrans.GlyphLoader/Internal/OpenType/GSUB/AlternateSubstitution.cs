@@ -16,7 +16,7 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.GSUB
         /// </summary>
         /// <param name="glyphIndex">Sets original glyph index.</param>
         /// <param name="substitutionGlyphIndex">Sets lookup glyph index.</param>
-        internal AlternateSubstitution(ushort glyphIndex, List<ushort> substitutionGlyphIndex)
+        internal AlternateSubstitution(ushort glyphIndex, ushort[] substitutionGlyphIndex)
         {
             GlyphIndex = glyphIndex;
             SubstitutionGlyphIndex = substitutionGlyphIndex;
@@ -26,6 +26,6 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.GSUB
         public ushort GlyphIndex { get; }
 
         /// <summary>Gets a lookup glyph index.</summary>
-        public List<ushort> SubstitutionGlyphIndex { get; } = new List<ushort>();
+        public ushort[] SubstitutionGlyphIndex { get; }
     }
 }

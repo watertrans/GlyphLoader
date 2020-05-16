@@ -86,7 +86,7 @@ namespace WaterTrans.GlyphLoader.Internal
                             {
                                 substitutionGlyphIndex.Add(reader.ReadUInt16());
                             }
-                            lt.MultipleSubstitutionList.Add(new MultipleSubstitution(coverage[i], substitutionGlyphIndex));
+                            lt.MultipleSubstitutionList.Add(new MultipleSubstitution(coverage[i], substitutionGlyphIndex.ToArray()));
                         }
                     }
                     else if (lt.LookupType == (ushort)LookupType.AlternateSubstitution)
@@ -112,7 +112,7 @@ namespace WaterTrans.GlyphLoader.Internal
                             {
                                 substitutionGlyphIndex.Add(reader.ReadUInt16());
                             }
-                            lt.AlternateSubstitutionList.Add(new AlternateSubstitution(coverage[i], substitutionGlyphIndex));
+                            lt.AlternateSubstitutionList.Add(new AlternateSubstitution(coverage[i], substitutionGlyphIndex.ToArray()));
                         }
                     }
                     else if (lt.LookupType == (ushort)LookupType.LigatureSubstitution)
@@ -149,7 +149,7 @@ namespace WaterTrans.GlyphLoader.Internal
                                 {
                                     glyphIndex.Add(reader.ReadUInt16());
                                 }
-                                lt.LigatureSubstitutionList.Add(new LigatureSubstitution(glyphIndex, substitutionGlyphIndex));
+                                lt.LigatureSubstitutionList.Add(new LigatureSubstitution(glyphIndex.ToArray(), substitutionGlyphIndex));
                             }
                         }
                     }
