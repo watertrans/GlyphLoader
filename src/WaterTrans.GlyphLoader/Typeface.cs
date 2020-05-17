@@ -18,7 +18,7 @@ using WaterTrans.GlyphLoader.OpenType;
 namespace WaterTrans.GlyphLoader
 {
     /// <summary>
-    /// Main class for WaterTrans.GlyphLoader.
+    /// Main class for GlyphLoader.
     /// </summary>
     public class Typeface
     {
@@ -29,6 +29,8 @@ namespace WaterTrans.GlyphLoader
         private readonly Dictionary<string, TableDirectory> _tableDirectories = new Dictionary<string, TableDirectory>(StringComparer.OrdinalIgnoreCase);
         private readonly ConcurrentDictionary<string, IDictionary<ushort, ushort>> _singleSubstitutionMaps = new ConcurrentDictionary<string, IDictionary<ushort, ushort>>(StringComparer.OrdinalIgnoreCase);
         private readonly ConcurrentDictionary<string, IDictionary<ushort[], ushort>> _ligatureSubstitutionMaps = new ConcurrentDictionary<string, IDictionary<ushort[], ushort>>(StringComparer.OrdinalIgnoreCase);
+        private readonly ConcurrentDictionary<string, IDictionary<ushort, ushort[]>> _multipleSubstitutionMaps = new ConcurrentDictionary<string, IDictionary<ushort, ushort[]>>(StringComparer.OrdinalIgnoreCase);
+        private readonly ConcurrentDictionary<string, IDictionary<ushort, ushort[]>> _alternateSubstitutionMaps = new ConcurrentDictionary<string, IDictionary<ushort, ushort[]>>(StringComparer.OrdinalIgnoreCase);
         private IDictionary<ushort, double> _designUnitsAdvanceWidths;
         private IDictionary<ushort, double> _designUnitsLeftSideBearings;
         private IDictionary<ushort, double> _designUnitsRightSideBearings;
@@ -450,6 +452,110 @@ namespace WaterTrans.GlyphLoader
             }
 
             return GetLigatureSubstitutionMap(id);
+        }
+
+        /// <summary>
+        /// Gets the multiple substitution map by the font 'GSUB' table.
+        /// </summary>
+        /// <param name="id">The feture record id by GSUBFeatures method result.</param>
+        /// <returns>The multiple substitution map.</returns>
+        public IDictionary<ushort, ushort[]> GetMultipleSubstitutionMap(string id)
+        {
+            if (!_tableDirectories.ContainsKey(TableNames.GSUB))
+            {
+                throw new NotSupportedException("This font file does not contain the 'GSUB' table.");
+            }
+
+            var record = _gsubFeatures[id];
+            if (_multipleSubstitutionMaps.ContainsKey(id))
+            {
+                return _multipleSubstitutionMaps[id];
+            }
+
+            var multipleSubstitutionMap = new Dictionary<ushort, ushort[]>();
+            foreach (ushort lookupIndex in _tableOfGSUB.FeatureList[record.FeatureIndex].LookupListIndex)
+            {
+                foreach (var ssb in _tableOfGSUB.LookupList[lookupIndex].MultipleSubstitutionList)
+                {
+                    multipleSubstitutionMap[ssb.GlyphIndex] = ssb.SubstitutionGlyphIndex;
+                }
+            }
+            return _multipleSubstitutionMaps.GetOrAdd(id, new MultipleGlyphMapDictionary(multipleSubstitutionMap));
+        }
+
+        /// <summary>
+        /// Gets the multiple substitution map by the font 'GSUB' table.
+        /// </summary>
+        /// <param name="scriptTag">The OpenType script identification tag.</param>
+        /// <param name="langSysTag">The OpenType language system identification tag.</param>
+        /// <param name="featureTag">The OpenType feature identification tag.</param>
+        /// <returns>The multiple substitution map.</returns>
+        public IDictionary<ushort, ushort[]> GetMultipleSubstitutionMap(string scriptTag, string langSysTag, string featureTag)
+        {
+            if (!_tableDirectories.ContainsKey(TableNames.GSUB))
+            {
+                throw new NotSupportedException("This font file does not contain the 'GSUB' table.");
+            }
+
+            string id = scriptTag + "." + langSysTag + "." + featureTag;
+            if (!_gsubFeatures.ContainsKey(id))
+            {
+                throw new NotSupportedException("This font file does not contain the argument glyph substitution.");
+            }
+
+            return GetMultipleSubstitutionMap(id);
+        }
+
+        /// <summary>
+        /// Gets the alternate substitution map by the font 'GSUB' table.
+        /// </summary>
+        /// <param name="id">The feture record id by GSUBFeatures method result.</param>
+        /// <returns>The alternate substitution map.</returns>
+        public IDictionary<ushort, ushort[]> GetAlternateSubstitutionMap(string id)
+        {
+            if (!_tableDirectories.ContainsKey(TableNames.GSUB))
+            {
+                throw new NotSupportedException("This font file does not contain the 'GSUB' table.");
+            }
+
+            var record = _gsubFeatures[id];
+            if (_alternateSubstitutionMaps.ContainsKey(id))
+            {
+                return _alternateSubstitutionMaps[id];
+            }
+
+            var alternateSubstitutionMap = new Dictionary<ushort, ushort[]>();
+            foreach (ushort lookupIndex in _tableOfGSUB.FeatureList[record.FeatureIndex].LookupListIndex)
+            {
+                foreach (var ssb in _tableOfGSUB.LookupList[lookupIndex].AlternateSubstitutionList)
+                {
+                    alternateSubstitutionMap[ssb.GlyphIndex] = ssb.SubstitutionGlyphIndex;
+                }
+            }
+            return _alternateSubstitutionMaps.GetOrAdd(id, new MultipleGlyphMapDictionary(alternateSubstitutionMap));
+        }
+
+        /// <summary>
+        /// Gets the alternate substitution map by the font 'GSUB' table.
+        /// </summary>
+        /// <param name="scriptTag">The OpenType script identification tag.</param>
+        /// <param name="langSysTag">The OpenType language system identification tag.</param>
+        /// <param name="featureTag">The OpenType feature identification tag.</param>
+        /// <returns>The alternate substitution map.</returns>
+        public IDictionary<ushort, ushort[]> GetAlternateSubstitutionMap(string scriptTag, string langSysTag, string featureTag)
+        {
+            if (!_tableDirectories.ContainsKey(TableNames.GSUB))
+            {
+                throw new NotSupportedException("This font file does not contain the 'GSUB' table.");
+            }
+
+            string id = scriptTag + "." + langSysTag + "." + featureTag;
+            if (!_gsubFeatures.ContainsKey(id))
+            {
+                throw new NotSupportedException("This font file does not contain the argument glyph substitution.");
+            }
+
+            return GetAlternateSubstitutionMap(id);
         }
 
         /// <summary>
