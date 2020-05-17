@@ -31,6 +31,7 @@ namespace WaterTrans.GlyphLoader
         private readonly ConcurrentDictionary<string, IDictionary<ushort[], ushort>> _ligatureSubstitutionMaps = new ConcurrentDictionary<string, IDictionary<ushort[], ushort>>(StringComparer.OrdinalIgnoreCase);
         private readonly ConcurrentDictionary<string, IDictionary<ushort, ushort[]>> _multipleSubstitutionMaps = new ConcurrentDictionary<string, IDictionary<ushort, ushort[]>>(StringComparer.OrdinalIgnoreCase);
         private readonly ConcurrentDictionary<string, IDictionary<ushort, ushort[]>> _alternateSubstitutionMaps = new ConcurrentDictionary<string, IDictionary<ushort, ushort[]>>(StringComparer.OrdinalIgnoreCase);
+        private readonly ConcurrentDictionary<string, IDictionary<ushort, Adjustment>> _singleAdjustments = new ConcurrentDictionary<string, IDictionary<ushort, Adjustment>>(StringComparer.OrdinalIgnoreCase);
         private IDictionary<ushort, double> _designUnitsAdvanceWidths;
         private IDictionary<ushort, double> _designUnitsLeftSideBearings;
         private IDictionary<ushort, double> _designUnitsRightSideBearings;
@@ -556,6 +557,63 @@ namespace WaterTrans.GlyphLoader
             }
 
             return GetAlternateSubstitutionMap(id);
+        }
+
+        /// <summary>
+        /// Gets the single adjustment by the font 'GPOS' table.
+        /// </summary>
+        /// <param name="id">The feture record id by GPOSFeatures method result.</param>
+        /// <returns>The single adjustment.</returns>
+        public IDictionary<ushort, Adjustment> GetSingleAdjustment(string id)
+        {
+            if (!_tableDirectories.ContainsKey(TableNames.GPOS))
+            {
+                throw new NotSupportedException("This font file does not contain the 'GPOS' table.");
+            }
+
+            var record = _gposFeatures[id];
+            if (_singleAdjustments.ContainsKey(id))
+            {
+                return _singleAdjustments[id];
+            }
+
+            var singleAdjustment = new Dictionary<ushort, Adjustment>();
+            foreach (ushort lookupIndex in _tableOfGPOS.FeatureList[record.FeatureIndex].LookupListIndex)
+            {
+                foreach (var item in _tableOfGPOS.LookupList[lookupIndex].SingleAdjustmentList)
+                {
+                    singleAdjustment[item.GlyphIndex] = new Adjustment(
+                        item.ValueRecord.XPlacement,
+                        item.ValueRecord.YPlacement,
+                        item.ValueRecord.XAdvance,
+                        item.ValueRecord.YAdvance,
+                        _tableOfHEAD.UnitsPerEm);
+                }
+            }
+            return _singleAdjustments.GetOrAdd(id, new ReadOnlyDictionary<ushort, Adjustment>(singleAdjustment));
+        }
+
+        /// <summary>
+        /// Gets the single adjustment by the font 'GPOS' table.
+        /// </summary>
+        /// <param name="scriptTag">The OpenType script identification tag.</param>
+        /// <param name="langSysTag">The OpenType language system identification tag.</param>
+        /// <param name="featureTag">The OpenType feature identification tag.</param>
+        /// <returns>The single adjustment.</returns>
+        public IDictionary<ushort, Adjustment> GetSingleAdjustment(string scriptTag, string langSysTag, string featureTag)
+        {
+            if (!_tableDirectories.ContainsKey(TableNames.GPOS))
+            {
+                throw new NotSupportedException("This font file does not contain the 'GPOS' table.");
+            }
+
+            string id = scriptTag + "." + langSysTag + "." + featureTag;
+            if (!_gposFeatures.ContainsKey(id))
+            {
+                throw new NotSupportedException("This font file does not contain the argument glyph positioning.");
+            }
+
+            return GetSingleAdjustment(id);
         }
 
         /// <summary>
