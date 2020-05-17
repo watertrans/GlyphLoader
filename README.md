@@ -11,6 +11,10 @@ In WebAssembly environment, it can be used for application development using gly
 
 ## Release Notes
 
+### 1.0-beta2
+
+- Add support for GSUB ligature, alternate, multiple substitution
+
 ### 1.0-beta
 
 - Add support for vertical writing in Japanese
