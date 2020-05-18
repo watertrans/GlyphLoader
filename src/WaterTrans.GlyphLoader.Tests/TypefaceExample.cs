@@ -82,6 +82,112 @@ namespace WaterTrans.GlyphLoader.Tests
         }
 
         [TestMethod]
+        public void CreatePairAdjustmentGlyphOutline()
+        {
+            string fontPath = System.IO.Path.Combine(Environment.CurrentDirectory, "Lora-VariableFont_wght.ttf");
+            Typeface tf;
+            using (var fontStream = System.IO.File.OpenRead(fontPath))
+            {
+                // Initialize stream only
+                tf = new Typeface(fontStream);
+            }
+
+            // Get kern glyph adjustment (https://docs.microsoft.com/en-us/typography/opentype/spec/features_ko#tag-kern)
+            var kern = tf.GetPairAdjustmentMap("DFLT.DFLT.kern");
+
+            var glyphList = new List<ushort>();
+
+            string kerningText = "You Won.";
+
+            foreach (char c in kerningText)
+            {
+                // Get glyph index
+                ushort glyphIndex = tf.CharacterToGlyphMap[(int)c];
+                glyphList.Add(glyphIndex);
+            }
+
+            var svg = new System.Text.StringBuilder();
+            double unit = 100;
+            double x = 20;
+            double y = 20;
+
+
+            svg.AppendLine("<svg width='540' height='140' viewBox='0 0 540 140' xmlns='http://www.w3.org/2000/svg' version='1.1'>");
+
+            bool secondKern = false;
+            double secondXPlacement = 0;
+            double secondXAdvance = 0;
+
+            for (int i = 0; i < glyphList.Count; i++)
+            {
+                ushort glyphIndex = glyphList[i];
+
+                // Get glyph outline
+                var geometry = tf.GetGlyphOutline(glyphIndex, unit);
+
+                // Get advanced width
+                double advanceWidth = tf.AdvanceWidths[glyphIndex] * unit;
+
+                // Get advanced height
+                double advanceHeight = tf.AdvanceHeights[glyphIndex] * unit;
+
+                // Get baseline
+                double baseline = tf.Baseline * unit;
+
+                // Get kern adjustment
+                ushort[] key;
+                if (i < glyphList.Count - 1)
+                {
+                    key = new ushort[] { glyphList[i], glyphList[i + 1] };
+                }
+                else
+                {
+                    key = new ushort[] { glyphList[i] };
+                }
+
+                double xPlacement = 0;
+                if (secondKern)
+                {
+                    xPlacement = secondXPlacement;
+                    advanceWidth += secondXAdvance;
+                    secondKern = false;
+                }
+
+                if (kern.ContainsKey(key))
+                {
+                    var adjustment = kern[key];
+                    xPlacement += adjustment.First.XPlacement * unit;
+                    advanceWidth += adjustment.First.XAdvance * unit;
+                    secondXPlacement = adjustment.Second.XPlacement * unit;
+                    secondXAdvance = adjustment.Second.XAdvance * unit;
+                    secondKern = true;
+                }
+
+                // Convert to path mini-language
+                string miniLanguage = geometry.Figures.ToString(x + xPlacement, y + baseline);
+
+                svg.AppendLine($"<path d='{miniLanguage}' fill='black' stroke='black' stroke-width='0' />");
+                x += advanceWidth;
+            }
+
+            svg.AppendLine("</svg>");
+            System.Diagnostics.Trace.WriteLine(svg.ToString());
+            /* Result
+            <svg width='540' height='140' viewBox='0 0 540 140' xmlns='http://www.w3.org/2000/svg' version='1.1'>
+            <path d='M65,120.6L41.5,120.6L41.5,117.3Q45.3,117.1 46.65,115.5Q48,113.9 48.15,111.15Q48.3,108.4 48.3,105L48.3,105L48.4,93.6L31,66.1Q28.5,62.1 27.25,59.4Q26,56.7 25.6,54.8L25.6,54.8Q24,54.9 22.5,54.9Q21,54.9 19.4,55L19.4,55L19.4,50.6L45.2,50.6L45.2,53.9Q40.6,53.9 38.8,55.3Q37,56.7 37.45,59.15Q37.9,61.6 39.9,64.8L39.9,64.8L47.9,77.4Q48.8,78.8 49.8,80.3Q50.8,81.8 51.85,83.35Q52.9,84.9 54.1,86.6L54.1,86.6L54.3,86.6Q55.4,84.4 56.5,82.35Q57.6,80.3 58.6,78.4L58.6,78.4L67.1,62.3Q67.6,61.3 68.35,59.95Q69.1,58.6 70,57.15Q70.9,55.7 71.9,54.7L71.9,54.7Q70,54.8 68,54.85Q66,54.9 64,55L64,55L64,50.6L84.4,50.6L84.4,53.9Q79.5,54.2 76.35,57.3Q73.2,60.4 69.7,66.8L69.7,66.8Q66.3,73.2 63.15,79.1Q60,85 57.1,90.6L57.1,90.6Q57.1,92.4 57.05,95.4Q57,98.4 57,101.45Q57,104.5 57,106.6Q57,108.7 57,108.7L57,108.7Q57,111.4 56.95,113.35Q56.9,115.3 56.7,116.6L56.7,116.6Q58.8,116.5 60.85,116.4Q62.9,116.3 65,116.2L65,116.2L65,120.6z ' fill='black' stroke='black' stroke-width='0' />
+            <path d='M105.6,122.2L105.6,122.2Q98.6,122.2 92.9,118.95Q87.2,115.7 83.85,109.95Q80.5,104.2 80.5,96.8L80.5,96.8Q80.5,88.9 83.8,82.6Q87.1,76.3 92.8,72.65Q98.5,69 105.6,69L105.6,69Q112.6,69 118.3,72.35Q124,75.7 127.4,81.4Q130.8,87.1 130.8,94.4L130.8,94.4Q130.8,102.1 127.45,108.45Q124.1,114.8 118.4,118.5Q112.7,122.2 105.6,122.2z M106.4,118.2L106.4,118.2Q111.7,118.2 114.8,115.2Q117.9,112.2 119.25,107.4Q120.6,102.6 120.6,97.3L120.6,97.3Q120.6,92.8 119.75,88.45Q118.9,84.1 117.1,80.55Q115.3,77 112.45,74.9Q109.6,72.8 105.6,72.8L105.6,72.8Q100.4,72.8 97.1,75.8Q93.8,78.8 92.25,83.6Q90.7,88.4 90.7,93.9L90.7,93.9Q90.7,100.1 92.4,105.65Q94.1,111.2 97.6,114.7Q101.1,118.2 106.4,118.2z ' fill='black' stroke='black' stroke-width='0' />
+            <path d='M160.4,122.2L160.4,122.2Q155,122.2 151.35,120.2Q147.7,118.2 145.85,113.4Q144,108.6 144,100.4L144,100.4L144,82.6Q144,81 144.05,79.4Q144.1,77.8 144.4,76.1L144.4,76.1Q142.7,76.2 140.95,76.25Q139.2,76.3 137.5,76.4L137.5,76.4L137.5,72.3L140.6,72.3Q144.9,72.3 146.85,71.45Q148.8,70.6 149.9,69.6L149.9,69.6L152.8,69.6L152.8,100.1Q152.8,108.7 155.25,112.95Q157.7,117.2 163.6,117.1L163.6,117.1Q167.4,117 170.85,114.75Q174.3,112.5 176.4,109.4L176.4,109.4L176.4,83.7Q176.4,81.3 176.5,79.55Q176.6,77.8 176.9,76.1L176.9,76.1Q175.1,76.2 173.3,76.25Q171.5,76.3 169.7,76.4L169.7,76.4L169.7,72.3L172.8,72.3Q177.1,72.3 179.05,71.45Q181,70.6 182.1,69.6L182.1,69.6L185,69.6L184.9,107.4Q184.9,109 184.8,111.9Q184.7,114.8 184.5,116.8L184.5,116.8Q186.3,116.7 188.1,116.6Q189.9,116.5 191.7,116.4L191.7,116.4L191.7,120.6L177.4,120.6Q177.1,118.9 176.95,117.4Q176.8,115.9 176.7,114.6L176.7,114.6Q173.6,117.7 169.2,119.95Q164.8,122.2 160.4,122.2z ' fill='black' stroke='black' stroke-width='0' />
+            <path d='' fill='black' stroke='black' stroke-width='0' />
+            <path d='M252.2,121.6L249.3,121.6L231.4,68.4Q229.7,63.1 228.7,60.05Q227.7,57 227.2,54.8L227.2,54.8Q225.8,54.9 224.4,54.9Q223,54.9 221.6,55L221.6,55L221.6,50.6L245.9,50.6L245.9,53.9Q240.1,54.2 238.95,56.5Q237.8,58.8 239.4,64.8L239.4,64.8Q241.1,71.4 243.1,76.7Q245.1,82 247,88.1L247,88.1Q248.4,92.6 249.85,96.4Q251.3,100.2 252.8,104.9L252.8,104.9L253,104.9Q253.5,103.2 254.05,101.3Q254.6,99.4 255.2,97.6Q255.8,95.8 256.3,94.25Q256.8,92.7 257.1,91.7L257.1,91.7Q259.9,82.8 262.65,74.45Q265.4,66.1 267.5,59.75Q269.6,53.4 270.4,50.4L270.4,50.4L273.6,50.4Q274.5,53.7 276.2,58.8Q277.9,63.9 279.8,69.5Q281.7,75.1 283.35,80.1Q285,85.1 286,88.1L286,88.1Q287.4,92.6 288.95,97Q290.5,101.4 291.8,106.1L291.8,106.1L292.1,106.1Q293,103.2 294.05,99.9Q295.1,96.6 296.2,93.2L296.2,93.2Q298.8,85.8 300.45,80.8Q302.1,75.8 303.15,72.5Q304.2,69.2 304.95,66.75Q305.7,64.3 306.5,62L306.5,62Q307.1,60.3 307.85,58.35Q308.6,56.4 309.6,54.7L309.6,54.7Q307.6,54.8 305.6,54.85Q303.6,54.9 301.6,55L301.6,55L301.6,50.6L321.9,50.6L321.9,53.9Q318.5,54.3 316.55,55.4Q314.6,56.5 313.1,59.5Q311.6,62.5 309.5,68.7L309.5,68.7Q304.9,82.3 300.55,95.45Q296.2,108.6 291.5,121.6L291.5,121.6L288.5,121.6L273.3,78.2Q272.4,75.6 271.55,73.1Q270.7,70.6 269.8,68.1L269.8,68.1Q269,70.6 268.15,73.1Q267.3,75.6 266.5,78.1L266.5,78.1L252.2,121.6z ' fill='black' stroke='black' stroke-width='0' />
+            <path d='M345.7,122.2L345.7,122.2Q338.7,122.2 333,118.95Q327.3,115.7 323.95,109.95Q320.6,104.2 320.6,96.8L320.6,96.8Q320.6,88.9 323.9,82.6Q327.2,76.3 332.9,72.65Q338.6,69 345.7,69L345.7,69Q352.7,69 358.4,72.35Q364.1,75.7 367.5,81.4Q370.9,87.1 370.9,94.4L370.9,94.4Q370.9,102.1 367.55,108.45Q364.2,114.8 358.5,118.5Q352.8,122.2 345.7,122.2z M346.5,118.2L346.5,118.2Q351.8,118.2 354.9,115.2Q358,112.2 359.35,107.4Q360.7,102.6 360.7,97.3L360.7,97.3Q360.7,92.8 359.85,88.45Q359,84.1 357.2,80.55Q355.4,77 352.55,74.9Q349.7,72.8 345.7,72.8L345.7,72.8Q340.5,72.8 337.2,75.8Q333.9,78.8 332.35,83.6Q330.8,88.4 330.8,93.9L330.8,93.9Q330.8,100.1 332.5,105.65Q334.2,111.2 337.7,114.7Q341.2,118.2 346.5,118.2z ' fill='black' stroke='black' stroke-width='0' />
+            <path d='M399.8,120.6L379.4,120.6L379.4,117.6Q382.5,117.6 383.7,116.05Q384.9,114.5 385.1,111.75Q385.3,109 385.3,105.4L385.3,105.4L385.4,82.6Q385.4,81 385.45,79.4Q385.5,77.8 385.8,76.1L385.8,76.1Q384,76.2 382.25,76.3Q380.5,76.4 378.7,76.5L378.7,76.5L378.7,72.3Q383.1,72.3 385.35,71.9Q387.6,71.5 388.7,70.9Q389.8,70.3 390.5,69.6L390.5,69.6L393.4,69.6Q393.5,70.3 393.55,71.2Q393.6,72.1 393.7,73.2Q393.8,74.3 393.8,75.7L393.8,75.7Q396,73.8 398.65,72.3Q401.3,70.8 404.25,69.9Q407.2,69 410.1,69L410.1,69Q418.8,69 422.8,74.45Q426.8,79.9 426.8,91.4L426.8,91.4L426.8,110Q426.8,112 426.75,113.55Q426.7,115.1 426.4,116.8L426.4,116.8Q428,116.7 429.55,116.65Q431.1,116.6 432.7,116.5L432.7,116.5L432.7,120.6L412.3,120.6L412.3,117.6Q415.4,117.6 416.6,116.05Q417.8,114.5 418,111.75Q418.2,109 418.2,105.4L418.2,105.4L418.2,91.4Q418.1,82.8 415.35,78.4Q412.6,74 406.7,74.1L406.7,74.1Q403.1,74.2 399.65,76Q396.2,77.8 393.9,80.6L393.9,80.6Q394,81.4 394,82.4Q394,83.4 394,84.5L394,84.5L393.9,110Q393.9,112 393.85,113.55Q393.8,115.1 393.5,116.8L393.5,116.8Q395.1,116.7 396.65,116.65Q398.2,116.6 399.8,116.5L399.8,116.5L399.8,120.6z ' fill='black' stroke='black' stroke-width='0' />
+            <path d='M447.9,122.2L447.9,122.2Q445.6,122.2 443.85,120.35Q442.1,118.5 442.1,115.8L442.1,115.8Q442.1,113.1 443.9,111.2Q445.7,109.3 448,109.3L448,109.3Q450.5,109.3 452.15,111.2Q453.8,113.1 453.8,115.8L453.8,115.8Q453.8,118.5 452,120.35Q450.2,122.2 447.9,122.2z ' fill='black' stroke='black' stroke-width='0' />
+            </svg>
+            */
+        }
+
+
+        [TestMethod]
         public void CreateAlternateGlyphOutline()
         {
             string fontPath = System.IO.Path.Combine(Environment.CurrentDirectory, "NotoSerifJP-Regular.otf");
@@ -169,13 +275,13 @@ namespace WaterTrans.GlyphLoader.Tests
             double unit = 100;
             double x = 20;
             double y = 20;
-            string japaneseText = "fluent office";
+            string ligatureText = "fluent office";
 
             svg.AppendLine("<svg width='690' height='140' viewBox='0 0 690 140' xmlns='http://www.w3.org/2000/svg' version='1.1'>");
 
             var glyphList = new List<ushort>();
 
-            foreach (char c in japaneseText)
+            foreach (char c in ligatureText)
             {
                 // Get glyph index
                 ushort glyphIndex = tf.CharacterToGlyphMap[(int)c];

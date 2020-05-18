@@ -32,6 +32,7 @@ namespace WaterTrans.GlyphLoader
         private readonly ConcurrentDictionary<string, IDictionary<ushort, ushort[]>> _multipleSubstitutionMaps = new ConcurrentDictionary<string, IDictionary<ushort, ushort[]>>(StringComparer.OrdinalIgnoreCase);
         private readonly ConcurrentDictionary<string, IDictionary<ushort, ushort[]>> _alternateSubstitutionMaps = new ConcurrentDictionary<string, IDictionary<ushort, ushort[]>>(StringComparer.OrdinalIgnoreCase);
         private readonly ConcurrentDictionary<string, IDictionary<ushort, Adjustment>> _singleAdjustmentMaps = new ConcurrentDictionary<string, IDictionary<ushort, Adjustment>>(StringComparer.OrdinalIgnoreCase);
+        private readonly ConcurrentDictionary<string, IDictionary<ushort[], PairAdjustment>> _pairAdjustmentMaps = new ConcurrentDictionary<string, IDictionary<ushort[], PairAdjustment>>(StringComparer.OrdinalIgnoreCase);
         private IDictionary<ushort, double> _designUnitsAdvanceWidths;
         private IDictionary<ushort, double> _designUnitsLeftSideBearings;
         private IDictionary<ushort, double> _designUnitsRightSideBearings;
@@ -421,7 +422,7 @@ namespace WaterTrans.GlyphLoader
                 return _ligatureSubstitutionMaps[id];
             }
 
-            var ligatureSubstitutionMap = new Dictionary<ushort[], ushort>(new LigatureGlyphMapComparer());
+            var ligatureSubstitutionMap = new Dictionary<ushort[], ushort>(new GlyphIndexArrayComparer());
             foreach (ushort lookupIndex in _tableOfGSUB.FeatureList[record.FeatureIndex].LookupListIndex)
             {
                 foreach (var ssb in _tableOfGSUB.LookupList[lookupIndex].LigatureSubstitutionList)
@@ -614,6 +615,71 @@ namespace WaterTrans.GlyphLoader
             }
 
             return GetSingleAdjustmentMap(id);
+        }
+
+        /// <summary>
+        /// Gets the pair adjustment map by the font 'GPOS' table.
+        /// </summary>
+        /// <param name="id">The feture record id by GPOSFeatures method result.</param>
+        /// <returns>The pair adjustment map.</returns>
+        public IDictionary<ushort[], PairAdjustment> GetPairAdjustmentMap(string id)
+        {
+            if (!_tableDirectories.ContainsKey(TableNames.GPOS))
+            {
+                throw new NotSupportedException("This font file does not contain the 'GPOS' table.");
+            }
+
+            var record = _gposFeatures[id];
+            if (_pairAdjustmentMaps.ContainsKey(id))
+            {
+                return _pairAdjustmentMaps[id];
+            }
+
+            var pairAdjustment = new Dictionary<ushort[], PairAdjustment>(new GlyphIndexArrayComparer());
+            foreach (ushort lookupIndex in _tableOfGPOS.FeatureList[record.FeatureIndex].LookupListIndex)
+            {
+                foreach (var item in _tableOfGPOS.LookupList[lookupIndex].PairAdjustmentList)
+                {
+                    var key = new ushort[] { item.FirstGlyphIndex, item.SecondGlyphIndex };
+                    pairAdjustment[key] = new PairAdjustment(
+                        new Adjustment(
+                            item.FirstValueRecord.XPlacement,
+                            item.FirstValueRecord.YPlacement,
+                            item.FirstValueRecord.XAdvance,
+                            item.FirstValueRecord.YAdvance,
+                            _tableOfHEAD.UnitsPerEm),
+                        new Adjustment(
+                            item.SecondValueRecord.XPlacement,
+                            item.SecondValueRecord.YPlacement,
+                            item.SecondValueRecord.XAdvance,
+                            item.SecondValueRecord.YAdvance,
+                            _tableOfHEAD.UnitsPerEm));
+                }
+            }
+            return _pairAdjustmentMaps.GetOrAdd(id, new ReadOnlyDictionary<ushort[], PairAdjustment>(pairAdjustment));
+        }
+
+        /// <summary>
+        /// Gets the pair adjustment map by the font 'GPOS' table.
+        /// </summary>
+        /// <param name="scriptTag">The OpenType script identification tag.</param>
+        /// <param name="langSysTag">The OpenType language system identification tag.</param>
+        /// <param name="featureTag">The OpenType feature identification tag.</param>
+        /// <returns>The pair adjustment map.</returns>
+        public IDictionary<ushort[], PairAdjustment> GetPairAdjustmentMap(string scriptTag, string langSysTag, string featureTag)
+        {
+            if (!_tableDirectories.ContainsKey(TableNames.GPOS))
+            {
+                throw new NotSupportedException("This font file does not contain the 'GPOS' table.");
+            }
+
+            string id = scriptTag + "." + langSysTag + "." + featureTag;
+            if (!_gposFeatures.ContainsKey(id))
+            {
+                throw new NotSupportedException("This font file does not contain the argument glyph positioning.");
+            }
+
+            return GetPairAdjustmentMap(id);
         }
 
         /// <summary>

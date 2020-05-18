@@ -1,4 +1,4 @@
-﻿// <copyright file="LigatureGlyphMapComparer.cs" company="WaterTrans">
+﻿// <copyright file="GlyphIndexArrayComparer.cs" company="WaterTrans">
 // © 2020 WaterTrans
 // </copyright>
 
@@ -8,9 +8,9 @@ using System.Linq;
 namespace WaterTrans.GlyphLoader.Internal.SFNT
 {
     /// <summary>
-    /// The ligature glyph map dictionary equality comparer.
+    /// The glyph index array equality comparer.
     /// </summary>
-    internal class LigatureGlyphMapComparer : IEqualityComparer<ushort[]>
+    internal class GlyphIndexArrayComparer : IEqualityComparer<ushort[]>
     {
         /// <inheritdoc/>
         public bool Equals(ushort[] x, ushort[] y)
