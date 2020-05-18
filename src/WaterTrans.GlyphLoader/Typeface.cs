@@ -31,7 +31,7 @@ namespace WaterTrans.GlyphLoader
         private readonly ConcurrentDictionary<string, IDictionary<ushort[], ushort>> _ligatureSubstitutionMaps = new ConcurrentDictionary<string, IDictionary<ushort[], ushort>>(StringComparer.OrdinalIgnoreCase);
         private readonly ConcurrentDictionary<string, IDictionary<ushort, ushort[]>> _multipleSubstitutionMaps = new ConcurrentDictionary<string, IDictionary<ushort, ushort[]>>(StringComparer.OrdinalIgnoreCase);
         private readonly ConcurrentDictionary<string, IDictionary<ushort, ushort[]>> _alternateSubstitutionMaps = new ConcurrentDictionary<string, IDictionary<ushort, ushort[]>>(StringComparer.OrdinalIgnoreCase);
-        private readonly ConcurrentDictionary<string, IDictionary<ushort, Adjustment>> _singleAdjustments = new ConcurrentDictionary<string, IDictionary<ushort, Adjustment>>(StringComparer.OrdinalIgnoreCase);
+        private readonly ConcurrentDictionary<string, IDictionary<ushort, Adjustment>> _singleAdjustmentMaps = new ConcurrentDictionary<string, IDictionary<ushort, Adjustment>>(StringComparer.OrdinalIgnoreCase);
         private IDictionary<ushort, double> _designUnitsAdvanceWidths;
         private IDictionary<ushort, double> _designUnitsLeftSideBearings;
         private IDictionary<ushort, double> _designUnitsRightSideBearings;
@@ -560,11 +560,11 @@ namespace WaterTrans.GlyphLoader
         }
 
         /// <summary>
-        /// Gets the single adjustment by the font 'GPOS' table.
+        /// Gets the single adjustment map by the font 'GPOS' table.
         /// </summary>
         /// <param name="id">The feture record id by GPOSFeatures method result.</param>
-        /// <returns>The single adjustment.</returns>
-        public IDictionary<ushort, Adjustment> GetSingleAdjustment(string id)
+        /// <returns>The single adjustment map.</returns>
+        public IDictionary<ushort, Adjustment> GetSingleAdjustmentMap(string id)
         {
             if (!_tableDirectories.ContainsKey(TableNames.GPOS))
             {
@@ -572,9 +572,9 @@ namespace WaterTrans.GlyphLoader
             }
 
             var record = _gposFeatures[id];
-            if (_singleAdjustments.ContainsKey(id))
+            if (_singleAdjustmentMaps.ContainsKey(id))
             {
-                return _singleAdjustments[id];
+                return _singleAdjustmentMaps[id];
             }
 
             var singleAdjustment = new Dictionary<ushort, Adjustment>();
@@ -590,17 +590,17 @@ namespace WaterTrans.GlyphLoader
                         _tableOfHEAD.UnitsPerEm);
                 }
             }
-            return _singleAdjustments.GetOrAdd(id, new ReadOnlyDictionary<ushort, Adjustment>(singleAdjustment));
+            return _singleAdjustmentMaps.GetOrAdd(id, new ReadOnlyDictionary<ushort, Adjustment>(singleAdjustment));
         }
 
         /// <summary>
-        /// Gets the single adjustment by the font 'GPOS' table.
+        /// Gets the single adjustment map by the font 'GPOS' table.
         /// </summary>
         /// <param name="scriptTag">The OpenType script identification tag.</param>
         /// <param name="langSysTag">The OpenType language system identification tag.</param>
         /// <param name="featureTag">The OpenType feature identification tag.</param>
-        /// <returns>The single adjustment.</returns>
-        public IDictionary<ushort, Adjustment> GetSingleAdjustment(string scriptTag, string langSysTag, string featureTag)
+        /// <returns>The single adjustment map.</returns>
+        public IDictionary<ushort, Adjustment> GetSingleAdjustmentMap(string scriptTag, string langSysTag, string featureTag)
         {
             if (!_tableDirectories.ContainsKey(TableNames.GPOS))
             {
@@ -613,7 +613,7 @@ namespace WaterTrans.GlyphLoader
                 throw new NotSupportedException("This font file does not contain the argument glyph positioning.");
             }
 
-            return GetSingleAdjustment(id);
+            return GetSingleAdjustmentMap(id);
         }
 
         /// <summary>

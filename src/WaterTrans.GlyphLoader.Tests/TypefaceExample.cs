@@ -20,7 +20,7 @@ namespace WaterTrans.GlyphLoader.Tests
 
             // Get halt glyph adjustment (https://docs.microsoft.com/en-us/typography/opentype/spec/features_fj#halt)
             // The user may invoke this feature in a CJKV font to get better fit for punctuation or symbol glyphs without disrupting the monospaced alignment.
-            var halt = tf.GetSingleAdjustment("DFLT.DFLT.halt");
+            var halt = tf.GetSingleAdjustmentMap("DFLT.DFLT.halt");
 
             var svg = new System.Text.StringBuilder();
             double unit = 100;
