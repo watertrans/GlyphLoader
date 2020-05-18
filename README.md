@@ -48,6 +48,10 @@ GlyphLoader has the following limitations:
 - CFF2 table will be supported in future version
 - Variable fonts will be supported in future version
 
+## Make sure to read
+Font files are inherently dangerous. You shouldn't read font files uploaded by someone via the internet.
+The GlyphLoader expects to load your own safe font file with a clear source.
+
 ## License
 MIT
 
