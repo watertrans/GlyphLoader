@@ -309,7 +309,7 @@ namespace WaterTrans.GlyphLoader
         /// <summary>
         /// Gets the GSUB feature list.
         /// </summary>
-        public ReadOnlyDictionary<string, FeatureRecord> GSUBFeatures
+        public IDictionary<string, FeatureRecord> GSUBFeatures
         {
             get { return new ReadOnlyDictionary<string, FeatureRecord>(_gsubFeatures); }
         }
@@ -317,7 +317,7 @@ namespace WaterTrans.GlyphLoader
         /// <summary>
         /// Gets the GPOS feature list.
         /// </summary>
-        public ReadOnlyDictionary<string, FeatureRecord> GPOSFeatures
+        public IDictionary<string, FeatureRecord> GPOSFeatures
         {
             get { return new ReadOnlyDictionary<string, FeatureRecord>(_gposFeatures); }
         }
