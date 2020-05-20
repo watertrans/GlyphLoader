@@ -109,14 +109,14 @@ namespace WaterTrans.GlyphLoader.TestFonts
             return string.Format(GraphResources.Baseline, y + GraphOffsetY);
         }
 
-        public string GetCurvePoint(double x, double y, double coodinateX, double doodinateY)
+        public string GetCurvePoint(double x, double y, double coodinateX, double coodinateY)
         {
-            return string.Format(GraphResources.CurvePoint, x + GraphOffsetX, y + GraphOffsetY, coodinateX, doodinateY);
+            return string.Format(GraphResources.CurvePoint, x + GraphOffsetX, y + GraphOffsetY, coodinateX, coodinateY);
         }
 
-        public string GetControlPoint(double x, double y, double coodinateX, double doodinateY)
+        public string GetControlPoint(double x, double y, double coodinateX, double coodinateY)
         {
-            return string.Format(GraphResources.ControlPoint, x + GraphOffsetX, y + GraphOffsetY, coodinateX, doodinateY);
+            return string.Format(GraphResources.ControlPoint, x + GraphOffsetX, y + GraphOffsetY, coodinateX, coodinateY);
         }
     }
 }
