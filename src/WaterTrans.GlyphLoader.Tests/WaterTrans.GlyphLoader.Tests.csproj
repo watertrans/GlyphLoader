@@ -75,27 +75,13 @@
     <Compile Include="TypefaceTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Lora-VariableFont_wght.ttf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="NotoSansJP-Regular.otf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="NotoSerifJP-Regular.otf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="packages.config" />
-    <None Include="Roboto-Regular.ttf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="RobotoMono-Regular.ttf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="LICENSE.txt" />
-  </ItemGroup>
-  <ItemGroup>
+    <ProjectReference Include="..\WaterTrans.GlyphLoader.TestFonts\WaterTrans.GlyphLoader.TestFonts.csproj">
+      <Project>{1888ce7a-3201-4333-a273-129a893c5ad8}</Project>
+      <Name>WaterTrans.GlyphLoader.TestFonts</Name>
+    </ProjectReference>
     <ProjectReference Include="..\WaterTrans.GlyphLoader\WaterTrans.GlyphLoader.csproj">
       <Project>{1b3f5e68-ae35-4ab7-b383-843e8fa37f8b}</Project>
       <Name>WaterTrans.GlyphLoader</Name>
