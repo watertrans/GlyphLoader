@@ -117,13 +117,64 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="GlyphComparison" xml:space="preserve">
-    <value>&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;&lt;style&gt;dt {{ font-weight: bold; }} svg {{ border: 1px solid #000; }}&lt;/style&gt;&lt;/head&gt;
-&lt;body&gt;&lt;h1&gt;Glyph comparison view&lt;/h1&gt;
-&lt;dl&gt;&lt;dt&gt;File: &lt;/dt&gt;&lt;dd&gt;{0}&lt;/dd&gt;&lt;/dl&gt;
-&lt;dl&gt;&lt;dt&gt;GlyphIndex: &lt;/dt&gt;&lt;dd&gt;{1}&lt;/dd&gt;&lt;/dl&gt;
-&lt;dl&gt;&lt;dt&gt;Typeface: &lt;/dt&gt;&lt;dd&gt;{2}&lt;/dd&gt;&lt;/dl&gt;
-&lt;dl&gt;&lt;dt&gt;GlyphTypeface: &lt;/dt&gt;&lt;dd&gt;{3}&lt;/dd&gt;&lt;/dl&gt;
-&lt;/body&gt;&lt;/html&gt;</value>
+  <data name="AdvanceBox" xml:space="preserve">
+    <value>&lt;rect x="{0}" y="{1}" width="{2}" height="{3}" stroke="orange" stroke-width="1"  fill="transparent" /&gt;</value>
+  </data>
+  <data name="Baseline" xml:space="preserve">
+    <value>&lt;line x1="0" y1="{0}" x2="400" y2="{0}" style="stroke:red;stroke-width:2" /&gt;</value>
+  </data>
+  <data name="BlackBox" xml:space="preserve">
+    <value>&lt;rect x="{0}" y="{1}" width="{2}" height="{3}" stroke="black" stroke-width="1"  fill="transparent" /&gt;</value>
+  </data>
+  <data name="ControlPoint" xml:space="preserve">
+    <value>&lt;circle cx="{0}" cy="{1}" r="2" stroke-width="0" fill="blue" cursor="pointer"&gt;
+  &lt;title&gt;({2},{3})&lt;/title&gt;
+&lt;/circle&gt;</value>
+  </data>
+  <data name="CurvePoint" xml:space="preserve">
+    <value>&lt;circle cx="{0}" cy="{1}" r="2" stroke-width="0" fill="black" cursor="pointer"&gt;
+  &lt;title&gt;({2},{3})&lt;/title&gt;
+&lt;/circle&gt;</value>
+  </data>
+  <data name="Grid" xml:space="preserve">
+    <value>&lt;!-- Created with Inkscape (http://www.inkscape.org/) --&gt;
+&lt;svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.0" width="400" height="400" id="svg2180"&gt;
+  &lt;defs id="defs2182"/&gt;
+  &lt;g style="opacity:1;display:inline" id="layer1"&gt;
+    &lt;g style="stroke:#a9a9a9;stroke-opacity:1" id="g8191"&gt;
+      &lt;path d="M 20,0 L 20,400" style="fill:none;fill-rule:evenodd;stroke:#a9a9a9;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" id="path1872"/&gt;
+      &lt;use transform="translate(20,0)" style="stroke:#a9a9a9;stroke-opacity:1" id="use8185" x="0" y="0" width="400" height="400" xlink:href="#path1872"/&gt;
+      &lt;use transform="translate(40,0)" style="stroke:#a9a9a9;stroke-opacity:1" id="use8187" x="0" y="0" width="400" height="400" xlink:href="#path1872"/&gt;
+      &lt;use transform="translate(60,0)" style="stroke:#a9a9a9;stroke-opacity:1" id="use8189" x="0" y="0" width="400" height="400" xlink:href="#path1872"/&gt;
+    &lt;/g&gt;
+    &lt;use transform="translate(100,0)" id="use8197" x="0" y="0" width="400" height="400" xlink:href="#g8191"/&gt;
+    &lt;use transform="translate(200,0)" id="use8199" x="0" y="0" width="400" height="400" xlink:href="#g8191"/&gt;
+    &lt;use transform="translate(300,0)" id="use8201" x="0" y="0" width="400" height="400" xlink:href="#g8191"/&gt;
+    &lt;use transform="matrix(0,1,-1,0,400,0)" id="use8203" x="0" y="0" width="400" height="400" xlink:href="#g8191"/&gt;
+    &lt;use transform="translate(0,100)" id="use8205" x="0" y="0" width="400" height="400" xlink:href="#use8203"/&gt;
+    &lt;use transform="translate(0,200)" id="use8207" x="0" y="0" width="400" height="400" xlink:href="#use8203"/&gt;
+    &lt;use transform="translate(0,300)" id="use8209" x="0" y="0" width="400" height="400" xlink:href="#use8203"/&gt;
+  &lt;/g&gt;
+  &lt;g style="display:inline" id="layer2"&gt;
+    &lt;g style="stroke:#366;stroke-opacity:1" id="g8225"&gt;
+      &lt;path d="M 100,0 L 100,400" style="fill:none;fill-rule:evenodd;stroke:#366;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" id="path8215"/&gt;
+      &lt;use transform="translate(100,0)" style="stroke:#366;stroke-opacity:1" id="use8217" x="0" y="0" width="400" height="400" xlink:href="#path8215"/&gt;
+      &lt;use transform="translate(200,0)" style="stroke:#366;stroke-opacity:1" id="use8219" x="0" y="0" width="400" height="400" xlink:href="#path8215"/&gt;
+    &lt;/g&gt;
+    &lt;use transform="matrix(0,1,-1,0,400,0)" id="use8232" x="0" y="0" width="400" height="400" xlink:href="#g8225"/&gt;
+  &lt;/g&gt;
+  &lt;g id="layer3"&gt;
+    &lt;rect width="399" height="399" x="0.5" y="0.5" style="fill:none;stroke:#366;stroke-opacity:1" id="rect10078"/&gt;
+  &lt;/g&gt;
+  {0}
+&lt;/svg&gt;</value>
+  </data>
+  <data name="OriginPoint" xml:space="preserve">
+    <value>&lt;circle cx="{0}" cy="{1}" r="2" stroke="black" stroke-width="1" fill="transparent" cursor="pointer"&gt;
+  &lt;title&gt;({2},{3})&lt;/title&gt;
+&lt;/circle&gt;</value>
+  </data>
+  <data name="StrokePath" xml:space="preserve">
+    <value>&lt;path transform="translate({1},{2})" d="{0}" fill="transparent" stroke="black" stroke-width="1" /&gt;</value>
   </data>
 </root>

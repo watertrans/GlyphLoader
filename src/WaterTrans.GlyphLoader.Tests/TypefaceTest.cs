@@ -6,6 +6,7 @@ using System.IO;
 using System.Text;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using WaterTrans.GlyphLoader.TestFonts;
 
 namespace WaterTrans.GlyphLoader.Tests
 {
@@ -385,10 +386,10 @@ namespace WaterTrans.GlyphLoader.Tests
 
         // For individual glyph analysis
         // [TestMethod]
-        public void CreateGraphPaper()
+        public void CreateGlyphComparisonGraph()
         {
             string fontFile = "Roboto-Regular.ttf";
-            ushort glyphIndex = 58;
+            ushort glyphIndex = 60;
             System.Diagnostics.Trace.WriteLine(CreateGlyphComparison(fontFile, glyphIndex));
         }
 
@@ -396,139 +397,79 @@ namespace WaterTrans.GlyphLoader.Tests
 
         #region Graph
 
-        private const int graphOffsetX = 100;
-        private const int graphOffsetY = 100;
-        private const int graphEmSize = 200;
+        private const int GraphEmSize = 200;
 
         public string CreateGlyphComparison(string fontFile, ushort glyphIndex)
         {
-            return string.Format(
-                TextResources.GlyphComparison,
-                fontFile,
-                glyphIndex,
-                CreateTypefaceGraphPaper(fontFile, glyphIndex),
-                CreateGlyphTypefaceGraphPaper(fontFile, glyphIndex));
-        }
-
-        public string CreateTypefaceGraphPaper(string fontFile, ushort glyphIndex)
-        {
+            var renderer = new GraphRenderer();
             var tf = _typefaceCache[fontFile];
+            var typefaceGeometry = tf.GetGlyphOutline(glyphIndex, GraphEmSize);
+            var typefaceGraph = renderer.CreateGraph(
+                typefaceGeometry,
+                tf.Baseline,
+                tf.AdvanceWidths[glyphIndex],
+                tf.AdvanceHeights[glyphIndex],
+                tf.LeftSideBearings[glyphIndex],
+                tf.RightSideBearings[glyphIndex],
+                tf.TopSideBearings[glyphIndex],
+                tf.BottomSideBearings[glyphIndex],
+                GraphEmSize);
 
-            var geometry = tf.GetGlyphOutline(glyphIndex, graphEmSize);
-            var miniLanguage = geometry.Figures.ToString();
+            var gt = _glyphTypefaceCache[fontFile];
 
-            var glyphAnalysis = new StringBuilder();
-            var glyphPath = string.Format(TextResources.StrokePath, miniLanguage, graphOffsetX, graphOffsetY + tf.Baseline * graphEmSize);
-            glyphAnalysis.AppendLine(glyphPath);
+            var geometry = gt.GetGlyphOutline(glyphIndex, GraphEmSize, GraphEmSize);
+            var wpfGeometry = geometry is PathGeometry ? (PathGeometry)geometry : geometry.GetOutlinedPathGeometry();
+            var wpfGraph = CreateWPFGraph(
+                wpfGeometry,
+                gt.Baseline,
+                gt.AdvanceWidths[glyphIndex],
+                gt.AdvanceHeights[glyphIndex],
+                gt.LeftSideBearings[glyphIndex],
+                gt.RightSideBearings[glyphIndex],
+                gt.TopSideBearings[glyphIndex],
+                gt.BottomSideBearings[glyphIndex],
+                GraphEmSize);
 
-            // origin point
-            glyphAnalysis.AppendLine(GetBaseline(tf.Baseline * graphEmSize));
-            glyphAnalysis.AppendLine(GetOriginPoint(0, tf.Baseline * graphEmSize));
-
-            // advance box
-            glyphAnalysis.AppendLine(GetAdvanceBox(0,
-                0,
-                tf.AdvanceWidths[glyphIndex] * graphEmSize,
-                tf.AdvanceHeights[glyphIndex] * graphEmSize));
-
-            // black box
-            glyphAnalysis.AppendLine(GetBlackBox(tf.LeftSideBearings[glyphIndex] * graphEmSize,
-                (tf.TopSideBearings[glyphIndex]) * graphEmSize,
-                (tf.AdvanceWidths[glyphIndex] - tf.LeftSideBearings[glyphIndex] - tf.RightSideBearings[glyphIndex]) * graphEmSize,
-                (tf.AdvanceHeights[glyphIndex] - tf.TopSideBearings[glyphIndex] - tf.BottomSideBearings[glyphIndex]) * graphEmSize));
-
-            foreach (var figure in geometry.Figures)
-            {
-                glyphAnalysis.AppendLine(GetCurvePoint(figure.StartPoint.X,
-                    figure.StartPoint.Y + tf.Baseline * graphEmSize,
-                    figure.StartPoint.X,
-                    figure.StartPoint.Y));
-
-                foreach (var segment in figure.Segments)
-                {
-                    if (segment is WaterTrans.GlyphLoader.Geometry.LineSegment l)
-                    {
-                        glyphAnalysis.AppendLine(GetCurvePoint(l.Point.X,
-                            l.Point.Y + tf.Baseline * graphEmSize,
-                            l.Point.X,
-                            l.Point.Y));
-                    }
-                    else if (segment is WaterTrans.GlyphLoader.Geometry.QuadraticBezierSegment q)
-                    {
-                        glyphAnalysis.AppendLine(GetControlPoint(q.Point1.X,
-                            q.Point1.Y + tf.Baseline * graphEmSize,
-                            q.Point1.X,
-                            q.Point1.Y));
-
-                        glyphAnalysis.AppendLine(GetCurvePoint(q.Point2.X,
-                            q.Point2.Y + tf.Baseline * graphEmSize,
-                            q.Point2.X,
-                            q.Point2.Y));
-                    }
-                    else if (segment is WaterTrans.GlyphLoader.Geometry.BezierSegment b)
-                    {
-                        glyphAnalysis.AppendLine(GetControlPoint(b.Point1.X,
-                            b.Point1.Y + tf.Baseline * graphEmSize,
-                            b.Point1.X,
-                            b.Point1.Y));
-
-                        glyphAnalysis.AppendLine(GetControlPoint(b.Point2.X,
-                            b.Point2.Y + tf.Baseline * graphEmSize,
-                            b.Point2.X,
-                            b.Point2.Y));
-
-                        glyphAnalysis.AppendLine(GetCurvePoint(b.Point3.X,
-                            b.Point3.Y + tf.Baseline * graphEmSize,
-                            b.Point3.X,
-                            b.Point3.Y));
-                    }
-                }
-            }
-
-            return string.Format(TextResources.GraphPaper, glyphAnalysis.ToString());
+            return string.Format(TextResources.GlyphComparison, fontFile, glyphIndex, typefaceGraph, wpfGraph);
         }
 
-        public string CreateGlyphTypefaceGraphPaper(string fontFile, ushort glyphIndex)
+
+        public string CreateWPFGraph(
+            PathGeometry geometry,
+            double baseline,
+            double advanceWidth,
+            double advanceHeight,
+            double leftSideBearing,
+            double rightSideBearing,
+            double topSideBearing,
+            double bottomSideBearing,
+            int graphEmSize)
         {
-            var tf = _glyphTypefaceCache[fontFile];
-
-            var original = tf.GetGlyphOutline(glyphIndex, graphEmSize, graphEmSize);
-            PathGeometry geometry;
-            if (original is PathGeometry)
-            {
-                geometry = (PathGeometry)original;
-            }
-            else
-            {
-                geometry = original.GetOutlinedPathGeometry();
-            }
-
+            var renderer = new GraphRenderer();
             var miniLanguage = geometry.Figures.ToString();
 
-            var glyphAnalysis = new StringBuilder();
-            var glyphPath = string.Format(TextResources.StrokePath, miniLanguage, graphOffsetX, graphOffsetY + tf.Baseline * graphEmSize);
-            glyphAnalysis.AppendLine(glyphPath);
+            var graph = new StringBuilder();
+            var glyphPath = string.Format(GraphResources.StrokePath, miniLanguage, renderer.GraphOffsetX, renderer.GraphOffsetY + baseline * graphEmSize);
+            graph.AppendLine(glyphPath);
 
             // origin point
-            glyphAnalysis.AppendLine(GetBaseline(tf.Baseline * graphEmSize));
-            glyphAnalysis.AppendLine(GetOriginPoint(0, tf.Baseline * graphEmSize));
+            graph.AppendLine(renderer.GetBaseline(baseline * graphEmSize));
+            graph.AppendLine(renderer.GetOriginPoint(0, baseline * graphEmSize));
 
             // advance box
-            glyphAnalysis.AppendLine(GetAdvanceBox(0,
-                0,
-                tf.AdvanceWidths[glyphIndex] * graphEmSize,
-                tf.AdvanceHeights[glyphIndex] * graphEmSize));
+            graph.AppendLine(renderer.GetAdvanceBox(0, 0, advanceWidth * graphEmSize, advanceHeight * graphEmSize));
 
             // black box
-            glyphAnalysis.AppendLine(GetBlackBox(tf.LeftSideBearings[glyphIndex] * graphEmSize,
-                (tf.TopSideBearings[glyphIndex]) * graphEmSize,
-                (tf.AdvanceWidths[glyphIndex] - tf.LeftSideBearings[glyphIndex] - tf.RightSideBearings[glyphIndex]) * graphEmSize,
-                (tf.AdvanceHeights[glyphIndex] - tf.TopSideBearings[glyphIndex] - tf.BottomSideBearings[glyphIndex]) * graphEmSize));
+            graph.AppendLine(renderer.GetBlackBox(
+                leftSideBearing * graphEmSize,
+                topSideBearing * graphEmSize,
+                (advanceWidth - leftSideBearing - rightSideBearing) * graphEmSize,
+                (advanceHeight - topSideBearing - bottomSideBearing) * graphEmSize));
 
             foreach (var figure in geometry.Figures)
             {
-                glyphAnalysis.AppendLine(GetCurvePoint(figure.StartPoint.X,
-                    figure.StartPoint.Y + tf.Baseline * graphEmSize,
+                graph.AppendLine(renderer.GetCurvePoint(figure.StartPoint.X,
+                    figure.StartPoint.Y + baseline * graphEmSize,
                     figure.StartPoint.X,
                     figure.StartPoint.Y));
 
@@ -536,8 +477,8 @@ namespace WaterTrans.GlyphLoader.Tests
                 {
                     if (segment is LineSegment l)
                     {
-                        glyphAnalysis.AppendLine(GetCurvePoint(figure.StartPoint.X,
-                            figure.StartPoint.Y + tf.Baseline * graphEmSize,
+                        graph.AppendLine(renderer.GetCurvePoint(figure.StartPoint.X,
+                            figure.StartPoint.Y + baseline * graphEmSize,
                             figure.StartPoint.X,
                             figure.StartPoint.Y));
                     }
@@ -545,22 +486,22 @@ namespace WaterTrans.GlyphLoader.Tests
                     {
                         foreach (var p in pl.Points)
                         {
-                            glyphAnalysis.AppendLine(GetCurvePoint(
+                            graph.AppendLine(renderer.GetCurvePoint(
                                 p.X, 
-                                p.Y + tf.Baseline * graphEmSize,
+                                p.Y + baseline * graphEmSize,
                                 p.X,
                                 p.Y));
                         }
                     }
                     else if (segment is QuadraticBezierSegment q)
                     {
-                        glyphAnalysis.AppendLine(GetControlPoint(q.Point1.X,
-                            q.Point1.Y + tf.Baseline * graphEmSize,
+                        graph.AppendLine(renderer.GetControlPoint(q.Point1.X,
+                            q.Point1.Y + baseline * graphEmSize,
                             q.Point1.X,
                             q.Point1.Y));
 
-                        glyphAnalysis.AppendLine(GetCurvePoint(q.Point2.X,
-                            q.Point2.Y + tf.Baseline * graphEmSize,
+                        graph.AppendLine(renderer.GetCurvePoint(q.Point2.X,
+                            q.Point2.Y + baseline * graphEmSize,
                             q.Point2.X,
                             q.Point2.Y));
                     }
@@ -570,16 +511,16 @@ namespace WaterTrans.GlyphLoader.Tests
                         {
                             if (i % 2 == 1)
                             {
-                                glyphAnalysis.AppendLine(GetCurvePoint(
+                                graph.AppendLine(renderer.GetCurvePoint(
                                     pq.Points[i].X,
-                                    pq.Points[i].Y + tf.Baseline * graphEmSize,
+                                    pq.Points[i].Y + baseline * graphEmSize,
                                     pq.Points[i].X,
                                     pq.Points[i].Y));
                             }
                             else
                             {
-                                glyphAnalysis.AppendLine(GetControlPoint(pq.Points[i].X,
-                                    pq.Points[i].Y + tf.Baseline * graphEmSize,
+                                graph.AppendLine(renderer.GetControlPoint(pq.Points[i].X,
+                                    pq.Points[i].Y + baseline * graphEmSize,
                                     pq.Points[i].X,
                                     pq.Points[i].Y));
                             }
@@ -587,18 +528,18 @@ namespace WaterTrans.GlyphLoader.Tests
                     }
                     else if (segment is BezierSegment b)
                     {
-                        glyphAnalysis.AppendLine(GetControlPoint(b.Point1.X,
-                            b.Point1.Y + tf.Baseline * graphEmSize,
+                        graph.AppendLine(renderer.GetControlPoint(b.Point1.X,
+                            b.Point1.Y + baseline * graphEmSize,
                             b.Point1.X,
                             b.Point1.Y));
 
-                        glyphAnalysis.AppendLine(GetControlPoint(b.Point2.X,
-                            b.Point2.Y + tf.Baseline * graphEmSize,
+                        graph.AppendLine(renderer.GetControlPoint(b.Point2.X,
+                            b.Point2.Y + baseline * graphEmSize,
                             b.Point2.X,
                             b.Point2.Y));
 
-                        glyphAnalysis.AppendLine(GetCurvePoint(b.Point3.X,
-                            b.Point3.Y + tf.Baseline * graphEmSize,
+                        graph.AppendLine(renderer.GetCurvePoint(b.Point3.X,
+                            b.Point3.Y + baseline * graphEmSize,
                             b.Point3.X,
                             b.Point3.Y));
                     }
@@ -608,15 +549,15 @@ namespace WaterTrans.GlyphLoader.Tests
                         {
                             if (i % 3 == 2)
                             {
-                                glyphAnalysis.AppendLine(GetCurvePoint(pb.Points[i].X,
-                                    pb.Points[i].Y + tf.Baseline * graphEmSize,
+                                graph.AppendLine(renderer.GetCurvePoint(pb.Points[i].X,
+                                    pb.Points[i].Y + baseline * graphEmSize,
                                     pb.Points[i].X,
                                     pb.Points[i].Y));
                             }
                             else
                             {
-                                glyphAnalysis.AppendLine(GetControlPoint(pb.Points[i].X,
-                                    pb.Points[i].Y + tf.Baseline * graphEmSize,
+                                graph.AppendLine(renderer.GetControlPoint(pb.Points[i].X,
+                                    pb.Points[i].Y + baseline * graphEmSize,
                                     pb.Points[i].X,
                                     pb.Points[i].Y));
                             }
@@ -625,38 +566,7 @@ namespace WaterTrans.GlyphLoader.Tests
                 }
             }
 
-            return string.Format(TextResources.GraphPaper, glyphAnalysis.ToString());
-        }
-
-
-        private string GetBlackBox(double x, double y, double width, double height)
-        {
-            return string.Format(TextResources.BlackBox, x + graphOffsetX, y + graphOffsetY, width, height);
-        }
-
-        private string GetAdvanceBox(double x, double y, double width, double height)
-        {
-            return string.Format(TextResources.AdvanceBox, x + graphOffsetX, y + graphOffsetY, width, height);
-        }
-
-        private string GetOriginPoint(double x, double y)
-        {
-            return string.Format(TextResources.OriginPoint, x + graphOffsetX, y + graphOffsetY, 0, 0);
-        }
-
-        private string GetBaseline(double y)
-        {
-            return string.Format(TextResources.Baseline, y + graphOffsetY);
-        }
-
-        private string GetCurvePoint(double x, double y, double coodinateX, double doodinateY)
-        {
-            return string.Format(TextResources.CurvePoint, x + graphOffsetX, y + graphOffsetY, coodinateX, doodinateY);
-        }
-
-        private string GetControlPoint(double x, double y, double coodinateX, double doodinateY)
-        {
-            return string.Format(TextResources.ControlPoint, x + graphOffsetX, y + graphOffsetY, coodinateX, doodinateY);
+            return string.Format(GraphResources.Grid, graph.ToString());
         }
 
         #endregion

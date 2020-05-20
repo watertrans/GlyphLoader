@@ -5,6 +5,25 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\WaterTrans.GlyphLoader\WaterTrans.GlyphLoader.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="GraphResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>GraphResources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="GraphResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>GraphResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="Lora-VariableFont_wght.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -61,55 +61,6 @@ namespace WaterTrans.GlyphLoader.Tests {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;rect x=&quot;{0}&quot; y=&quot;{1}&quot; width=&quot;{2}&quot; height=&quot;{3}&quot; stroke=&quot;orange&quot; stroke-width=&quot;1&quot;  fill=&quot;transparent&quot; /&gt;.
-        /// </summary>
-        internal static string AdvanceBox {
-            get {
-                return ResourceManager.GetString("AdvanceBox", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;line x1=&quot;0&quot; y1=&quot;{0}&quot; x2=&quot;400&quot; y2=&quot;{0}&quot; style=&quot;stroke:red;stroke-width:2&quot; /&gt;.
-        /// </summary>
-        internal static string Baseline {
-            get {
-                return ResourceManager.GetString("Baseline", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;rect x=&quot;{0}&quot; y=&quot;{1}&quot; width=&quot;{2}&quot; height=&quot;{3}&quot; stroke=&quot;black&quot; stroke-width=&quot;1&quot;  fill=&quot;transparent&quot; /&gt;.
-        /// </summary>
-        internal static string BlackBox {
-            get {
-                return ResourceManager.GetString("BlackBox", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;circle cx=&quot;{0}&quot; cy=&quot;{1}&quot; r=&quot;2&quot; stroke-width=&quot;0&quot; fill=&quot;blue&quot; cursor=&quot;pointer&quot;&gt;
-        ///  &lt;title&gt;({2},{3})&lt;/title&gt;
-        ///&lt;/circle&gt;.
-        /// </summary>
-        internal static string ControlPoint {
-            get {
-                return ResourceManager.GetString("ControlPoint", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;circle cx=&quot;{0}&quot; cy=&quot;{1}&quot; r=&quot;2&quot; stroke-width=&quot;0&quot; fill=&quot;black&quot; cursor=&quot;pointer&quot;&gt;
-        ///  &lt;title&gt;({2},{3})&lt;/title&gt;
-        ///&lt;/circle&gt;.
-        /// </summary>
-        internal static string CurvePoint {
-            get {
-                return ResourceManager.GetString("CurvePoint", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to &lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;&lt;style&gt;dt {{ font-weight: bold; }} svg {{ border: 1px solid #000; }}&lt;/style&gt;&lt;/head&gt;
         ///&lt;body&gt;&lt;h1&gt;Glyph comparison view&lt;/h1&gt;
         ///&lt;dl&gt;&lt;dt&gt;File: &lt;/dt&gt;&lt;dd&gt;{0}&lt;/dd&gt;&lt;/dl&gt;
@@ -121,40 +72,6 @@ namespace WaterTrans.GlyphLoader.Tests {
         internal static string GlyphComparison {
             get {
                 return ResourceManager.GetString("GlyphComparison", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;!-- Created with Inkscape (http://www.inkscape.org/) --&gt;
-        ///&lt;svg xmlns:svg=&quot;http://www.w3.org/2000/svg&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot; version=&quot;1.0&quot; width=&quot;400&quot; height=&quot;400&quot; id=&quot;svg2180&quot;&gt;
-        ///  &lt;defs id=&quot;defs2182&quot;/&gt;
-        ///  &lt;g style=&quot;opacity:1;display:inline&quot; id=&quot;layer1&quot;&gt;
-        ///    &lt;g style=&quot;stroke:#a9a9a9;stroke-opacity:1&quot; id=&quot;g8191&quot;&gt;
-        ///      &lt;path d=&quot;M 20,0 L 20,400&quot; style=&quot;fill:none;fill-rule:evenodd;stroke:#a9a9a9;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string GraphPaper {
-            get {
-                return ResourceManager.GetString("GraphPaper", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;circle cx=&quot;{0}&quot; cy=&quot;{1}&quot; r=&quot;2&quot; stroke=&quot;black&quot; stroke-width=&quot;1&quot; fill=&quot;transparent&quot; cursor=&quot;pointer&quot;&gt;
-        ///  &lt;title&gt;({2},{3})&lt;/title&gt;
-        ///&lt;/circle&gt;.
-        /// </summary>
-        internal static string OriginPoint {
-            get {
-                return ResourceManager.GetString("OriginPoint", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;path transform=&quot;translate({1},{2})&quot; d=&quot;{0}&quot; fill=&quot;transparent&quot; stroke=&quot;black&quot; stroke-width=&quot;1&quot; /&gt;.
-        /// </summary>
-        internal static string StrokePath {
-            get {
-                return ResourceManager.GetString("StrokePath", resourceCulture);
             }
         }
     }
