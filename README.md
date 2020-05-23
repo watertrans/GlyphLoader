@@ -9,7 +9,17 @@ In WebAssembly environment, it can be used for application development using gly
 - The output glyph outline can be easily converted to SVG tags.
 - It also supports vertical writing in Japanese.
 
+## Demo
+
+![AjaxDemo](./docs/img/demo/ajaxrendering.gif)
+
+![GraphDemo](./docs/img/demo/glyphcontuours.gif)
+
 ## Release Notes
+
+### 1.0-beta3
+
+- Add support for GPOS single adjustment, pair adjustment
 
 ### 1.0-beta2
 

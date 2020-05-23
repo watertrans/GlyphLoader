@@ -7,8 +7,12 @@ a.navbar-brand {
   word-break: break-all;
 }
 
-#AjaxResults {
-    min-height: 100px;
+#AjaxRendering {
+    padding: 20px;
+}
+
+#GlyphContuours {
+    padding: 20px;
 }
 
 /* Provide sufficient contrast against white background */
