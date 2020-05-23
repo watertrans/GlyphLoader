@@ -124,7 +124,7 @@
     <value>&lt;line x1="0" y1="{0}" x2="400" y2="{0}" style="stroke:red;stroke-width:2" /&gt;</value>
   </data>
   <data name="BlackBox" xml:space="preserve">
-    <value>&lt;rect x="{0}" y="{1}" width="{2}" height="{3}" stroke="black" stroke-width="1"  fill="transparent" /&gt;</value>
+    <value>&lt;rect x="{0}" y="{1}" width="{2}" height="{3}" stroke="navy" stroke-width="1"  fill="transparent" /&gt;</value>
   </data>
   <data name="ControlPoint" xml:space="preserve">
     <value>&lt;circle cx="{0}" cy="{1}" r="2" stroke-width="0" fill="blue" cursor="pointer"&gt;

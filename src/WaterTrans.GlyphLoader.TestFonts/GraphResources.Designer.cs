@@ -79,7 +79,7 @@ namespace WaterTrans.GlyphLoader.TestFonts {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;rect x=&quot;{0}&quot; y=&quot;{1}&quot; width=&quot;{2}&quot; height=&quot;{3}&quot; stroke=&quot;black&quot; stroke-width=&quot;1&quot;  fill=&quot;transparent&quot; /&gt;.
+        ///   Looks up a localized string similar to &lt;rect x=&quot;{0}&quot; y=&quot;{1}&quot; width=&quot;{2}&quot; height=&quot;{3}&quot; stroke=&quot;navy&quot; stroke-width=&quot;1&quot;  fill=&quot;transparent&quot; /&gt;.
         /// </summary>
         public static string BlackBox {
             get {

@@ -1,0 +1,138 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+@section Scripts {
+    <script type="text/javascript">
+
+        function callSVGRender() {
+            (function (startTime) {
+                $.ajax({
+                    url: "SVGRender",
+                    cache: true,
+                    dataType: 'html',
+                    data: {
+                        'font': $('#AjaxFontFile').val(),
+                        'emsize': $('#AjaxSize').val(),
+                        'text': $('#AjaxText').val()
+                    },
+                    success: function (html) {
+                        $("#AjaxResults").html(html);
+                        $("#AjaxTime").html("(" + Math.floor(performance.now() - startTime) + "ms)");
+                    }
+                });
+            })(performance.now());
+        }
+
+        function callGraphRender() {
+
+            var glyphCounts = $.parseJSON($('#GlyphCounts').val());
+            var font = $('#GraphFontFile').val();
+
+            $("#GraphGlyphCount").val(glyphCounts[font]);
+
+            (function (startTime) {
+                $.ajax({
+                    url: "GraphRender",
+                    cache: true,
+                    dataType: 'html',
+                    data: {
+                        'font': $('#GraphFontFile').val(),
+                        'index': $('#GraphIndex').val()
+                    },
+                    success: function (html) {
+                        $("#GraphResults").html(html);
+                        $("#GraphTime").html("(" + Math.floor(performance.now() - startTime) + "ms)");
+                    }
+                });
+            })(performance.now());
+        }
+
+        function onClickIndexDown() {
+            var current = parseInt($("#GraphIndex").val());
+            if (current < 1) {
+                current = 0;
+            } else {
+                current--;
+            }
+            $("#GraphIndex").val(current);
+            callGraphRender();
+        }
+
+        function onClickIndexUp() {
+            var max = parseInt($("#GraphGlyphCount").val());
+            var current = parseInt($("#GraphIndex").val());
+            if (current >= max) {
+                current = max;
+            } else {
+                current++;
+            }
+            $("#GraphIndex").val(current);
+            callGraphRender();
+        }
+
+        $(document).ready(function () {
+            $('#AjaxFontFile').on('change', callSVGRender);
+            $('#AjaxSize').on('change', callSVGRender);
+            $('#AjaxText').on('keyup', callSVGRender);
+            $('#GraphFontFile').on('change', callGraphRender);
+            $('#GraphIndex').on('change', callGraphRender);
+            $('#GraphIndexDown').on('click', onClickIndexDown);
+            $('#GraphIndexUp').on('click', onClickIndexUp);
+            callSVGRender();
+            callGraphRender();
+        });
+
+    </script>
+}
+
+<h2 class="display-4">Ajax Rendering</h2>
+<div id="AjaxRendering">
+    <form>
+        <div class="form-group">
+            <label for="AjaxFontFile">Font</label>
+            <select id="AjaxFontFile" name="AjaxFontFile" class="form-control" asp-items="Model.FontFiles"></select>
+        </div>
+        <div class="form-group">
+            <label for="AjaxSize">Size</label>
+            <input id="AjaxSize" type="text" name="AjaxSize" class="form-control" value="40">
+        </div>
+        <div class="form-group">
+            <label for="AjaxText">Text</label>
+            <input id="AjaxText" type="text" name="AjaxText" class="form-control" placeholder="Please enter something here...">
+        </div>
+    </form>
+    <div id="AjaxTime" class="text-right">(0ms)</div>
+    <div id="AjaxResults" class="overflow-auto"></div>
+</div>
+
+<h2 class="display-4">Glyph Contuours</h2>
+<div id="Glyph Contuours">
+    <form>
+        <div class="form-group">
+            <label for="GraphFontFile">Font</label>
+            <select id="GraphFontFile" name="GraphFontFile" class="form-control" asp-items="Model.FontFiles"></select>
+        </div>
+        <div class="form-group">
+            <label for="GraphGlyphCount">GlyphCount</label>
+            <input id="GraphGlyphCount" type="text" name="GraphGlyphCount" class="form-control" value="" readonly="readonly">
+        </div>
+        <div class="form-group">
+            <label for="GraphIndex">GlyphIndex</label>
+
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <button class="btn btn-secondary" type="button" id="GraphIndexDown">&lt;</button>
+                </div>
+                <input id="GraphIndex" type="text" name="GraphIndex" class="form-control" value="0">
+                <div class="input-group-append">
+                    <button class="btn btn-secondary" type="button" id="GraphIndexUp">&gt;</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div id="GraphTime" class="text-right">(0ms)</div>
+    <div id="GraphResults"></div>
+</div>
+<input type="hidden" id="GlyphCounts" name="GlyphCounts" value="@Model.GlyphCounts"/>
