@@ -32,6 +32,18 @@ namespace WaterTrans.GlyphLoader.Internal
         public long Position { get; set; }
 
         /// <summary>
+        /// Read string.
+        /// </summary>
+        /// <param name="len">Number of length.</param>
+        /// <param name="encoding">Encoding</param>
+        /// <returns>Read result.</returns>
+        public string ReadString(int len, Encoding encoding)
+        {
+            var buf = ReadBytes(len);
+            return encoding.GetString(buf);
+        }
+
+        /// <summary>
         /// Read char array.
         /// </summary>
         /// <param name="len">Number of length.</param>
