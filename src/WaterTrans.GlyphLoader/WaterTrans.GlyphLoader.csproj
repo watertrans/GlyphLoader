@@ -10,10 +10,10 @@
 It is written in C#, designed to be small, efficient and portable while capable of producing high-quality glyph images.
 In WebAssembly environment, it can be used for application development using glyph outline information.
 </Description>
-    <Copyright>© 2020 WaterTrans</Copyright>
+    <Copyright>© 2020 WaterTrans and Contributors</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/WaterTrans/GlyphLoader</PackageProjectUrl>
-    <PackageTags>OpenType, TrueType, TypeLoader, WebAssembly</PackageTags>
+    <PackageTags>OpenType TrueType TypeLoader WebAssembly Glyph GlyphTypeface</PackageTags>
     <PackageReleaseNotes>https://github.com/WaterTrans/GlyphLoader</PackageReleaseNotes>
     <RepositoryUrl>https://github.com/WaterTrans/GlyphLoader</RepositoryUrl>
     <Company>WaterTrans</Company>
