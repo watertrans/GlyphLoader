@@ -1,12 +1,14 @@
-﻿using System;
+﻿// <copyright file="TableOfNAME.cs" company="WaterTrans">
+// © 2020 WaterTrans and Contributors
+// </copyright>
+
 using System.Collections.Generic;
-using System.Text;
 using WaterTrans.GlyphLoader.Internal.NAME;
 
 namespace WaterTrans.GlyphLoader.Internal
 {
     /// <summary>
-    /// Table of NAME
+    /// Table of NAME.
     /// </summary>
     internal sealed class TableOfNAME
     {

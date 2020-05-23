@@ -1,4 +1,8 @@
-﻿namespace WaterTrans.GlyphLoader.Internal.NAME
+﻿// <copyright file="PlatformID.cs" company="WaterTrans">
+// © 2020 WaterTrans and Contributors
+// </copyright>
+
+namespace WaterTrans.GlyphLoader.Internal.NAME
 {
     /// <summary>The NAME NameRecord PlatformID type enumeration.</summary>
     internal enum PlatformID : ushort
@@ -13,6 +17,6 @@
         ISO = 2,
 
         /// <summary>Microsoft encoding.</summary>
-        Microsoft = 3
+        Microsoft = 3,
     }
 }

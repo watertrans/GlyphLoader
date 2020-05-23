@@ -35,7 +35,7 @@ namespace WaterTrans.GlyphLoader.Internal
         /// Read string.
         /// </summary>
         /// <param name="len">Number of length.</param>
-        /// <param name="encoding">Encoding</param>
+        /// <param name="encoding">Encoding.</param>
         /// <returns>Read result.</returns>
         public string ReadString(int len, Encoding encoding)
         {

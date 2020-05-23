@@ -1,4 +1,8 @@
-﻿namespace WaterTrans.GlyphLoader.Internal.NAME
+﻿// <copyright file="NameRecord.cs" company="WaterTrans">
+// © 2020 WaterTrans and Contributors
+// </copyright>
+
+namespace WaterTrans.GlyphLoader.Internal.NAME
 {
     /// <summary>
     /// The name records array item.
@@ -37,7 +41,7 @@
         /// <summary>Name string offset in bytes from stringOffset.</summary>
         public ushort Offset { get; }
 
-        /// <summary>The character strings of the names. Note that these are not necessarily ASCII!</summary>
+        /// <summary>The character strings of the names (Note that these are not necessarily ASCII!).</summary>
         public string NameString { get; set; }
     }
 }
