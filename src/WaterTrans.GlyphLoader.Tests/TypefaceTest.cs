@@ -19,7 +19,7 @@ namespace WaterTrans.GlyphLoader.Tests
             "Lora-VariableFont_wght.ttf",
             "NotoSansJP-Regular.otf",
             "NotoSerifJP-Regular.otf",
-            // "KozGoPr6N-Medium.otf",
+            "Font Awesome 5 Free-Solid-900.otf",
         };
 
         private static readonly Dictionary<string, Typeface> _typefaceCache = LoadAllTypeface();
@@ -37,6 +37,7 @@ namespace WaterTrans.GlyphLoader.Tests
         [DataRow("Lora-VariableFont_wght.ttf", 1.006)]
         [DataRow("NotoSansJP-Regular.otf", 0.88)]
         [DataRow("NotoSerifJP-Regular.otf", 0.88)]
+        [DataRow("Font Awesome 5 Free-Solid-900.otf", 0.875)]
         public void Baseline_Equal_KnownValue(string fontFile, double baseline)
         {
             var tf = _typefaceCache[fontFile];
@@ -108,6 +109,7 @@ namespace WaterTrans.GlyphLoader.Tests
         [DataRow("Lora-VariableFont_wght.ttf", 1.28)]
         [DataRow("NotoSansJP-Regular.otf", 1.0)]
         [DataRow("NotoSerifJP-Regular.otf", 1.0)]
+        [DataRow("Font Awesome 5 Free-Solid-900.otf", 1.0)]
         public void Height_Equal_KnownValue(string fontFile, double height)
         {
             var tf = _typefaceCache[fontFile];
@@ -374,7 +376,7 @@ namespace WaterTrans.GlyphLoader.Tests
         // [TestMethod]
         public void OtherFont()
         {
-            string fontFile = "FontAwesome.otf";
+            string fontFile = "Font Awesome 5 Free-Solid-900.otf";
             string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
             
             using (var fontStream = File.OpenRead(fontPath))

@@ -52,7 +52,7 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
         /// </summary>
         /// <param name="opCode">The One-byte or Two-byte Type 2 operator code.</param>
         /// <param name="operands">The array of operand.</param>
-        internal CharStringExpression(int opCode, int[] operands)
+        internal CharStringExpression(int opCode, double[] operands)
         {
             if (!Operators.ContainsKey(opCode))
             {
@@ -71,6 +71,6 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
         public string Operator { get; }
 
         /// <summary>The array of operand.</summary>
-        public int[] Operands { get; }
+        public double[] Operands { get; }
     }
 }

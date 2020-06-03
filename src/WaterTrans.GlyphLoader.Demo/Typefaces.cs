@@ -36,6 +36,9 @@ namespace WaterTrans.GlyphLoader.Demo
             "Roboto-Regular.ttf",
             "RobotoMono-Regular.ttf",
             "Lora-VariableFont_wght.ttf",
+            "Font Awesome 5 Free-Solid-900.otf",
+            "Font Awesome 5 Free-Regular-400.otf",
+            "Font Awesome 5 Brands-Regular-400.otf",
         };
 
         public bool ContainsKey(string key)

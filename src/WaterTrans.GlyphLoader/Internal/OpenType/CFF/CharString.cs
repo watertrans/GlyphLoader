@@ -59,7 +59,7 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
         /// </summary>
         /// <param name="data">The byte array of The Type 2 Charstring.</param>
         /// <param name="operand">The stack of operand.</param>
-        public void Parse(byte[] data, Stack<int> operand)
+        public void Parse(byte[] data, Stack<double> operand)
         {
             int index = 0;
 
@@ -68,7 +68,7 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                 _stemCount = 0;
                 _haveWidth = false;
                 Expressions.Clear();
-                operand = new Stack<int>();
+                operand = new Stack<double>();
             }
 
             while (index < data.Length)
@@ -91,7 +91,7 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                 }
                 else if (data[index] == 255)
                 {
-                    operand.Push(data[index + 1] << 24 | data[index + 2] << 16 | data[index + 3] << 8 | data[index + 4]);
+                    operand.Push((data[index + 1] << 24 | data[index + 2] << 16 | data[index + 3] << 8 | data[index + 4]) / 65536.0);
                     advance = 5;
                 }
                 else if (data[index] == 28)
@@ -117,7 +117,7 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                     if (operand.Count > 0)
                     {
                         var subrs = operand.Pop();
-                        Parse(_localSubroutines.Objects[subrs + _localSubroutinesBias], operand);
+                        Parse(_localSubroutines.Objects[(int)subrs + _localSubroutinesBias], operand);
                     }
                 }
                 else if (data[index] == 11)
@@ -142,7 +142,7 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                     if (operand.Count > 0)
                     {
                         var subrs = operand.Pop();
-                        Parse(_globalSubroutines.Objects[subrs + _globalSubroutinesBias], operand);
+                        Parse(_globalSubroutines.Objects[(int)subrs + _globalSubroutinesBias], operand);
                     }
                 }
                 else if (data[index] == 4 || data[index] == 22)
@@ -213,8 +213,8 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
         /// </summary>
         public void CalcMetrics()
         {
-            int x = 0;
-            int y = 0;
+            double x = 0;
+            double y = 0;
 
             foreach (var expression in Expressions)
             {
@@ -268,10 +268,10 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                 {
                     for (int i = 0; i < expression.Operands.Length; i += 6)
                     {
-                        int c1x = x + expression.Operands[i];
-                        int c1y = y + expression.Operands[i + 1];
-                        int c2x = c1x + expression.Operands[i + 2];
-                        int c2y = c1y + expression.Operands[i + 3];
+                        double c1x = x + expression.Operands[i];
+                        double c1y = y + expression.Operands[i + 1];
+                        double c2x = c1x + expression.Operands[i + 2];
+                        double c2y = c1y + expression.Operands[i + 3];
                         x = c2x + expression.Operands[i + 4];
                         y = c2y + expression.Operands[i + 5];
 
@@ -295,10 +295,10 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                 {
                     for (int i = 0; i < expression.Operands.Length - 2; i += 6)
                     {
-                        int c1x = x + expression.Operands[i];
-                        int c1y = y + expression.Operands[i + 1];
-                        int c2x = c1x + expression.Operands[i + 2];
-                        int c2y = c1y + expression.Operands[i + 3];
+                        double c1x = x + expression.Operands[i];
+                        double c1y = y + expression.Operands[i + 1];
+                        double c2x = c1x + expression.Operands[i + 2];
+                        double c2y = c1y + expression.Operands[i + 3];
                         x = c2x + expression.Operands[i + 4];
                         y = c2y + expression.Operands[i + 5];
 
@@ -320,10 +320,10 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                         SetXY(x, y);
                     }
 
-                    int c1x = x + expression.Operands[expression.Operands.Length - 6];
-                    int c1y = y + expression.Operands[expression.Operands.Length - 5];
-                    int c2x = c1x + expression.Operands[expression.Operands.Length - 4];
-                    int c2y = c1y + expression.Operands[expression.Operands.Length - 3];
+                    double c1x = x + expression.Operands[expression.Operands.Length - 6];
+                    double c1y = y + expression.Operands[expression.Operands.Length - 5];
+                    double c2x = c1x + expression.Operands[expression.Operands.Length - 4];
+                    double c2y = c1y + expression.Operands[expression.Operands.Length - 3];
                     x = c2x + expression.Operands[expression.Operands.Length - 2];
                     y = c2y + expression.Operands[expression.Operands.Length - 1];
 
@@ -342,10 +342,10 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
 
                     for (int i = start; i < expression.Operands.Length; i += 4)
                     {
-                        int c1x = x;
-                        int c1y = y + expression.Operands[i];
-                        int c2x = c1x + expression.Operands[i + 1];
-                        int c2y = c1y + expression.Operands[i + 2];
+                        double c1x = x;
+                        double c1y = y + expression.Operands[i];
+                        double c2x = c1x + expression.Operands[i + 1];
+                        double c2y = c1y + expression.Operands[i + 2];
                         x = c2x;
                         y = c2y + expression.Operands[i + 3];
 
@@ -365,10 +365,10 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
 
                     for (int i = start; i < expression.Operands.Length; i += 4)
                     {
-                        int c1x = x + expression.Operands[i];
-                        int c1y = y;
-                        int c2x = c1x + expression.Operands[i + 1];
-                        int c2y = c1y + expression.Operands[i + 2];
+                        double c1x = x + expression.Operands[i];
+                        double c1y = y;
+                        double c2x = c1x + expression.Operands[i + 1];
+                        double c2y = c1y + expression.Operands[i + 2];
                         x = c2x + expression.Operands[i + 3];
                         y = c2y;
 
@@ -382,10 +382,10 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                     int i = 0;
                     while (i < expression.Operands.Length)
                     {
-                        int c1x = x;
-                        int c1y = y + expression.Operands[i];
-                        int c2x = c1x + expression.Operands[i + 1];
-                        int c2y = c1y + expression.Operands[i + 2];
+                        double c1x = x;
+                        double c1y = y + expression.Operands[i];
+                        double c2x = c1x + expression.Operands[i + 1];
+                        double c2y = c1y + expression.Operands[i + 2];
                         x = c2x + expression.Operands[i + 3];
                         y = c2y + (expression.Operands.Length == i + 5 ? expression.Operands[i + 4] : 0);
 
@@ -424,10 +424,10 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                     int i = 0;
                     while (i < expression.Operands.Length)
                     {
-                        int c1x = x + expression.Operands[i];
-                        int c1y = y;
-                        int c2x = c1x + expression.Operands[i + 1];
-                        int c2y = c1y + expression.Operands[i + 2];
+                        double c1x = x + expression.Operands[i];
+                        double c1y = y;
+                        double c2x = c1x + expression.Operands[i + 1];
+                        double c2y = c1y + expression.Operands[i + 2];
                         x = c2x + (expression.Operands.Length == i + 5 ? expression.Operands[i + 4] : 0);
                         y = c2y + expression.Operands[i + 3];
 
@@ -463,21 +463,21 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                 }
                 else if (expression.OpCode == 0x0c22) // hflex
                 {
-                    int c1x = x + expression.Operands[0];
-                    int c1y = y;
-                    int c2x = c1x + expression.Operands[1];
-                    int c2y = c1y + expression.Operands[2];
-                    int c3x = c2x + expression.Operands[3];
-                    int c3y = c2y;
+                    double c1x = x + expression.Operands[0];
+                    double c1y = y;
+                    double c2x = c1x + expression.Operands[1];
+                    double c2y = c1y + expression.Operands[2];
+                    double c3x = c2x + expression.Operands[3];
+                    double c3y = c2y;
 
                     SetXY(c1x, c1y);
                     SetXY(c2x, c2y);
                     SetXY(c3x, c3y);
 
-                    int c4x = c3x + expression.Operands[4];
-                    int c4y = c2y;
-                    int c5x = c4x + expression.Operands[5];
-                    int c5y = y;
+                    double c4x = c3x + expression.Operands[4];
+                    double c4y = c2y;
+                    double c5x = c4x + expression.Operands[5];
+                    double c5y = y;
                     x = c5x + expression.Operands[6];
 
                     SetXY(c4x, c4y);
@@ -486,21 +486,21 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                 }
                 else if (expression.OpCode == 0x0c23) // flex
                 {
-                    int c1x = x + expression.Operands[0];
-                    int c1y = y + expression.Operands[1];
-                    int c2x = c1x + expression.Operands[2];
-                    int c2y = c1y + expression.Operands[3];
-                    int c3x = c2x + expression.Operands[4];
-                    int c3y = c2y + expression.Operands[5];
+                    double c1x = x + expression.Operands[0];
+                    double c1y = y + expression.Operands[1];
+                    double c2x = c1x + expression.Operands[2];
+                    double c2y = c1y + expression.Operands[3];
+                    double c3x = c2x + expression.Operands[4];
+                    double c3y = c2y + expression.Operands[5];
 
                     SetXY(c1x, c1y);
                     SetXY(c2x, c2y);
                     SetXY(c3x, c3y);
 
-                    int c4x = c3x + expression.Operands[6];
-                    int c4y = c3y + expression.Operands[7];
-                    int c5x = c4x + expression.Operands[8];
-                    int c5y = c4y + expression.Operands[9];
+                    double c4x = c3x + expression.Operands[6];
+                    double c4y = c3y + expression.Operands[7];
+                    double c5x = c4x + expression.Operands[8];
+                    double c5y = c4y + expression.Operands[9];
                     x = c5x + expression.Operands[10];
                     y = c5y + expression.Operands[11];
 
@@ -510,21 +510,21 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                 }
                 else if (expression.OpCode == 0x0c24) // hflex1
                 {
-                    int c1x = x + expression.Operands[0];
-                    int c1y = y + expression.Operands[1];
-                    int c2x = c1x + expression.Operands[2];
-                    int c2y = c1y + expression.Operands[3];
-                    int c3x = c2x + expression.Operands[4];
-                    int c3y = c2y;
+                    double c1x = x + expression.Operands[0];
+                    double c1y = y + expression.Operands[1];
+                    double c2x = c1x + expression.Operands[2];
+                    double c2y = c1y + expression.Operands[3];
+                    double c3x = c2x + expression.Operands[4];
+                    double c3y = c2y;
 
                     SetXY(c1x, c1y);
                     SetXY(c2x, c2y);
                     SetXY(c3x, c3y);
 
-                    int c4x = c3x + expression.Operands[5];
-                    int c4y = c2y;
-                    int c5x = c4x + expression.Operands[6];
-                    int c5y = c4y + expression.Operands[7];
+                    double c4x = c3x + expression.Operands[5];
+                    double c4y = c2y;
+                    double c5x = c4x + expression.Operands[6];
+                    double c5y = c4y + expression.Operands[7];
                     x = c5x + expression.Operands[8];
 
                     SetXY(c4x, c4y);
@@ -533,21 +533,21 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                 }
                 else if (expression.OpCode == 0x0c25) // flex1
                 {
-                    int c1x = x + expression.Operands[0];
-                    int c1y = y + expression.Operands[1];
-                    int c2x = c1x + expression.Operands[2];
-                    int c2y = c1y + expression.Operands[3];
-                    int c3x = c2x + expression.Operands[4];
-                    int c3y = c2y + expression.Operands[5];
+                    double c1x = x + expression.Operands[0];
+                    double c1y = y + expression.Operands[1];
+                    double c2x = c1x + expression.Operands[2];
+                    double c2y = c1y + expression.Operands[3];
+                    double c3x = c2x + expression.Operands[4];
+                    double c3y = c2y + expression.Operands[5];
 
                     SetXY(c1x, c1y);
                     SetXY(c2x, c2y);
                     SetXY(c3x, c3y);
 
-                    int c4x = c3x + expression.Operands[6];
-                    int c4y = c3y + expression.Operands[7];
-                    int c5x = c4x + expression.Operands[8];
-                    int c5y = c4y + expression.Operands[9];
+                    double c4x = c3x + expression.Operands[6];
+                    double c4y = c3y + expression.Operands[7];
+                    double c5x = c4x + expression.Operands[8];
+                    double c5y = c4y + expression.Operands[9];
 
                     if (Math.Abs(c5x - x) > Math.Abs(c5y - y))
                     {
@@ -592,8 +592,8 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
         /// <returns>Returns the <see cref="PathGeometry"/>.</returns>
         public PathGeometry ConvertToPathGeometry(double scale)
         {
-            int x = 0;
-            int y = 0;
+            double x = 0;
+            double y = 0;
 
             var result = new PathGeometry();
             result.FillRule = FillRule.Nonzero;
@@ -655,10 +655,10 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                 {
                     for (int i = 0; i < expression.Operands.Length; i += 6)
                     {
-                        int c1x = x + expression.Operands[i];
-                        int c1y = y + expression.Operands[i + 1];
-                        int c2x = c1x + expression.Operands[i + 2];
-                        int c2y = c1y + expression.Operands[i + 3];
+                        double c1x = x + expression.Operands[i];
+                        double c1y = y + expression.Operands[i + 1];
+                        double c2x = c1x + expression.Operands[i + 2];
+                        double c2y = c1y + expression.Operands[i + 3];
                         x = c2x + expression.Operands[i + 4];
                         y = c2y + expression.Operands[i + 5];
 
@@ -690,10 +690,10 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                 {
                     for (int i = 0; i < expression.Operands.Length - 2; i += 6)
                     {
-                        int c1x = x + expression.Operands[i];
-                        int c1y = y + expression.Operands[i + 1];
-                        int c2x = c1x + expression.Operands[i + 2];
-                        int c2y = c1y + expression.Operands[i + 3];
+                        double c1x = x + expression.Operands[i];
+                        double c1y = y + expression.Operands[i + 1];
+                        double c2x = c1x + expression.Operands[i + 2];
+                        double c2y = c1y + expression.Operands[i + 3];
                         x = c2x + expression.Operands[i + 4];
                         y = c2y + expression.Operands[i + 5];
 
@@ -717,10 +717,10 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                         figure.Segments.Add(new LineSegment(new Point(x * scale, -y * scale), true));
                     }
 
-                    int c1x = x + expression.Operands[expression.Operands.Length - 6];
-                    int c1y = y + expression.Operands[expression.Operands.Length - 5];
-                    int c2x = c1x + expression.Operands[expression.Operands.Length - 4];
-                    int c2y = c1y + expression.Operands[expression.Operands.Length - 3];
+                    double c1x = x + expression.Operands[expression.Operands.Length - 6];
+                    double c1y = y + expression.Operands[expression.Operands.Length - 5];
+                    double c2x = c1x + expression.Operands[expression.Operands.Length - 4];
+                    double c2y = c1y + expression.Operands[expression.Operands.Length - 3];
                     x = c2x + expression.Operands[expression.Operands.Length - 2];
                     y = c2y + expression.Operands[expression.Operands.Length - 1];
 
@@ -741,10 +741,10 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
 
                     for (int i = start; i < expression.Operands.Length; i += 4)
                     {
-                        int c1x = x;
-                        int c1y = y + expression.Operands[i];
-                        int c2x = c1x + expression.Operands[i + 1];
-                        int c2y = c1y + expression.Operands[i + 2];
+                        double c1x = x;
+                        double c1y = y + expression.Operands[i];
+                        double c2x = c1x + expression.Operands[i + 1];
+                        double c2y = c1y + expression.Operands[i + 2];
                         x = c2x;
                         y = c2y + expression.Operands[i + 3];
 
@@ -766,10 +766,10 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
 
                     for (int i = start; i < expression.Operands.Length; i += 4)
                     {
-                        int c1x = x + expression.Operands[i];
-                        int c1y = y;
-                        int c2x = c1x + expression.Operands[i + 1];
-                        int c2y = c1y + expression.Operands[i + 2];
+                        double c1x = x + expression.Operands[i];
+                        double c1y = y;
+                        double c2x = c1x + expression.Operands[i + 1];
+                        double c2y = c1y + expression.Operands[i + 2];
                         x = c2x + expression.Operands[i + 3];
                         y = c2y;
 
@@ -785,10 +785,10 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                     int i = 0;
                     while (i < expression.Operands.Length)
                     {
-                        int c1x = x;
-                        int c1y = y + expression.Operands[i];
-                        int c2x = c1x + expression.Operands[i + 1];
-                        int c2y = c1y + expression.Operands[i + 2];
+                        double c1x = x;
+                        double c1y = y + expression.Operands[i];
+                        double c2x = c1x + expression.Operands[i + 1];
+                        double c2y = c1y + expression.Operands[i + 2];
                         x = c2x + expression.Operands[i + 3];
                         y = c2y + (expression.Operands.Length == i + 5 ? expression.Operands[i + 4] : 0);
 
@@ -831,10 +831,10 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                     int i = 0;
                     while (i < expression.Operands.Length)
                     {
-                        int c1x = x + expression.Operands[i];
-                        int c1y = y;
-                        int c2x = c1x + expression.Operands[i + 1];
-                        int c2y = c1y + expression.Operands[i + 2];
+                        double c1x = x + expression.Operands[i];
+                        double c1y = y;
+                        double c2x = c1x + expression.Operands[i + 1];
+                        double c2y = c1y + expression.Operands[i + 2];
                         x = c2x + (expression.Operands.Length == i + 5 ? expression.Operands[i + 4] : 0);
                         y = c2y + expression.Operands[i + 3];
 
@@ -874,12 +874,12 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                 }
                 else if (expression.OpCode == 0x0c22) // hflex
                 {
-                    int c1x = x + expression.Operands[0];
-                    int c1y = y;
-                    int c2x = c1x + expression.Operands[1];
-                    int c2y = c1y + expression.Operands[2];
-                    int c3x = c2x + expression.Operands[3];
-                    int c3y = c2y;
+                    double c1x = x + expression.Operands[0];
+                    double c1y = y;
+                    double c2x = c1x + expression.Operands[1];
+                    double c2y = c1y + expression.Operands[2];
+                    double c3x = c2x + expression.Operands[3];
+                    double c3y = c2y;
 
                     figure.Segments.Add(new BezierSegment(
                         new Point(c1x * scale, -c1y * scale),
@@ -887,10 +887,10 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                         new Point(c3x * scale, -c3y * scale),
                         true));
 
-                    int c4x = c3x + expression.Operands[4];
-                    int c4y = c2y;
-                    int c5x = c4x + expression.Operands[5];
-                    int c5y = y;
+                    double c4x = c3x + expression.Operands[4];
+                    double c4y = c2y;
+                    double c5x = c4x + expression.Operands[5];
+                    double c5y = y;
                     x = c5x + expression.Operands[6];
 
                     figure.Segments.Add(new BezierSegment(
@@ -901,12 +901,12 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                 }
                 else if (expression.OpCode == 0x0c23) // flex
                 {
-                    int c1x = x + expression.Operands[0];
-                    int c1y = y + expression.Operands[1];
-                    int c2x = c1x + expression.Operands[2];
-                    int c2y = c1y + expression.Operands[3];
-                    int c3x = c2x + expression.Operands[4];
-                    int c3y = c2y + expression.Operands[5];
+                    double c1x = x + expression.Operands[0];
+                    double c1y = y + expression.Operands[1];
+                    double c2x = c1x + expression.Operands[2];
+                    double c2y = c1y + expression.Operands[3];
+                    double c3x = c2x + expression.Operands[4];
+                    double c3y = c2y + expression.Operands[5];
 
                     figure.Segments.Add(new BezierSegment(
                         new Point(c1x * scale, -c1y * scale),
@@ -914,10 +914,10 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                         new Point(c3x * scale, -c3y * scale),
                         true));
 
-                    int c4x = c3x + expression.Operands[6];
-                    int c4y = c3y + expression.Operands[7];
-                    int c5x = c4x + expression.Operands[8];
-                    int c5y = c4y + expression.Operands[9];
+                    double c4x = c3x + expression.Operands[6];
+                    double c4y = c3y + expression.Operands[7];
+                    double c5x = c4x + expression.Operands[8];
+                    double c5y = c4y + expression.Operands[9];
                     x = c5x + expression.Operands[10];
                     y = c5y + expression.Operands[11];
 
@@ -929,12 +929,12 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                 }
                 else if (expression.OpCode == 0x0c24) // hflex1
                 {
-                    int c1x = x + expression.Operands[0];
-                    int c1y = y + expression.Operands[1];
-                    int c2x = c1x + expression.Operands[2];
-                    int c2y = c1y + expression.Operands[3];
-                    int c3x = c2x + expression.Operands[4];
-                    int c3y = c2y;
+                    double c1x = x + expression.Operands[0];
+                    double c1y = y + expression.Operands[1];
+                    double c2x = c1x + expression.Operands[2];
+                    double c2y = c1y + expression.Operands[3];
+                    double c3x = c2x + expression.Operands[4];
+                    double c3y = c2y;
 
                     figure.Segments.Add(new BezierSegment(
                         new Point(c1x * scale, -c1y * scale),
@@ -942,10 +942,10 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                         new Point(c3x * scale, -c3y * scale),
                         true));
 
-                    int c4x = c3x + expression.Operands[5];
-                    int c4y = c2y;
-                    int c5x = c4x + expression.Operands[6];
-                    int c5y = c4y + expression.Operands[7];
+                    double c4x = c3x + expression.Operands[5];
+                    double c4y = c2y;
+                    double c5x = c4x + expression.Operands[6];
+                    double c5y = c4y + expression.Operands[7];
                     x = c5x + expression.Operands[8];
 
                     figure.Segments.Add(new BezierSegment(
@@ -956,12 +956,12 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                 }
                 else if (expression.OpCode == 0x0c25) // flex1
                 {
-                    int c1x = x + expression.Operands[0];
-                    int c1y = y + expression.Operands[1];
-                    int c2x = c1x + expression.Operands[2];
-                    int c2y = c1y + expression.Operands[3];
-                    int c3x = c2x + expression.Operands[4];
-                    int c3y = c2y + expression.Operands[5];
+                    double c1x = x + expression.Operands[0];
+                    double c1y = y + expression.Operands[1];
+                    double c2x = c1x + expression.Operands[2];
+                    double c2y = c1y + expression.Operands[3];
+                    double c3x = c2x + expression.Operands[4];
+                    double c3y = c2y + expression.Operands[5];
 
                     figure.Segments.Add(new BezierSegment(
                         new Point(c1x * scale, -c1y * scale),
@@ -969,10 +969,10 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
                         new Point(c3x * scale, -c3y * scale),
                         true));
 
-                    int c4x = c3x + expression.Operands[6];
-                    int c4y = c3y + expression.Operands[7];
-                    int c5x = c4x + expression.Operands[8];
-                    int c5y = c4y + expression.Operands[9];
+                    double c4x = c3x + expression.Operands[6];
+                    double c4y = c3y + expression.Operands[7];
+                    double c5x = c4x + expression.Operands[8];
+                    double c5y = c4y + expression.Operands[9];
 
                     if (Math.Abs(c5x - x) > Math.Abs(c5y - y))
                     {
@@ -994,7 +994,7 @@ namespace WaterTrans.GlyphLoader.Internal.OpenType.CFF
             return result;
         }
 
-        private void SetXY(int x, int y)
+        private void SetXY(double x, double y)
         {
             if (x < XMin)
             {
