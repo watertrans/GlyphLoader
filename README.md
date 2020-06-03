@@ -17,6 +17,10 @@ In WebAssembly environment, it can be used for application development using gly
 
 ## Release Notes
 
+### 1.0
+
+- Initial release
+
 ### 1.0-beta3
 
 - Add support for GPOS single adjustment, pair adjustment
