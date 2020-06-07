@@ -75,6 +75,7 @@
       <DependentUpon>TextResources.resx</DependentUpon>
     </Compile>
     <Compile Include="TypefaceExample.cs" />
+    <Compile Include="TypefaceReaderTest.cs" />
     <Compile Include="TypefaceTest.cs" />
   </ItemGroup>
   <ItemGroup>

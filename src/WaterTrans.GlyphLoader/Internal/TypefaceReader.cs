@@ -3,8 +3,10 @@
 // </copyright>
 
 using System;
-using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
+
+[assembly: InternalsVisibleTo("WaterTrans.GlyphLoader.Tests")]
 
 namespace WaterTrans.GlyphLoader.Internal
 {
@@ -119,6 +121,81 @@ namespace WaterTrans.GlyphLoader.Internal
             byte result = _byteArray[Position];
             Position += 1;
             return result;
+        }
+
+        /// <summary>
+        /// Read 255UInt16.
+        /// </summary>
+        /// <returns>Read result.</returns>
+        public ushort Read255UInt16()
+        {
+            byte code;
+            ushort value, value2;
+
+            const byte oneMoreByteCode1    = 255;
+            const byte oneMoreByteCode2    = 254;
+            const byte wordCode            = 253;
+            const byte lowestUCode         = 253;
+
+            code = ReadByte();
+            if (code == wordCode)
+            {
+                value = ReadByte();
+                value <<= 8;
+                value2 = ReadByte();
+                value = (ushort)(value | value2);
+            }
+            else if (code == oneMoreByteCode1)
+            {
+                value = ReadByte();
+                value += lowestUCode;
+            }
+            else if (code == oneMoreByteCode2)
+            {
+                value = ReadByte();
+                value += lowestUCode * 2;
+            }
+            else
+            {
+                value = code;
+            }
+            return value;
+        }
+
+        /// <summary>
+        /// Read UIntBase128.
+        /// </summary>
+        /// <returns>Read result.</returns>
+        public uint ReadUIntBase128()
+        {
+            uint accum = 0;
+
+            for (int i = 0; i < 5; i++)
+            {
+                byte data_byte = ReadByte();
+
+                // No leading 0's
+                if (i == 0 && data_byte == 0x80)
+                {
+                    throw new FormatException("Encountered a UintBase128-encoded value with leading zeros.");
+                }
+
+                // If any of top 7 bits are set then << 7 would overflow
+                if ((accum & 0xFE000000) != 0)
+                {
+                    throw new FormatException("Encountered a UintBase128-encoded value with overflow.");
+                }
+
+                accum = (uint)(accum << 7) | (uint)(data_byte & 0x7F);
+
+                // Spin until most significant bit of data byte is false
+                if ((data_byte & 0x80) == 0)
+                {
+                    return accum;
+                }
+            }
+            // UIntBase128 sequence exceeds 5 bytes
+            throw new FormatException("Encountered a UintBase128-encoded value with sequence exceeds 5 bytes.");
         }
 
         /// <summary>
