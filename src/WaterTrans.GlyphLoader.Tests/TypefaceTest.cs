@@ -373,16 +373,15 @@ namespace WaterTrans.GlyphLoader.Tests
             }
         }
 
-        // [TestMethod]
-        public void OtherFont()
+        [TestMethod]
+        public void WOFF2Font()
         {
-            string fontFile = "Font Awesome 5 Free-Solid-900.otf";
+            string fontFile = "Roboto-Regular.woff2";
             string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
             
             using (var fontStream = File.OpenRead(fontPath))
             {
                 var tf = new Typeface(fontStream);
-                var gt = new GlyphTypeface(new Uri(fontPath));
             }
         }
 

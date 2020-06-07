@@ -1,12 +1,9 @@
 ﻿// <copyright file="TypefaceReader.cs" company="WaterTrans">
-// © 2020 WaterTrans
+// © 2020 WaterTrans and Contributors
 // </copyright>
 
 using System;
-using System.Runtime.CompilerServices;
 using System.Text;
-
-[assembly: InternalsVisibleTo("WaterTrans.GlyphLoader.Tests")]
 
 namespace WaterTrans.GlyphLoader.Internal
 {

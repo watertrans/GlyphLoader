@@ -13,6 +13,7 @@ using WaterTrans.GlyphLoader.Internal;
 using WaterTrans.GlyphLoader.Internal.AAT;
 using WaterTrans.GlyphLoader.Internal.OpenType.CFF;
 using WaterTrans.GlyphLoader.Internal.SFNT;
+using WaterTrans.GlyphLoader.Internal.WOFF2;
 using WaterTrans.GlyphLoader.OpenType;
 
 namespace WaterTrans.GlyphLoader
@@ -27,6 +28,7 @@ namespace WaterTrans.GlyphLoader
         private readonly Dictionary<ushort, GlyphData> _glyphDataCache = new Dictionary<ushort, GlyphData>();
         private readonly Dictionary<ushort, CharString> _charStringCache = new Dictionary<ushort, CharString>();
         private readonly Dictionary<string, TableDirectory> _tableDirectories = new Dictionary<string, TableDirectory>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, WOFF2TableDirectory> _woff2TableDirectories = new Dictionary<string, WOFF2TableDirectory>(StringComparer.OrdinalIgnoreCase);
         private readonly ConcurrentDictionary<string, IDictionary<ushort, ushort>> _singleSubstitutionMaps = new ConcurrentDictionary<string, IDictionary<ushort, ushort>>(StringComparer.OrdinalIgnoreCase);
         private readonly ConcurrentDictionary<string, IDictionary<ushort[], ushort>> _ligatureSubstitutionMaps = new ConcurrentDictionary<string, IDictionary<ushort[], ushort>>(StringComparer.OrdinalIgnoreCase);
         private readonly ConcurrentDictionary<string, IDictionary<ushort, ushort[]>> _multipleSubstitutionMaps = new ConcurrentDictionary<string, IDictionary<ushort, ushort[]>>(StringComparer.OrdinalIgnoreCase);
@@ -40,6 +42,7 @@ namespace WaterTrans.GlyphLoader
         private IDictionary<ushort, double> _designUnitsTopSideBearings;
         private IDictionary<ushort, double> _designUnitsBottomSideBearings;
         private IDictionary<ushort, double> _designUnitsDistancesFromHorizontalBaselineToBlackBoxBottom;
+        private WOFF2Header _woff2Header;
         private TableOfCMAP _tableOfCMAP;
         private TableOfMAXP _tableOfMAXP;
         private TableOfHEAD _tableOfHEAD;
@@ -95,6 +98,12 @@ namespace WaterTrans.GlyphLoader
                     stream.CopyTo(memoryStream);
                     byteArray = memoryStream.ToArray();
                 }
+            }
+
+            if (IsWOFF2(byteArray))
+            {
+                ReadWOFF2(byteArray, 0);
+                return; // under construction...
             }
 
             if (IsCollection(byteArray))
@@ -725,12 +734,48 @@ namespace WaterTrans.GlyphLoader
             return _charStringCache[glyphIndex];
         }
 
+        private bool IsWOFF2(byte[] byteArray)
+        {
+            bool result;
+            var reader = new TypefaceReader(byteArray, 0);
+            result = reader.ReadCharArray(4) == "wOF2";
+            return result;
+        }
+
         private bool IsCollection(byte[] byteArray)
         {
             bool result;
             var reader = new TypefaceReader(byteArray, 0);
             result = reader.ReadCharArray(4) == "ttcf";
             return result;
+        }
+
+        private void ReadWOFF2(byte[] byteArray, long position)
+        {
+            var reader = new TypefaceReader(byteArray, position);
+            _woff2Header = new WOFF2Header(reader);
+
+            if (_woff2Header.Flavor == 0x74746366)
+            {
+                // TODO Collection directory format
+                throw new NotSupportedException();
+            }
+
+            uint offset = 0;
+            for (int i = 1; i <= _woff2Header.NumTables; i++)
+            {
+                var table = new WOFF2TableDirectory(reader, offset);
+                offset += table.Length;
+                _woff2TableDirectories.Add(table.Tag, table);
+            }
+
+            foreach (string name in TableNames.RequiedTables)
+            {
+                if (!_woff2TableDirectories.ContainsKey(name))
+                {
+                    throw new NotSupportedException("This font file does not contain the required tables.");
+                }
+            }
         }
 
         private void ReadCollectionTypeface(byte[] byteArray, int index)
