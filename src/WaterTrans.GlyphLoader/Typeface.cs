@@ -7,7 +7,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using Brotli;
 using WaterTrans.GlyphLoader.Geometry;
 using WaterTrans.GlyphLoader.Internal;
 using WaterTrans.GlyphLoader.Internal.AAT;
@@ -102,8 +104,9 @@ namespace WaterTrans.GlyphLoader
 
             if (IsWOFF2(byteArray))
             {
-                ReadWOFF2(byteArray, 0);
-                return; // under construction...
+                byteArray = ReadWOFF2(byteArray, 0);
+                ReadTypeface(byteArray, 0, true);
+                return;
             }
 
             if (IsCollection(byteArray))
@@ -112,9 +115,14 @@ namespace WaterTrans.GlyphLoader
             }
             else
             {
-                ReadTypeface(byteArray, 0);
+                ReadTypeface(byteArray, 0, false);
             }
         }
+
+        /// <summary>
+        /// Gets whether to perform checksum calculation.
+        /// </summary>
+        public bool SkipChecksum { get; } = true;  // (Support in future versions)
 
         /// <summary>
         /// Gets height of character cell relative to em size.
@@ -750,7 +758,7 @@ namespace WaterTrans.GlyphLoader
             return result;
         }
 
-        private void ReadWOFF2(byte[] byteArray, long position)
+        private byte[] ReadWOFF2(byte[] byteArray, long position)
         {
             var reader = new TypefaceReader(byteArray, position);
             _woff2Header = new WOFF2Header(reader);
@@ -776,6 +784,25 @@ namespace WaterTrans.GlyphLoader
                     throw new NotSupportedException("This font file does not contain the required tables.");
                 }
             }
+
+            foreach (var item in _woff2TableDirectories)
+            {
+                _tableDirectories[item.Value.Tag] = new TableDirectory(item.Value.Tag, 0, item.Value.Offset, item.Value.Length);
+            }
+
+            return DecodeBrotli(byteArray, (int)reader.Position, (int)_woff2Header.TotalCompressedSize);
+        }
+
+        private byte[] DecodeBrotli(byte[] input, int index, int count)
+        {
+            using (var inputStream = new MemoryStream(input, index, count))
+            using (var bs = new BrotliStream(inputStream, CompressionMode.Decompress))
+            using (var outputStream = new MemoryStream())
+            {
+                bs.CopyTo(outputStream);
+                outputStream.Seek(0, System.IO.SeekOrigin.Begin);
+                return outputStream.ToArray();
+            }
         }
 
         private void ReadCollectionTypeface(byte[] byteArray, int index)
@@ -791,7 +818,7 @@ namespace WaterTrans.GlyphLoader
                 uint ttcDirectoryOffset = reader.ReadUInt32();
                 if (i == index)
                 {
-                    ReadTypeface(byteArray, ttcDirectoryOffset);
+                    ReadTypeface(byteArray, ttcDirectoryOffset, false);
                     return;
                 }
             }
@@ -877,7 +904,7 @@ namespace WaterTrans.GlyphLoader
 
         private void ReadLOCA(TypefaceReader reader)
         {
-            if (!_tableDirectories.ContainsKey(TableNames.LOCA))
+            if (!_tableDirectories.ContainsKey(TableNames.LOCA) || _tableDirectories[TableNames.LOCA].Length == 0)
             {
                 return;
             }
@@ -964,9 +991,17 @@ namespace WaterTrans.GlyphLoader
                 return;
             }
 
-            for (ushort i = 0; i < _tableOfMAXP.NumGlyphs; i++)
+            if (_woff2Header != null && _woff2TableDirectories[TableNames.GLYF].PreprocessingTransformationVersion == 0)
             {
-                ReadGLYFGlyphData(reader, i);
+                reader.Position = _woff2TableDirectories[TableNames.GLYF].Offset;
+                ReadGLYFTransformedGlyphData(reader);
+            }
+            else
+            {
+                for (ushort i = 0; i < _tableOfMAXP.NumGlyphs; i++)
+                {
+                    ReadGLYFGlyphData(reader, i);
+                }
             }
         }
 
@@ -993,6 +1028,127 @@ namespace WaterTrans.GlyphLoader
             result = _tableOfCFF.ParseCharString(glyphIndex, _tableOfHMTX.AdvanceWidths[glyphIndex]);
             _charStringCache[glyphIndex] = result;
             return result;
+        }
+
+        private void ReadGLYFTransformedGlyphData(TypefaceReader reader)
+        {
+            var version = reader.ReadFixed();
+            var numGlyphs = reader.ReadUInt16();
+            var indexFormat = reader.ReadUInt16();
+            var nContourStreamSize = reader.ReadUInt32();
+            var nPointsStreamSize = reader.ReadUInt32();
+            var flagStreamSize = reader.ReadUInt32();
+            var glyphStreamSize = reader.ReadUInt32();
+            var compositeStreamSize = reader.ReadUInt32();
+            var bboxStreamSize = reader.ReadUInt32();
+            var instructionStreamSize = reader.ReadUInt32();
+
+            var currentPosition = reader.Position;
+
+            var nContourStream = new List<short>();
+            var contourCount = 0;
+            for (ushort i = 0; i < numGlyphs; i++)
+            {
+                var contour = reader.ReadInt16();
+                nContourStream.Add(contour);
+                if (contour > 0)
+                {
+                    contourCount += contour;
+                }
+            }
+
+            if (reader.Position - currentPosition != nContourStreamSize)
+            {
+                throw new NotSupportedException("Incorrect value for nContourStreamSize.");
+            }
+
+            currentPosition = reader.Position;
+            var nPointsStream = new List<ushort>();
+            for (ushort i = 0; i < contourCount; i++)
+            {
+                nPointsStream.Add(reader.Read255UInt16());
+            }
+
+            if (reader.Position - currentPosition != nPointsStreamSize)
+            {
+                throw new NotSupportedException("Incorrect value for nPointsStreamSize.");
+            }
+
+            currentPosition = reader.Position;
+            var flagStream = new List<byte>();
+            for (ushort i = 0; i < flagStreamSize; i++)
+            {
+                flagStream.Add(reader.ReadByte());
+            }
+
+            if (reader.Position - currentPosition != flagStreamSize)
+            {
+                throw new NotSupportedException("Incorrect value for flagStreamSize.");
+            }
+
+            int nPointsIndex = 0;
+            int flagIndex = 0;
+            for (ushort i = 0; i < numGlyphs; i++)
+            {
+                var endPtsOfContours = new List<ushort>();
+                var xCoordinates = new List<short>();
+                var yCoordinates = new List<short>();
+                var flags = new List<byte>();
+                ushort instructionLength = 0;
+                int x = 0;
+                int y = 0;
+                ushort nPoints = 0;
+
+                if (nContourStream[i] == 0)
+                {
+                    _glyphDataCache[i] = new GlyphData(i);
+                }
+                else if (nContourStream[i] > 0)
+                {
+                    // Simple Glyph
+                    for (int j = 0; j < nContourStream[i]; j++)
+                    {
+                        ushort endPts = nPointsStream[nPointsIndex + j];
+                        nPoints += endPts;
+                        endPtsOfContours.Add(--endPts);
+                    }
+                    nPointsIndex += nContourStream[i];
+
+                    for (int j = 0; j < nPoints; j++)
+                    {
+                        byte flag = flagStream[flagIndex + j];
+                        int tripletIndex = flag & 0x7F;
+                        var triplet = TripletEncoding.Items[tripletIndex];
+                        byte[] coordinates = reader.ReadBytes(triplet.ByteCount - 1);
+
+                        x += triplet.TranslateX(coordinates);
+                        y += triplet.TranslateY(coordinates);
+
+                        xCoordinates.Add((short)x);
+                        yCoordinates.Add((short)y);
+                        flags.Add((byte)(flag >> 7));
+                    }
+                    flagIndex += nPoints;
+                    instructionLength = reader.Read255UInt16();
+
+                    var glyph = new GlyphData(i);
+                    glyph.NumberOfContours = nContourStream[i];
+                    glyph.EndPtsOfContours.AddRange(endPtsOfContours);
+                    glyph.InstructionLength = instructionLength;
+                    glyph.NumberOfCoordinates = nPoints;
+                    glyph.Flags.AddRange(flags);
+                    glyph.XCoordinates.AddRange(xCoordinates);
+                    glyph.YCoordinates.AddRange(yCoordinates);
+                    _glyphDataCache[i] = glyph;
+                }
+                else
+                {
+                    // Composite Glyph
+                    // TODO under construction...
+                }
+            }
+
+            return;
         }
 
         private GlyphData ReadGLYFGlyphData(TypefaceReader reader, ushort glyphIndex)
@@ -1178,10 +1334,18 @@ namespace WaterTrans.GlyphLoader
             }
         }
 
-        private void ReadTypeface(byte[] byteArray, long position)
+        private void ReadTypeface(byte[] byteArray, long position, bool isWOFF2)
         {
             var reader = new TypefaceReader(byteArray, position);
-            ReadDirectory(reader);
+
+            if (!isWOFF2)
+            {
+                ReadDirectory(reader);
+                if (!SkipChecksum)
+                {
+                    CalcAllTableChecksum(byteArray);
+                }
+            }
             ReadCMAP(reader);
             ReadMAXP(reader);
             ReadHEAD(reader);
@@ -1231,6 +1395,37 @@ namespace WaterTrans.GlyphLoader
                     throw new NotSupportedException("This font file does not contain the required tables.");
                 }
             }
+        }
+
+        private void CalcAllTableChecksum(byte[] byteArray)
+        {
+            foreach (var item in _tableDirectories)
+            {
+                if (item.Key == TableNames.HEAD)
+                {
+                    continue;
+                }
+
+                var table = _tableDirectories[item.Key];
+                var checksum = CalcTableChecksum(byteArray, table.Offset, table.Length);
+
+                if (checksum != table.CheckSum)
+                {
+                    throw new NotSupportedException($"The checksums in the '{item.Key}' table did not match.");
+                }
+            }
+        }
+
+        private uint CalcTableChecksum(byte[] byteArray, long position, uint numberOfBytesInTable)
+        {
+            var reader = new TypefaceReader(byteArray, position);
+            uint sum = 0;
+            uint nLongs = (numberOfBytesInTable + 3) / 4;
+            while (nLongs-- > 0)
+            {
+                sum += reader.ReadUInt32();
+            }
+            return sum;
         }
     }
 }

@@ -29,6 +29,7 @@ In WebAssembly environment, it can be used for application development using gly
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Brotli.NET" Version="2.0.4.2" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
