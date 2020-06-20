@@ -50,6 +50,7 @@ namespace WaterTrans.GlyphLoader.Internal.AAT
             XMax = glyphData.XMax;
             YMax = glyphData.YMax;
             EndPtsOfContours.AddRange(glyphData.EndPtsOfContours);
+            HasInstructions = glyphData.HasInstructions;
             InstructionLength = glyphData.InstructionLength;
             Instructions.AddRange(glyphData.Instructions);
             NumberOfCoordinates = glyphData.NumberOfCoordinates;
@@ -180,7 +181,7 @@ namespace WaterTrans.GlyphLoader.Internal.AAT
                 }
                 if ((flags & WE_HAVE_INSTRUCTIONS) > 0)
                 {
-                    // We have instructions
+                    HasInstructions = true;
                     InstructionLength = reader.ReadUInt16();
 
                     for (int i = 0; i < InstructionLength; i++)
@@ -211,6 +212,9 @@ namespace WaterTrans.GlyphLoader.Internal.AAT
 
         /// <summary>Gets an array of point indices for the last point of each contour, in increasing numeric order.</summary>
         public List<ushort> EndPtsOfContours { get; } = new List<ushort>();
+
+        /// <summary>Gets a value that indicates whether this glyph has instructions.</summary>
+        public bool HasInstructions { get; internal set; }
 
         /// <summary>Gets the total number of bytes for instructions. If instructionLength is zero, no instructions are present for this glyph, and this field is followed directly by the flags field.</summary>
         public ushort InstructionLength { get; internal set; }

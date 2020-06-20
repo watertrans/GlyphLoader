@@ -1043,10 +1043,18 @@ namespace WaterTrans.GlyphLoader
             var bboxStreamSize = reader.ReadUInt32();
             var instructionStreamSize = reader.ReadUInt32();
 
-            var currentPosition = reader.Position;
+            var nContourStreamPosition = reader.Position;
+            var nPointsStreamPosition = nContourStreamPosition + nContourStreamSize;
+            var flagStreamPosition = nPointsStreamPosition + nPointsStreamSize;
+            var glyphStreamPosition = flagStreamPosition + flagStreamSize;
+            var compositeStreamPosition = glyphStreamPosition + glyphStreamSize;
+            var bboxStreamPosition = compositeStreamPosition + compositeStreamSize;
+            var instructionStreamPosition = bboxStreamPosition + bboxStreamSize;
 
+            // Stream of Int16 values representing number of contours for each glyph record
             var nContourStream = new List<short>();
             var contourCount = 0;
+            var compositeGlyphs = new List<ushort>();
             for (ushort i = 0; i < numGlyphs; i++)
             {
                 var contour = reader.ReadInt16();
@@ -1055,37 +1063,72 @@ namespace WaterTrans.GlyphLoader
                 {
                     contourCount += contour;
                 }
+                else if (contour < 0)
+                {
+                    compositeGlyphs.Add(i);
+                }
             }
 
-            if (reader.Position - currentPosition != nContourStreamSize)
+            if (reader.Position != nPointsStreamPosition)
             {
                 throw new NotSupportedException("Incorrect value for nContourStreamSize.");
             }
 
-            currentPosition = reader.Position;
+            // Stream of values representing number of outline points for each contour in glyph records
             var nPointsStream = new List<ushort>();
             for (ushort i = 0; i < contourCount; i++)
             {
                 nPointsStream.Add(reader.Read255UInt16());
             }
 
-            if (reader.Position - currentPosition != nPointsStreamSize)
+            if (reader.Position != flagStreamPosition)
             {
                 throw new NotSupportedException("Incorrect value for nPointsStreamSize.");
             }
 
-            currentPosition = reader.Position;
+            // Stream of UInt8 values representing flag values for each outline point
             var flagStream = new List<byte>();
             for (ushort i = 0; i < flagStreamSize; i++)
             {
                 flagStream.Add(reader.ReadByte());
             }
 
-            if (reader.Position - currentPosition != flagStreamSize)
+            if (reader.Position != glyphStreamPosition)
             {
                 throw new NotSupportedException("Incorrect value for flagStreamSize.");
             }
 
+            // Stream of bytes representing component flag values and associated composite glyph data
+            reader.Position = compositeStreamPosition;
+            const ushort MORE_COMPONENTS = 0x0020;
+            const ushort WE_HAVE_INSTRUCTIONS = 0x0100;
+            for (ushort i = 0; i < compositeGlyphs.Count; i++)
+            {
+                var glyphIndex = compositeGlyphs[i];
+                var glyph = new GlyphData(glyphIndex);
+                glyph.NumberOfContours = nContourStream[glyphIndex];
+                ushort flags = 0;
+                bool moreComponents = true;
+                while (moreComponents)
+                {
+                    flags = reader.ReadUInt16();
+                    glyph.Components.Add(new GlyphComponent(reader, flags));
+                    moreComponents = (flags & MORE_COMPONENTS) > 0;
+                }
+                if ((flags & WE_HAVE_INSTRUCTIONS) > 0)
+                {
+                    glyph.HasInstructions = true;
+                }
+                _glyphDataCache[glyphIndex] = glyph;
+            }
+
+            if (reader.Position != bboxStreamPosition)
+            {
+                throw new NotSupportedException("Incorrect value for compositeStreamSize.");
+            }
+
+            // Stream of bytes representing point coordinate values using variable length encoding format
+            reader.Position = glyphStreamPosition;
             int nPointsIndex = 0;
             int flagIndex = 0;
             for (ushort i = 0; i < numGlyphs; i++)
@@ -1108,9 +1151,8 @@ namespace WaterTrans.GlyphLoader
                     // Simple Glyph
                     for (int j = 0; j < nContourStream[i]; j++)
                     {
-                        ushort endPts = nPointsStream[nPointsIndex + j];
-                        nPoints += endPts;
-                        endPtsOfContours.Add(--endPts);
+                        nPoints += nPointsStream[nPointsIndex + j];
+                        endPtsOfContours.Add((ushort)(nPoints - 1));
                     }
                     nPointsIndex += nContourStream[i];
 
@@ -1126,7 +1168,7 @@ namespace WaterTrans.GlyphLoader
 
                         xCoordinates.Add((short)x);
                         yCoordinates.Add((short)y);
-                        flags.Add((byte)(flag >> 7));
+                        flags.Add((byte)~(flag >> 7));
                     }
                     flagIndex += nPoints;
                     instructionLength = reader.Read255UInt16();
@@ -1144,11 +1186,94 @@ namespace WaterTrans.GlyphLoader
                 else
                 {
                     // Composite Glyph
-                    // TODO under construction...
+                    if (_glyphDataCache[i].HasInstructions)
+                    {
+                        _glyphDataCache[i].InstructionLength = reader.Read255UInt16();
+                    }
                 }
             }
 
+            if (reader.Position != compositeStreamPosition)
+            {
+                throw new NotSupportedException("Incorrect value for glyphStreamSize.");
+            }
+
+            // Bitmap (a numGlyphs-long bit array) indicating explicit bounding boxes
+            reader.Position = bboxStreamPosition;
+            int bitmapCount = (int)(4 * Math.Floor((double)((numGlyphs + 31) / 32)));
+            int bitIndex = 7;
+            byte[] bboxBitmap = reader.ReadBytes(bitmapCount);
+            for (ushort i = 0; i < numGlyphs; i++)
+            {
+                var glyph = _glyphDataCache[i];
+                int bboxBitmapIndex = i / 8;
+                int hasBbox = (bboxBitmap[bboxBitmapIndex] >> bitIndex) & 0x1;
+
+                if (hasBbox == 1)
+                {
+                    glyph.XMin = reader.ReadInt16();
+                    glyph.YMin = reader.ReadInt16();
+                    glyph.XMax = reader.ReadInt16();
+                    glyph.YMax = reader.ReadInt16();
+                }
+                else
+                {
+                    if (glyph.NumberOfContours < 0)
+                    {
+                        throw new NotSupportedException("For a composite glyph, an encoder MUST always set the corresponding bboxBitmap flag and record the original bounding box values in the bboxStream.");
+                    }
+                }
+
+                if (glyph.NumberOfContours == 0 && (glyph.XMin != 0 || glyph.YMin != 0 || glyph.XMax != 0 || glyph.YMax != 0))
+                {
+                    throw new NotSupportedException("For glyphs records that contain zero contours, MUST the glyph bounding box values are all zeros.");
+                }
+
+                bitIndex = bitIndex > 0 ? bitIndex - 1 : 7;
+            }
+
+            if (reader.Position != instructionStreamPosition)
+            {
+                throw new NotSupportedException("Incorrect value for bboxStreamSize.");
+            }
+
+            // Stream of UInt8 values representing a set of instructions for each corresponding glyph
+            for (ushort i = 0; i < numGlyphs; i++)
+            {
+                var glyph = _glyphDataCache[i];
+                if (glyph.InstructionLength > 0)
+                {
+                    glyph.Instructions.AddRange(reader.ReadBytes(glyph.InstructionLength));
+                }
+            }
+
+            if (reader.Position != instructionStreamPosition + instructionStreamSize)
+            {
+                throw new NotSupportedException("Incorrect value for instructionStreamSize.");
+            }
+
+            for (ushort i = 0; i < numGlyphs; i++)
+            {
+                CompoundGLYFTransformedGlyphData(i);
+            }
+
             return;
+        }
+
+        private void CompoundGLYFTransformedGlyphData(ushort glyphIndex)
+        {
+            var glyph = _glyphDataCache[glyphIndex];
+            if (glyph.Components.Count == 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < glyph.Components.Count; i++)
+            {
+                CompoundGLYFTransformedGlyphData(glyph.Components[i].GlyphIndex);
+            }
+
+            glyph.Compound(_glyphDataCache);
         }
 
         private GlyphData ReadGLYFGlyphData(TypefaceReader reader, ushort glyphIndex)
