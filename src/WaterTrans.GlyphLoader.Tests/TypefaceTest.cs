@@ -376,7 +376,7 @@ namespace WaterTrans.GlyphLoader.Tests
         [TestMethod]
         public void WOFF2Font()
         {
-            string fontFile = "Roboto-Regular.woff2";
+            string fontFile = "RobotoMono-Regular.woff2";
             string fontPath = Path.Combine(Environment.CurrentDirectory, fontFile);
             
             using (var fontStream = File.OpenRead(fontPath))

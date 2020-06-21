@@ -19,14 +19,14 @@ namespace WaterTrans.GlyphLoader.Internal.WOFF2
             Offset = offset;
             Flags = reader.ReadByte();
 
-            int knowTable = Flags & 0x1F;
+            int knowTable = Flags & 0x3F;
             if (knowTable < 63)
             {
                 Tag = KnownTable.Tags[knowTable];
             }
             else
             {
-                reader.ReadCharArray(4);
+                Tag = reader.ReadCharArray(4);
             }
 
             PreprocessingTransformationVersion = (byte)((Flags >> 5) & 0x3);

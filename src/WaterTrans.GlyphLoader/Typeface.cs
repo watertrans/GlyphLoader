@@ -770,11 +770,11 @@ namespace WaterTrans.GlyphLoader
             }
 
             uint offset = 0;
-            for (int i = 1; i <= _woff2Header.NumTables; i++)
+            for (int i = 0; i < _woff2Header.NumTables; i++)
             {
                 var table = new WOFF2TableDirectory(reader, offset);
                 offset += table.Length;
-                _woff2TableDirectories.Add(table.Tag, table);
+                _woff2TableDirectories[table.Tag] = table;
             }
 
             foreach (string name in TableNames.RequiedTables)
@@ -876,8 +876,17 @@ namespace WaterTrans.GlyphLoader
                 return;
             }
 
-            reader.Position = _tableDirectories[TableNames.HMTX].Offset;
-            _tableOfHMTX = new TableOfHMTX(reader, _tableOfHHEA.NumberOfHMetrics, _tableOfMAXP.NumGlyphs);
+            if (_woff2Header != null && _woff2TableDirectories[TableNames.HMTX].PreprocessingTransformationVersion == 1)
+            {
+                // TODO Not tested. Please provide the font file.
+                reader.Position = _tableDirectories[TableNames.HMTX].Offset;
+                _tableOfHMTX = new TableOfHMTX(reader, _tableOfHHEA.NumberOfHMetrics, _tableOfMAXP.NumGlyphs, true);
+            }
+            else
+            {
+                reader.Position = _tableDirectories[TableNames.HMTX].Offset;
+                _tableOfHMTX = new TableOfHMTX(reader, _tableOfHHEA.NumberOfHMetrics, _tableOfMAXP.NumGlyphs, false);
+            }
         }
 
         private void ReadOS2(TypefaceReader reader)
@@ -993,7 +1002,7 @@ namespace WaterTrans.GlyphLoader
 
             if (_woff2Header != null && _woff2TableDirectories[TableNames.GLYF].PreprocessingTransformationVersion == 0)
             {
-                reader.Position = _woff2TableDirectories[TableNames.GLYF].Offset;
+                reader.Position = _tableDirectories[TableNames.GLYF].Offset;
                 ReadGLYFTransformedGlyphData(reader);
             }
             else
