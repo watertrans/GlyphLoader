@@ -17,6 +17,10 @@ In WebAssembly environment, it can be used for application development using gly
 
 ## Release Notes
 
+### 1.1
+
+- Add support for Web Open Font Format 2
+
 ### 1.0
 
 - Initial release
@@ -54,7 +58,7 @@ Supports following font file format:
 
 - TrueType(TTF) and TrueType collections(TTC)
 - OpenType(OTF) and OpenType collections(OTC)
-- Web Open Font Format 2(WOFF2) [comming soon]
+- Web Open Font Format 2(WOFF2) without collections
 
 ## Limitations
 GlyphLoader has the following limitations:
