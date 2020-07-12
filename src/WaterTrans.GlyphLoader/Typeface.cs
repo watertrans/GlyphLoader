@@ -6,6 +6,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -13,6 +14,7 @@ using Brotli;
 using WaterTrans.GlyphLoader.Geometry;
 using WaterTrans.GlyphLoader.Internal;
 using WaterTrans.GlyphLoader.Internal.AAT;
+using WaterTrans.GlyphLoader.Internal.NAME;
 using WaterTrans.GlyphLoader.Internal.OpenType.CFF;
 using WaterTrans.GlyphLoader.Internal.SFNT;
 using WaterTrans.GlyphLoader.Internal.WOFF2;
@@ -25,6 +27,21 @@ namespace WaterTrans.GlyphLoader
     /// </summary>
     public class Typeface
     {
+        private readonly Dictionary<CultureInfo, string> _copyrights = new Dictionary<CultureInfo, string>();
+        private readonly Dictionary<CultureInfo, string> _fontFamilyNames = new Dictionary<CultureInfo, string>();
+        private readonly Dictionary<CultureInfo, string> _fontSubfamilyNames = new Dictionary<CultureInfo, string>();
+        private readonly Dictionary<CultureInfo, string> _fullFontNames = new Dictionary<CultureInfo, string>();
+        private readonly Dictionary<CultureInfo, string> _trademarks = new Dictionary<CultureInfo, string>();
+        private readonly Dictionary<CultureInfo, string> _versionStrings = new Dictionary<CultureInfo, string>();
+        private readonly Dictionary<CultureInfo, string> _manufacturerNames = new Dictionary<CultureInfo, string>();
+        private readonly Dictionary<CultureInfo, string> _designerNames = new Dictionary<CultureInfo, string>();
+        private readonly Dictionary<CultureInfo, string> _descriptions = new Dictionary<CultureInfo, string>();
+        private readonly Dictionary<CultureInfo, string> _vendorUrls = new Dictionary<CultureInfo, string>();
+        private readonly Dictionary<CultureInfo, string> _designerUrls = new Dictionary<CultureInfo, string>();
+        private readonly Dictionary<CultureInfo, string> _licenseDescriptions = new Dictionary<CultureInfo, string>();
+        private readonly Dictionary<CultureInfo, string> _preferredFontFamilyNames = new Dictionary<CultureInfo, string>();
+        private readonly Dictionary<CultureInfo, string> _preferredFontSubfamilyNames = new Dictionary<CultureInfo, string>();
+        private readonly Dictionary<CultureInfo, string> _sampleTexts = new Dictionary<CultureInfo, string>();
         private readonly Dictionary<string, FeatureRecord> _gsubFeatures = new Dictionary<string, FeatureRecord>();
         private readonly Dictionary<string, FeatureRecord> _gposFeatures = new Dictionary<string, FeatureRecord>();
         private readonly Dictionary<ushort, GlyphData> _glyphDataCache = new Dictionary<ushort, GlyphData>();
@@ -123,6 +140,162 @@ namespace WaterTrans.GlyphLoader
         /// Gets whether to perform checksum calculation.
         /// </summary>
         public bool SkipChecksum { get; } = true;  // (Support in future versions)
+
+        /// <summary>
+        /// Gets the copyright information for the Typeface object.
+        /// </summary>
+        public IDictionary<CultureInfo, string> Copyrights
+        {
+            get
+            {
+                return new ReadOnlyDictionary<CultureInfo, string>(_copyrights);
+            }
+        }
+
+        /// <summary>
+        /// Gets the description information for the Typeface object.
+        /// </summary>
+        public IDictionary<CultureInfo, string> Descriptions
+        {
+            get
+            {
+                return new ReadOnlyDictionary<CultureInfo, string>(_descriptions);
+            }
+        }
+
+        /// <summary>
+        /// Gets the designer information for the Typeface object.
+        /// </summary>
+        public IDictionary<CultureInfo, string> DesignerNames
+        {
+            get
+            {
+                return new ReadOnlyDictionary<CultureInfo, string>(_designerNames);
+            }
+        }
+
+        /// <summary>
+        /// Gets the designer URL information for the Typeface object.
+        /// </summary>
+        public IDictionary<CultureInfo, string> DesignerUrls
+        {
+            get
+            {
+                return new ReadOnlyDictionary<CultureInfo, string>(_designerUrls);
+            }
+        }
+
+        /// <summary>
+        /// Gets the face name for the Typeface object.
+        /// </summary>
+        public IDictionary<CultureInfo, string> FaceNames
+        {
+            get
+            {
+                // TODO Need to investigate specifications
+                return new ReadOnlyDictionary<CultureInfo, string>(_preferredFontSubfamilyNames);
+            }
+        }
+
+        /// <summary>
+        /// Gets the family name for the Typeface object.
+        /// </summary>
+        public IDictionary<CultureInfo, string> FamilyNames
+        {
+            get
+            {
+                return new ReadOnlyDictionary<CultureInfo, string>(_preferredFontFamilyNames);
+            }
+        }
+
+        /// <summary>
+        /// Gets the font license description information for the Typeface object.
+        /// </summary>
+        public IDictionary<CultureInfo, string> LicenseDescriptions
+        {
+            get
+            {
+                return new ReadOnlyDictionary<CultureInfo, string>(_licenseDescriptions);
+            }
+        }
+
+        /// <summary>
+        /// Gets the font manufacturer information for the Typeface object.
+        /// </summary>
+        public IDictionary<CultureInfo, string> ManufacturerNames
+        {
+            get
+            {
+                return new ReadOnlyDictionary<CultureInfo, string>(_manufacturerNames);
+            }
+        }
+
+        /// <summary>
+        /// Gets the sample text information for the Typeface object.
+        /// </summary>
+        public IDictionary<CultureInfo, string> SampleTexts
+        {
+            get
+            {
+                return new ReadOnlyDictionary<CultureInfo, string>(_sampleTexts);
+            }
+        }
+
+        /// <summary>
+        /// Gets the trademark notice information for the Typeface object.
+        /// </summary>
+        public IDictionary<CultureInfo, string> Trademarks
+        {
+            get
+            {
+                return new ReadOnlyDictionary<CultureInfo, string>(_trademarks);
+            }
+        }
+
+        /// <summary>
+        /// Gets the vendor URL information for the Typeface object.
+        /// </summary>
+        public IDictionary<CultureInfo, string> VendorUrls
+        {
+            get
+            {
+                return new ReadOnlyDictionary<CultureInfo, string>(_vendorUrls);
+            }
+        }
+
+        /// <summary>
+        /// Gets the version string information for the Typeface object interpreted from the font's 'NAME' table.
+        /// </summary>
+        public IDictionary<CultureInfo, string> VersionStrings
+        {
+            get
+            {
+                return new ReadOnlyDictionary<CultureInfo, string>(_versionStrings);
+            }
+        }
+
+        /// <summary>
+        /// Gets the Win32 face name for the font represented by the Typeface object.
+        /// </summary>
+        public IDictionary<CultureInfo, string> Win32FaceNames
+        {
+            get
+            {
+                // TODO Need to investigate specifications
+                return new ReadOnlyDictionary<CultureInfo, string>(_fontSubfamilyNames);
+            }
+        }
+
+        /// <summary>
+        /// Gets the Win32 family name for the font represented by the Typeface object.
+        /// </summary>
+        public IDictionary<CultureInfo, string> Win32FamilyNames
+        {
+            get
+            {
+                return new ReadOnlyDictionary<CultureInfo, string>(_fontFamilyNames);
+            }
+        }
 
         /// <summary>
         /// Gets height of character cell relative to em size.
@@ -1023,6 +1196,85 @@ namespace WaterTrans.GlyphLoader
 
             reader.Position = _tableDirectories[TableNames.NAME].Offset;
             _tableOfNAME = new TableOfNAME(reader);
+
+            foreach (var record in _tableOfNAME.NameRecords)
+            {
+                switch (record.PlatformID)
+                {
+                    case (ushort)WaterTrans.GlyphLoader.Internal.NAME.PlatformID.Unicode:
+                        break;
+                    case (ushort)WaterTrans.GlyphLoader.Internal.NAME.PlatformID.Macintosh:
+                        break;
+                    case (ushort)WaterTrans.GlyphLoader.Internal.NAME.PlatformID.ISO:
+                        break;
+                    case (ushort)WaterTrans.GlyphLoader.Internal.NAME.PlatformID.Microsoft:
+                        switch (record.NameID)
+                        {
+                            case (ushort)NameID.Copyright:
+                                _copyrights[new CultureInfo(record.LanguageID)] = record.NameString;
+                                break;
+                            case (ushort)NameID.FontFamilyName:
+                                _fontFamilyNames[new CultureInfo(record.LanguageID)] = record.NameString;
+                                break;
+                            case (ushort)NameID.FontSubfamilyName:
+                                _fontSubfamilyNames[new CultureInfo(record.LanguageID)] = record.NameString;
+                                break;
+                            case (ushort)NameID.FullFontName:
+                                _fullFontNames[new CultureInfo(record.LanguageID)] = record.NameString;
+                                break;
+                            case (ushort)NameID.VersionString:
+                                _versionStrings[new CultureInfo(record.LanguageID)] = record.NameString;
+                                break;
+                            case (ushort)NameID.Trademark:
+                                _trademarks[new CultureInfo(record.LanguageID)] = record.NameString;
+                                break;
+                            case (ushort)NameID.ManufacturerName:
+                                _manufacturerNames[new CultureInfo(record.LanguageID)] = record.NameString;
+                                break;
+                            case (ushort)NameID.DesignerName:
+                                _designerNames[new CultureInfo(record.LanguageID)] = record.NameString;
+                                break;
+                            case (ushort)NameID.Description:
+                                _descriptions[new CultureInfo(record.LanguageID)] = record.NameString;
+                                break;
+                            case (ushort)NameID.VendorUrl:
+                                _vendorUrls[new CultureInfo(record.LanguageID)] = record.NameString;
+                                break;
+                            case (ushort)NameID.DesignerUrl:
+                                _designerUrls[new CultureInfo(record.LanguageID)] = record.NameString;
+                                break;
+                            case (ushort)NameID.LicenseDescription:
+                                _licenseDescriptions[new CultureInfo(record.LanguageID)] = record.NameString;
+                                break;
+                            case (ushort)NameID.TypographicFamilyName:
+                                _preferredFontFamilyNames[new CultureInfo(record.LanguageID)] = record.NameString;
+                                break;
+                            case (ushort)NameID.TypographicSubfamilyName:
+                                _preferredFontSubfamilyNames[new CultureInfo(record.LanguageID)] = record.NameString;
+                                break;
+                            case (ushort)NameID.SampleText:
+                                _sampleTexts[new CultureInfo(record.LanguageID)] = record.NameString;
+                                break;
+                        }
+                        break;
+                }
+            }
+
+            _fontFamilyNames.ToList().ForEach(x =>
+            {
+                if (!_preferredFontFamilyNames.ContainsKey(x.Key))
+                {
+                    _preferredFontFamilyNames[x.Key] = x.Value;
+                }
+            });
+
+            _fontSubfamilyNames.ToList().ForEach(x =>
+            {
+                if (!_preferredFontSubfamilyNames.ContainsKey(x.Key))
+                {
+                    _preferredFontSubfamilyNames[x.Key] = x.Value;
+                }
+            });
         }
 
         private CharString ReadCFFCharString(ushort glyphIndex)

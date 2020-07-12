@@ -45,6 +45,218 @@ namespace WaterTrans.GlyphLoader.Tests
         }
 
         [TestMethod]
+        public void Copyrights_Equal_GlyphTypefaceValue()
+        {
+            foreach (string fontFile in _fontFiles)
+            {
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+
+                foreach (var key in gt.Copyrights.Keys)
+                {
+                    Assert.AreEqual(tf.Copyrights[key], gt.Copyrights[key]);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void Descriptions_Equal_GlyphTypefaceValue()
+        {
+            foreach (string fontFile in _fontFiles)
+            {
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+
+                foreach (var key in gt.Descriptions.Keys)
+                {
+                    Assert.AreEqual(tf.Descriptions[key], gt.Descriptions[key]);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void DesignerNames_Equal_GlyphTypefaceValue()
+        {
+            foreach (string fontFile in _fontFiles)
+            {
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+
+                foreach (var key in gt.DesignerNames.Keys)
+                {
+                    Assert.AreEqual(tf.DesignerNames[key], gt.DesignerNames[key]);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void DesignerUrls_Equal_GlyphTypefaceValue()
+        {
+            foreach (string fontFile in _fontFiles)
+            {
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+
+                foreach (var key in gt.DesignerUrls.Keys)
+                {
+                    Assert.AreEqual(tf.DesignerUrls[key], gt.DesignerUrls[key]);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void FaceNames_Equal_GlyphTypefaceValue()
+        {
+            foreach (string fontFile in _fontFiles)
+            {
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+
+                foreach (var key in gt.FaceNames.Keys)
+                {
+                    // TODO Need to investigate specifications
+                    // Assert.AreEqual(tf.FaceNames[key], gt.FaceNames[key]);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void FamilyNames_Equal_GlyphTypefaceValue()
+        {
+            foreach (string fontFile in _fontFiles)
+            {
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+
+                foreach (var key in gt.FamilyNames.Keys)
+                {
+                    Assert.AreEqual(tf.FamilyNames[key], gt.FamilyNames[key]);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void LicenseDescriptions_Equal_GlyphTypefaceValue()
+        {
+            foreach (string fontFile in _fontFiles)
+            {
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+
+                foreach (var key in gt.LicenseDescriptions.Keys)
+                {
+                    Assert.AreEqual(tf.LicenseDescriptions[key], gt.LicenseDescriptions[key]);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void ManufacturerNames_Equal_GlyphTypefaceValue()
+        {
+            foreach (string fontFile in _fontFiles)
+            {
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+
+                foreach (var key in gt.ManufacturerNames.Keys)
+                {
+                    Assert.AreEqual(tf.ManufacturerNames[key], gt.ManufacturerNames[key]);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void SampleTexts_Equal_GlyphTypefaceValue()
+        {
+            foreach (string fontFile in _fontFiles)
+            {
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+
+                foreach (var key in gt.SampleTexts.Keys)
+                {
+                    Assert.AreEqual(tf.SampleTexts[key], gt.SampleTexts[key]);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void Trademarks_Equal_GlyphTypefaceValue()
+        {
+            foreach (string fontFile in _fontFiles)
+            {
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+
+                foreach (var key in gt.Trademarks.Keys)
+                {
+                    Assert.AreEqual(tf.Trademarks[key], gt.Trademarks[key]);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void VendorUrls_Equal_GlyphTypefaceValue()
+        {
+            foreach (string fontFile in _fontFiles)
+            {
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+
+                foreach (var key in gt.VendorUrls.Keys)
+                {
+                    Assert.AreEqual(tf.VendorUrls[key], gt.VendorUrls[key]);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void VersionStrings_Equal_GlyphTypefaceValue()
+        {
+            foreach (string fontFile in _fontFiles)
+            {
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+
+                foreach (var key in gt.VersionStrings.Keys)
+                {
+                    Assert.AreEqual(tf.VersionStrings[key], gt.VersionStrings[key]);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void Win32FaceNames_Equal_GlyphTypefaceValue()
+        {
+            foreach (string fontFile in _fontFiles)
+            {
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+
+                foreach (var key in gt.Win32FaceNames.Keys)
+                {
+                    // TODO Need to investigate specifications
+                    // Assert.AreEqual(tf.Win32FaceNames[key], gt.Win32FaceNames[key]);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void Win32FamilyNames_Equal_GlyphTypefaceValue()
+        {
+            foreach (string fontFile in _fontFiles)
+            {
+                var gt = _glyphTypefaceCache[fontFile];
+                var tf = _typefaceCache[fontFile];
+
+                foreach (var key in gt.Win32FamilyNames.Keys)
+                {
+                    Assert.AreEqual(tf.Win32FamilyNames[key], gt.Win32FamilyNames[key]);
+                }
+            }
+        }
+
+        [TestMethod]
         public void StrikethroughPosition_Equal_GlyphTypefaceValue()
         {
             foreach (string fontFile in _fontFiles)
