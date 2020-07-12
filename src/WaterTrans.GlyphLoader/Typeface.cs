@@ -54,6 +54,7 @@ namespace WaterTrans.GlyphLoader
         private readonly ConcurrentDictionary<string, IDictionary<ushort, ushort[]>> _alternateSubstitutionMaps = new ConcurrentDictionary<string, IDictionary<ushort, ushort[]>>(StringComparer.OrdinalIgnoreCase);
         private readonly ConcurrentDictionary<string, IDictionary<ushort, Adjustment>> _singleAdjustmentMaps = new ConcurrentDictionary<string, IDictionary<ushort, Adjustment>>(StringComparer.OrdinalIgnoreCase);
         private readonly ConcurrentDictionary<string, IDictionary<ushort[], PairAdjustment>> _pairAdjustmentMaps = new ConcurrentDictionary<string, IDictionary<ushort[], PairAdjustment>>(StringComparer.OrdinalIgnoreCase);
+        private IDictionary<ushort, short> _topSideBearings;
         private IDictionary<ushort, double> _designUnitsAdvanceWidths;
         private IDictionary<ushort, double> _designUnitsLeftSideBearings;
         private IDictionary<ushort, double> _designUnitsRightSideBearings;
@@ -340,10 +341,18 @@ namespace WaterTrans.GlyphLoader
         {
             get
             {
+                // the value may be set equal to the top of the unscaled and unhinted glyph bounding
+                // box of the glyph encoded at U+0048 (LATIN CAPITAL LETTER H).
+                // If no glyph is encoded in this position the field should be set to 0.
+                ushort glyphIndex = CharacterToGlyphMap[0x48];
+
                 if (_tableOfOS2 == null)
                 {
-                    // TODO Determining the cap height by 'H' or 'O'? see https://developer.apple.com/fonts/TrueType-Reference-Manual/RM03/Chap3.html#a_whole
-                    throw new NotImplementedException();
+                    return (double)(_tableOfHHEA.Ascender - _topSideBearings[glyphIndex]) / _tableOfHEAD.UnitsPerEm;
+                }
+                else if (_tableOfOS2.CapHeight == 0)
+                {
+                    return (double)(_tableOfOS2.TypoAscender - _topSideBearings[glyphIndex]) / _tableOfHEAD.UnitsPerEm;
                 }
                 else
                 {
@@ -359,10 +368,18 @@ namespace WaterTrans.GlyphLoader
         {
             get
             {
+                // the value may be set equal to the top of the unscaled and unhinted glyph bounding
+                // box of the glyph encoded at U+0078 (LATIN SMALL LETTER X).
+                // If no glyph is encoded in this position the field should be set to 0.
+                ushort glyphIndex = CharacterToGlyphMap[0x78];
+
                 if (_tableOfOS2 == null)
                 {
-                    // TODO Determining the x height by 'n' or 'o'? see https://developer.apple.com/fonts/TrueType-Reference-Manual/RM03/Chap3.html#a_whole
-                    throw new NotImplementedException();
+                    return (double)(_tableOfHHEA.Ascender - _topSideBearings[glyphIndex]) / _tableOfHEAD.UnitsPerEm;
+                }
+                else if (_tableOfOS2.XHeight == 0)
+                {
+                    return (double)(_tableOfOS2.TypoAscender - _topSideBearings[glyphIndex]) / _tableOfHEAD.UnitsPerEm;
                 }
                 else
                 {
@@ -1629,6 +1646,7 @@ namespace WaterTrans.GlyphLoader
                 glyfDistancesFromHorizontalBaselineToBlackBoxBottom[i] = (short)-(glyph.YCoordinates.Count > 0 ? glyph.YCoordinates.Min() : glyph.YMin);
             }
 
+            _topSideBearings = glyfTopSideBearings;
             _designUnitsAdvanceHeights = new GlyphMetricsDictionary<short>(glyfAdvancedHeights, _tableOfHEAD.UnitsPerEm);
             _designUnitsLeftSideBearings = new GlyphMetricsDictionary<short>(glyfLeftSideBearings, _tableOfHEAD.UnitsPerEm);
             _designUnitsRightSideBearings = new GlyphMetricsDictionary<short>(glyfRightSideBearings, _tableOfHEAD.UnitsPerEm);
@@ -1671,6 +1689,8 @@ namespace WaterTrans.GlyphLoader
                 cffBottomSideBearings[i] = (short)(Math.Abs(descender) + charString.YMin);
                 cffDistancesFromHorizontalBaselineToBlackBoxBottom[i] = (short)-charString.YMin;
             }
+
+            _topSideBearings = cffTopSideBearings;
             _designUnitsAdvanceWidths = new GlyphMetricsDictionary<short>(cffAdvancedWidths, _tableOfHEAD.UnitsPerEm);
             _designUnitsAdvanceHeights = new GlyphMetricsDictionary<short>(cffAdvancedHeights, _tableOfHEAD.UnitsPerEm);
             _designUnitsLeftSideBearings = new GlyphMetricsDictionary<short>(cffLeftSideBearings, _tableOfHEAD.UnitsPerEm);
