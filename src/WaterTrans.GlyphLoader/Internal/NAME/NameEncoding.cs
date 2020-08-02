@@ -76,6 +76,7 @@ namespace WaterTrans.GlyphLoader.Internal.NAME
                     case (ushort)PlatformID.Microsoft:
                         switch (record.EncodingID)
                         {
+                            case 0: return Encoding.BigEndianUnicode;
                             case 1: return Encoding.BigEndianUnicode;
                             case 2: return Encoding.GetEncoding("shift_jis");
                             case 3: return Encoding.GetEncoding("gb2312");
