@@ -114,8 +114,17 @@ namespace WaterTrans.GlyphLoader.Tests
 
                 foreach (var key in gt.FaceNames.Keys)
                 {
-                    // TODO Need to investigate specifications
-                    // Assert.AreEqual(tf.FaceNames[key], gt.FaceNames[key]);
+                    // TODO Variation Instance Selection in "Lora-VariableFont_wght.ttf"
+                    // see https://docs.microsoft.com/en-us/typography/opentype/spec/fvar#variation-instance-selection
+                    // When formatting text using a variable font, applications must select a particular
+                    // variation instance; that is, specific, in-range values must be specified for each
+                    // of the axes defined in the font variation table.
+                    if (fontFile == "Lora-VariableFont_wght.ttf")
+                    {
+                        continue;
+                    }
+
+                    Assert.AreEqual(tf.FaceNames[key], gt.FaceNames[key]);
                 }
             }
         }
@@ -235,8 +244,17 @@ namespace WaterTrans.GlyphLoader.Tests
 
                 foreach (var key in gt.Win32FaceNames.Keys)
                 {
-                    // TODO Need to investigate specifications
-                    // Assert.AreEqual(tf.Win32FaceNames[key], gt.Win32FaceNames[key]);
+                    // TODO Variation Instance Selection in "Lora-VariableFont_wght.ttf"
+                    // see https://docs.microsoft.com/en-us/typography/opentype/spec/fvar#variation-instance-selection
+                    // When formatting text using a variable font, applications must select a particular
+                    // variation instance; that is, specific, in-range values must be specified for each
+                    // of the axes defined in the font variation table.
+                    if (fontFile == "Lora-VariableFont_wght.ttf")
+                    {
+                        continue;
+                    }
+                    
+                    Assert.AreEqual(tf.Win32FaceNames[key], gt.Win32FaceNames[key]);
                 }
             }
         }
