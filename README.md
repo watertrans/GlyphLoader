@@ -17,6 +17,12 @@ In WebAssembly environment, it can be used for application development using gly
 
 ## Release Notes
 
+### 1.2
+
+- Add typeface properties: Copyrights, Descriptions, DesignerNames, DesignerUrls, FaceNames, FamilyNames, LicenseDescriptions, ManufacturerNames, SampleTexts, Trademarks,  VendorUrls, VersionStrings, Win32FaceNames, and Win32FamilyNames
+- Fix wrong value for CapsHeight and XHeight when legacy font
+- Fix reading of name table when the platform ID is 3 and the encoding ID is 0
+
 ### 1.1
 
 - Add support for Web Open Font Format 2
