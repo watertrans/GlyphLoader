@@ -302,6 +302,11 @@ namespace WaterTrans.GlyphLoader.Internal
                     sorted.Add(8, record.GlyphMap);
                     continue;
                 }
+                if (record.PlatformID == 3 && record.EncodingID == 0)
+                {
+                    sorted.Add(9, record.GlyphMap);
+                    continue;
+                }
             }
 
             _glyphMap = sorted.Values.ToArray()[0];
