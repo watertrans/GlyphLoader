@@ -17,6 +17,11 @@ In WebAssembly environment, it can be used for application development using gly
 
 ## Release Notes
 
+### 1.2.1
+
+- Fix glyph mapping for Microsoft Symbol fonts by supporting CMAP Platform ID 3, Encoding ID 0
+- Fix culture-dependent numeric formatting in path ToString output
+
 ### 1.2
 
 - Add typeface properties: Copyrights, Descriptions, DesignerNames, DesignerUrls, FaceNames, FamilyNames, LicenseDescriptions, ManufacturerNames, SampleTexts, Trademarks,  VendorUrls, VersionStrings, Win32FaceNames, and Win32FamilyNames
