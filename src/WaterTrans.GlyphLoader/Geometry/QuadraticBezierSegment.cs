@@ -3,6 +3,7 @@
 // </copyright>
 
 using System;
+using System.Globalization;
 using System.Text;
 using WaterTrans.GlyphLoader.Internal;
 
@@ -59,8 +60,8 @@ namespace WaterTrans.GlyphLoader.Geometry
         public override string ToString(double x, double y, int roundDigits)
         {
             var sb = new StringBuilder();
-            sb.Append("Q" + Math.Round(Point1.X + x, roundDigits) + "," + Math.Round(Point1.Y + y, roundDigits));
-            sb.Append(" " + Math.Round(Point2.X + x, roundDigits) + "," + Math.Round(Point2.Y + y, roundDigits));
+            sb.Append("Q" + Math.Round(Point1.X + x, roundDigits).ToString(CultureInfo.InvariantCulture) + "," + Math.Round(Point1.Y + y, roundDigits).ToString(CultureInfo.InvariantCulture));
+            sb.Append(" " + Math.Round(Point2.X + x, roundDigits).ToString(CultureInfo.InvariantCulture) + "," + Math.Round(Point2.Y + y, roundDigits).ToString(CultureInfo.InvariantCulture));
             return sb.ToString();
         }
     }

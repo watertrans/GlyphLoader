@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using WaterTrans.GlyphLoader.Internal;
 
@@ -81,7 +82,7 @@ namespace WaterTrans.GlyphLoader.Geometry
         public string ToString(double x, double y, int roundDigits)
         {
             var sb = new StringBuilder();
-            sb.Append("M" + Math.Round(StartPoint.X + x, roundDigits) + "," + Math.Round(StartPoint.Y + y, roundDigits));
+            sb.Append("M" + Math.Round(StartPoint.X + x, roundDigits).ToString(CultureInfo.InvariantCulture) + "," + Math.Round(StartPoint.Y + y, roundDigits).ToString(CultureInfo.InvariantCulture));
             sb.Append(Segments.ToString(x, y, roundDigits));
             sb.Append("z ");
             return sb.ToString();
