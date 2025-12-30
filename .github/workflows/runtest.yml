@@ -8,16 +8,15 @@ on:
 
 jobs:
   build:
-
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       
     - name: Setup .NET environment
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '3.1.102'
+        dotnet-version: '8.0.x'
 
     - name: Setup NuGet
       uses: warrenbuckley/Setup-Nuget@v1
@@ -40,10 +39,11 @@ jobs:
     - name: Prepare artifact
       run: mkdir package
       
-    - run: copy src\WaterTrans.GlyphLoader\bin\Release\WaterTrans.GlyphLoader.*.nupkg package
+    - name: Copy package
+      run: copy src\WaterTrans.GlyphLoader\bin\Release\WaterTrans.GlyphLoader.*.nupkg package
       
     - name: Upload artifact
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v4
       with:
         name: package
         path: package
