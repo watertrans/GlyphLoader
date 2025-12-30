@@ -4,6 +4,10 @@ on:
   push:
     branches: [ master ]
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build:
     runs-on: windows-latest
@@ -43,13 +47,12 @@ jobs:
         name: package
         path: package
       
-    - name: Configure GitHub Packages (NuGet)
-      uses: actions/setup-dotnet@v4
-      with:
-        source-url: https://nuget.pkg.github.com/watertrans/index.json
-      env: 
-        NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
     - name: Push generated package to GitHub registry
-      run: dotnet nuget push WaterTrans.GlyphLoader\bin\Release\WaterTrans.GlyphLoader.*.nupkg --api-key $NUGET_AUTH_TOKEN --skip-duplicate --force-english-output
+      run: dotnet nuget push WaterTrans.GlyphLoader\bin\Release\WaterTrans.GlyphLoader.*.nupkg `
+           --api-key $env:NUGET_AUTH_TOKEN `
+           --source https://nuget.pkg.github.com/watertrans/index.json `
+           --skip-duplicate `
+           --force-english-output
       working-directory: src
+      env:
+        NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
