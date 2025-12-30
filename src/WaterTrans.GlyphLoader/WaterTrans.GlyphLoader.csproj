@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.2.1</Version>
+    <Version>1.2.2</Version>
     <Authors>WaterTrans</Authors>
     <Product>GlyphLoader</Product>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -10,7 +10,7 @@
 It is written in C#, designed to be small, efficient and portable while capable of producing high-quality glyph images.
 In WebAssembly environment, it can be used for application development using glyph outline information.
 </Description>
-    <Copyright>© 2020 WaterTrans and Contributors</Copyright>
+    <Copyright>© 2025 WaterTrans and Contributors</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/WaterTrans/GlyphLoader</PackageProjectUrl>
     <PackageTags>OpenType TrueType WOFF2 TypeLoader WebAssembly Glyph GlyphTypeface Font Outline</PackageTags>
@@ -29,12 +29,12 @@ In WebAssembly environment, it can be used for application development using gly
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Brotli.NET" Version="2.0.4.2" />
+    <PackageReference Include="Brotli.NET" Version="2.1.1" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="4.7.1" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.1" />
   </ItemGroup>
 
   <ItemGroup>

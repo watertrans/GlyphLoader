@@ -17,6 +17,10 @@ In WebAssembly environment, it can be used for application development using gly
 
 ## Release Notes
 
+### 1.2.2
+
+- Update dependencies
+
 ### 1.2.1
 
 - Fix glyph mapping for Microsoft Symbol fonts by supporting CMAP Platform ID 3, Encoding ID 0
@@ -208,4 +212,4 @@ System.Diagnostics.Trace.WriteLine(svg.ToString());
 
 ## Building
 
-GlyphLoader is built using the Visual Studio Community 2019.
+GlyphLoader is built using the Visual Studio Community 2022.

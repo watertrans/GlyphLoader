@@ -31,7 +31,7 @@ namespace WaterTrans.GlyphLoader.Tests
         // see https://forum.glyphsapp.com/t/why-do-glyphs-fonts-seem-to-have-so-much-space-above-the-letters/266/3
         // see https://glyphsapp.com/tutorials/vertical-metrics
         // see https://social.msdn.microsoft.com/Forums/azure/en-US/7b21047f-bce9-41d3-ab39-55ab8850caca/how-to-get-glyphtypeface-line-gap?forum=wpf
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("Roboto-Regular.ttf", 0.75)]
         [DataRow("RobotoMono-Regular.ttf", 1.0478515625)]
         [DataRow("Lora-VariableFont_wght.ttf", 1.006)]
@@ -333,7 +333,7 @@ namespace WaterTrans.GlyphLoader.Tests
         // see https://forum.glyphsapp.com/t/why-do-glyphs-fonts-seem-to-have-so-much-space-above-the-letters/266/3
         // see https://glyphsapp.com/tutorials/vertical-metrics -> 'winAscent' and 'winDescent' are FONT RENDERING BOX, It is Not ascent or descent.
         // see https://social.msdn.microsoft.com/Forums/azure/en-US/7b21047f-bce9-41d3-ab39-55ab8850caca/how-to-get-glyphtypeface-line-gap?forum=wpf
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("Roboto-Regular.ttf", 1.0)]
         [DataRow("RobotoMono-Regular.ttf", 1.31884765625)]
         [DataRow("Lora-VariableFont_wght.ttf", 1.28)]
@@ -517,7 +517,7 @@ namespace WaterTrans.GlyphLoader.Tests
         [TestMethod]
         public void Constructor_ThrowsException_IfStreamIsNull()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => new Typeface(null));
+            Assert.Throws<ArgumentNullException>(() => new Typeface(null));
         }
 
         [TestMethod]
@@ -525,7 +525,7 @@ namespace WaterTrans.GlyphLoader.Tests
         {
             var stream = new Mock<Stream>();
             stream.SetupGet(x => x.CanRead).Returns(false);
-            Assert.ThrowsException<NotSupportedException>(() => new Typeface(stream.Object));
+            Assert.Throws<NotSupportedException>(() => new Typeface(stream.Object));
         }
 
         [TestMethod]
