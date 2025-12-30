@@ -28,7 +28,7 @@ jobs:
       working-directory: src
     
     - name: Run Test
-      run: vstest.console.exe /Platform:x64 "WaterTrans.GlyphLoader.Tests\bin\Release\WaterTrans.GlyphLoader.Tests.dll"
+      run: vstest.console.exe /Platform:x64 "WaterTrans.GlyphLoader.Tests\bin\Release\net48\WaterTrans.GlyphLoader.Tests.dll"
       working-directory: src
 
     - name: Prepare artifact
