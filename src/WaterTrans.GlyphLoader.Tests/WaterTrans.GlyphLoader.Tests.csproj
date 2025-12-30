@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <Authors>WaterTrans</Authors>
@@ -9,7 +9,15 @@
     <Company>WaterTrans</Company>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System.Configuration" />
+    <PackageReference Include="Brotli.NET" Version="2.1.1" />
+    <PackageReference Include="Castle.Core" Version="5.2.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+    <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="MSTest.TestAdapter" Version="4.0.2" />
+    <PackageReference Include="MSTest.TestFramework" Version="4.0.2" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.1" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.1" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="TextResources.Designer.cs">
@@ -27,17 +35,5 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>TextResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Brotli.NET" Version="2.1.1" />
-    <PackageReference Include="Castle.Core" Version="5.2.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
-    <PackageReference Include="Moq" Version="4.20.72" />
-    <PackageReference Include="MSTest.TestAdapter" Version="4.0.2" />
-    <PackageReference Include="MSTest.TestFramework" Version="4.0.2" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
-    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.1" />
-    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
   </ItemGroup>
 </Project>
